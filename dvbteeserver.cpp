@@ -94,6 +94,21 @@ static dvbtee_context context;
 
 void stop_server(struct dvbtee_context* context);
 
+
+void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channel)
+{
+	std::list<dvb_channel*>::iterator it;
+	for(it=channels.begin(); it!=channels.end(); ++it)
+	{
+		if (strcasecmp((*it)->callSign,channel->callSign) > 0)
+		{
+			channels.insert(it,channel);
+			return;
+		}
+	}
+	channels.push_back(channel);
+}
+
 void cleanup(struct dvbtee_context* context, bool quick = false)
 {
 	if (context->server)
@@ -192,9 +207,9 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 
 const char* chandump(void *context, parsed_channel_info_t *c)
 {
-	char channelno[7]; /* XXX.XXX */
+	char channelno[16]; /* XXX.XXX */
 	if (c->major + c->minor > 1)
-		sprintf(channelno, "%d.%d", c->major, c->minor);
+		sprintf(channelno, "%02d.%02d", c->major, c->minor);
 	else if (c->lcn)
 		sprintf(channelno, "%d", c->lcn);
 	else
@@ -207,7 +222,8 @@ const char* chandump(void *context, parsed_channel_info_t *c)
 
 	sprintf(tmp->channelID, "%d~%d", c->physical_channel, c->program_number);
 	sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
-	channel_list.push_back(tmp);
+
+	insert_sorted(channel_list, tmp);
 
 	/* xine format */
 /*
