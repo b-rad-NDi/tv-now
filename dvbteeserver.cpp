@@ -90,7 +90,7 @@ static std::list<struct dvb_channel*> channel_list;
 static std::list<struct dvb_channel*>::iterator channel_iterator;
 static int noChannel = 0;
 static int killServer = 0;
-static dvbtee_context context;
+static dvbtee_context *context;
 
 void stop_server(struct dvbtee_context* context);
 
@@ -300,7 +300,9 @@ extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
 
-	context.server = NULL;
+	dvbtee_context tmpContext;
+	context = &tmpContext;
+	context->server = NULL;
 
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
@@ -314,21 +316,21 @@ extern "C" void dvbtee_start(void* nothing)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
-	context.tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
-	context.tuner.feeder.parser.limit_eit(-1);
+	context->tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
+	context->tuner.feeder.parser.limit_eit(-1);
 
-	start_server(&context, scan_flags, 62080, 62081);
+	start_server(context, scan_flags, 62080, 62081);
 #if 0
-	channel_scan_and_dump(context.server, scan_flags);
+	channel_scan_and_dump(context->server, scan_flags);
 #else
-	list_channels(context.server);
+	list_channels(context->server);
 #endif
 
-	context.server->get_epg(NULL, epg_callback, NULL);
+	context->server->get_epg(NULL, epg_callback, NULL);
 
-	if (context.server) {
-		while (context.server->is_running() && killServer != 1) sleep(1);
-		stop_server(&context);
+	if (context->server) {
+		while (context->server->is_running() && killServer != 1) sleep(1);
+		stop_server(context);
 	}
 //	cleanup(&context);
 #if 1 /* FIXME */
