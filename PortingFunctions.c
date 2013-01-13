@@ -48,6 +48,8 @@
  *
  *****************************************************************************/
 
+#define LIVETV_FILESIZE 9384503541759
+
 #define _CRTDBG_MAP_ALLOC
 #include <stdio.h>
 #include <stdlib.h>
@@ -284,7 +286,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		printf("%s/%s.mpg\n",directory,tmpC->channelID);
 		sprintf(filename, "%s.mpg", tmpC->channelID);
 		if (filename != NULL && filesize != NULL) {
-			*filesize = 2147483647;
+			*filesize = LIVETV_FILESIZE;
 		}
 	}
 	return (void*)tmpC;
@@ -373,7 +375,7 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 	if (tmpC != NULL) {
 		sprintf(filename, "%s.mpg", tmpC->channelID);
 		if (filesize != NULL) {
-			*filesize = 2147483647;
+			*filesize = LIVETV_FILESIZE;
 		}
 		return 1;
 	}
@@ -614,7 +616,7 @@ uint64_t PCGetFileSize(const char* fullPath)
 #ifdef _POSIX
 #if NDi_LiveTV
 	if (strcmp(fullPath, "./") == 0) return filesize;
-	return 2147483647;
+	return LIVETV_FILESIZE;
 #endif
 	struct stat64 _si;
 
