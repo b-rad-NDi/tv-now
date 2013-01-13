@@ -1,0 +1,6 @@
+libdvbtee
+*.o
+*.a
+*.so*
+tv-now
+

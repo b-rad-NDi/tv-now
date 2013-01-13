@@ -1,0 +1,17 @@
+#
+# Remove for possible confusion about support website
+#
+--- libdvbtee-orig/libdvbtee/parse.cpp	2013-01-12 19:40:15.139497957 -0500
++++ libdvbtee/libdvbtee/parse.cpp	2013-01-12 19:41:54.119105642 -0500
+@@ -575,10 +575,7 @@ parse::parse()
+   , rewritten_pat_ver_offset(0)
+   , rewritten_pat_cont_ctr(0)
+ {
+-	if (!hello)
+-		fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__
+-			"\nMichael Krufky - http://github.com/mkrufky\n\n");
+-	hello = true;
++	if (!hello) fprintf(stderr, "dvbtee v" LIBDVBTEE_VERSION ", built " __DATE__ " " __TIME__ "\n\n"); hello = true;
+ 	dprintf("()");
+ 
+ 	memset(&new_channel_info, 0, sizeof(channel_info_t));

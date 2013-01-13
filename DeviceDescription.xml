@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+<root>
+  <specVersion>
+    <major>1</major>
+    <minor>0</minor>
+  </specVersion>
+  <device>
+    <deviceType>urn:schemas-upnp-org:device:MediaServer:1</deviceType>
+    <friendlyName>%s</friendlyName>
+    <manufacturer>Next Dimension Innovations</manufacturer>
+    <manufacturerURL>http://nextdimension.cc</manufacturerURL>
+    <modelDescription>TV-Now, The Live TV Streaming DLNA Media Server</modelDescription>
+    <modelName>TV-Now</modelName>
+    <modelNumber>1A4</modelNumber>
+    <modelURL>http://tv-now.nextdimension.cc</modelURL>
+    <serialNumber>%s</serialNumber>
+    <UDN>uuid:%s</UDN>
+    <presentationURL>/web</presentationURL>
+    <serviceList>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:ContentDirectory:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:CDS_0-99</serviceId>
+        <SCPDURL>ContentDirectory/scpd.xml</SCPDURL>
+        <controlURL>ContentDirectory/control</controlURL>
+        <eventSubURL>ContentDirectory/event</eventSubURL>
+      </service>
+      <service>
+        <serviceType>urn:schemas-upnp-org:service:ConnectionManager:1</serviceType>
+        <serviceId>urn:upnp-org:serviceId:CMGR_0-99</serviceId>
+        <SCPDURL>ConnectionManager/scpd.xml</SCPDURL>
+        <controlURL>ConnectionManager/control</controlURL>
+        <eventSubURL>ConnectionManager/event</eventSubURL>
+      </service>
+    </serviceList>
+  </device>
+</root>
