@@ -73,9 +73,9 @@ struct dvbtee_context
 extern "C" struct program_info
 {
 	char title[128];
-	char longDesc[1024];
-	int  start;
-	int  end;
+	char description[1024];
+	time_t  start;
+	int  duration;
 };
 
 extern "C" struct dvb_channel
@@ -259,6 +259,42 @@ void epg_callback(void *context, decoded_event_t *e)
 {
 	printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
 	        e->event_id, e->channel_name, e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name, e->text, e->start_time, e->length_sec);
+
+	char channelno[16];
+	if (e->chan_major + e->chan_minor > 1)
+		sprintf(channelno, "%02d.%02d", e->chan_major, e->chan_minor);
+/*
+	else if (e->lcn)
+		sprintf(channelno, "%d", e->lcn);
+*/
+	else
+		sprintf(channelno, "%d", e->chan_physical);
+
+	std::list<dvb_channel*>::iterator it;
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channelno) == 0) {
+			time_t t;
+			time(&t);
+			if ((*it)->next.start < t)
+				(*it)->next.start = 0;
+
+			if ((e->start_time < t) && (e->start_time + e->length_sec) < t)
+			{
+				(*it)->now.start = e->start_time;
+				(*it)->now.duration = e->length_sec;
+				snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e->name);
+				snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e->text);
+			}
+			else if ( (e->start_time > t) && (((*it)->next.start == 0) || (e->start_time < (*it)->next.start)) )
+			{
+				(*it)->next.start = e->start_time;
+				(*it)->next.duration = e->length_sec;
+				snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e->name);
+				snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e->text);
+			}
+		}
+	}
 }
 extern "C" void dvbtee_start(void* nothing)
 {
