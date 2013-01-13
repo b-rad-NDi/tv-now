@@ -255,6 +255,11 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 	server->scan(flags, chandump, NULL);
 }
 
+void epg_callback(void *context, decoded_event_t *e)
+{
+	printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
+	        e->event_id, e->channel_name, e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name, e->text, e->start_time, e->length_sec);
+}
 extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
@@ -282,6 +287,8 @@ extern "C" void dvbtee_start(void* nothing)
 #else
 	list_channels(context.server);
 #endif
+
+	context.server->get_epg(NULL, epg_callback, NULL);
 
 	if (context.server) {
 		while (context.server->is_running() && killServer != 1) sleep(1);
