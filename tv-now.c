@@ -116,10 +116,6 @@ int main(int argv, char** argc)
 	char friendlyname[100];
 	int i;
 
-#if NDi_LiveTV
-	SpawnNormalThread(&dvbtee_start, NULL);
-#endif
-
 	/* Randomized udn generation */
 	srand((unsigned int)time(NULL));
 	for (i=0;i<19;i++)
@@ -148,6 +144,11 @@ int main(int argv, char** argc)
 	UpnpIPAddressLength = ILibGetLocalIPAddressList(&UpnpIPAddressList);
 	UpdateIPAddresses(UpnpIPAddressList, UpnpIPAddressLength);
 	ILibLifeTime_Add(UpnpMonitor,NULL,4,&UpnpIPAddressMonitor,NULL);
+
+#if NDi_LiveTV
+	printf("Starting Transport Stream Engine...\n\t");
+	SpawnNormalThread(&dvbtee_start, NULL);
+#endif
 
 	/* start UPnP - blocking call*/
 	signal(SIGINT,BreakSink);
