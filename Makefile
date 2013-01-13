@@ -28,14 +28,16 @@ DVBTEE_SERVER = dvbteeserver
 
 IWEBLIB = libIWeb
 
+DEBUG = -D_DEBUG -D_VERBOSE
 # Compiler flags applied to all files
 # Optional flags: -D_VERBOSE -D_DEBUG -DSPAWN_BROWSE_THREAD -D_TEMPDEBUG
 # -g puts debug symbols
 # -DSPAWN_BROWSE_THREAD makes it so each browse thread spawns a thread (recommended only if browse request takes a long time)
 #
-export CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG) -D_GNU_SOURCE -D__USE_LARGEFILE64
-export CFLAGS   = -O2 -Wall -D_POSIX -D_DEBUG $(DEBUG) $(OPTFLAGS) -pthread -I./$(IWEBLIB) -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS
+export DEFINES  = -D_POSIX -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS -D_FILE_OFFSET_BITS=64
 
+export CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -pthread -fPIC $(DEBUG) $(DEFINES)
+export CFLAGS   = -O2 -Wall $(DEBUG) $(OPTFLAGS) -pthread -I./$(IWEBLIB) $(DEFINES)
 LIBS = ./$(IWEBLIB)/$(IWEBLIB).a
 
 # Compiler command name
