@@ -51,6 +51,6 @@
 #ifndef __TV_NOW_VERSION__
 #define __TV_NOW_VERSION__
 
-#define TV_NOW_VERSION "0.0.1"
+#define TV_NOW_VERSION "0.0.2"
 
 #endif
