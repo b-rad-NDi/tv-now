@@ -48,6 +48,7 @@
  *
  *****************************************************************************/
 
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -554,7 +555,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 									if ((res->Size >= 0) && (filter & CdsFilter_Size))
 									{
 										printThese |= CdsFilter_Size;
-										size += (CDS_DIDL_ATTRIB_SIZE_ESCAPED_LEN + SIZE_INT32_AS_CHARS);
+										size += (CDS_DIDL_ATTRIB_SIZE_ESCAPED_LEN + SIZE_INT64_AS_CHARS);
 									}
 
 									res = res->Next;

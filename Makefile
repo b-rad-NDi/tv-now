@@ -34,7 +34,7 @@ IWEBLIB = libIWeb
 # -DSPAWN_BROWSE_THREAD makes it so each browse thread spawns a thread (recommended only if browse request takes a long time)
 #
 export CPPFLAGS = -Wno-deprecated -Wno-deprecated-declarations -D_FILE_OFFSET_BITS=64 -pthread -fPIC $(DEBUG) -D_GNU_SOURCE -D__USE_LARGEFILE64
-export CFLAGS   = -O2 -Wall -D_POSIX -D_DEBUG $(DEBUG) $(OPTFLAGS) -pthread -I./$(IWEBLIB) -D_GNU_SOURCE -D__USE_LARGEFILE64
+export CFLAGS   = -O2 -Wall -D_POSIX -D_DEBUG $(DEBUG) $(OPTFLAGS) -pthread -I./$(IWEBLIB) -D_GNU_SOURCE -D__USE_LARGEFILE64 -D__STDC_FORMAT_MACROS
 
 LIBS = ./$(IWEBLIB)/$(IWEBLIB).a
 

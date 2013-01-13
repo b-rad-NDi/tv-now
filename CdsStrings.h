@@ -52,10 +52,10 @@
 #define _CDS_STRINGS_H
 
 /*
- *	Number of chars needed to represent a 32 bit integer, including sign and null char.
+ *	Number of chars needed to represent 32 and 64 bit integers, including sign and null char.
  */
 #define SIZE_INT32_AS_CHARS				12
-
+#define SIZE_INT64_AS_CHARS				24
 /*
  *	Defines a number of well-defined CDS related strings
  *	for DIDL-Lite as well as UPnP argument names.
@@ -113,7 +113,7 @@
 #define CDS_DIDL_ATTRIB_COLORDEPTH				" colorDepth=\"%d\""
 #define CDS_DIDL_ATTRIB_COLORDEPTH_LEN			14
 
-#define CDS_DIDL_ATTRIB_SIZE					" size=\"%d\""
+#define CDS_DIDL_ATTRIB_SIZE					" size=\"%" PRIu64 "\""
 #define CDS_DIDL_ATTRIB_SIZE_LEN				8
 
 #define CDS_DIDL_RES_VALUE						">%s</res>"
@@ -222,7 +222,7 @@
 #define CDS_DIDL_ATTRIB_SAMPLEFREQUENCY_ESCAPED	" sampleFrequency=&quot;%d&quot;"
 #define CDS_DIDL_ATTRIB_SAMPLEFREQUENCY_ESCAPED_LEN	29
 
-#define CDS_DIDL_ATTRIB_SIZE_ESCAPED			" size=&quot;%d&quot;"
+#define CDS_DIDL_ATTRIB_SIZE_ESCAPED			" size=&quot;%" PRIu64 "&quot;"
 #define CDS_DIDL_ATTRIB_SIZE_ESCAPED_LEN		18
 
 #define CDS_DIDL_RES_VALUE_ESCAPED				"&gt;%s&lt;/res&gt;"

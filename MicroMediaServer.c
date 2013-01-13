@@ -55,6 +55,7 @@
 #ifdef WIN32
 #include <crtdbg.h>
 #endif
+#include <inttypes.h>
 #include <string.h>
 #include "UpnpMicroStack.h"
 #include "ILibParsers.h"
@@ -146,7 +147,7 @@ struct FNTD
 
 	FILE*	File;			/* Print DIDL here if non-NULL. Works in conjuction with Socket. */
 	char*	String;			/* strcat DIDL here if non-NULL */
-	int		FileSize;		/* length of the file in bytes - used for res@size */
+	uint64_t FileSize;		/* length of the file in bytes - used for res@size */
 
 	const char*	ArgName;		/* Needed if UpnpToken != NULL */
 	void*	UpnpToken;		/* Print DIDL here if non-NULL. Works in conjunction with File. */
@@ -327,7 +328,7 @@ void ProcessDir(char* dir, int processWhen, int recurseWhen, void (*callForEachF
 	int ewDD;
 	struct FNTD* fntd = (struct FNTD*) arg;
 	int nextFile = 0;
-	int fileSize = 0;
+	uint64_t fileSize = 0;
 
 	if (callForEachFile == NULL) return;
 
@@ -377,9 +378,9 @@ void ProcessDir(char* dir, int processWhen, int recurseWhen, void (*callForEachF
 
 struct RangeRequest
 {
-	int StartIndex;
-	int BytesLeft;
-	int MultiRange;
+	uint64_t StartIndex;
+	uint64_t BytesLeft;
+	uint64_t MultiRange;
 };
 
 struct WebRequest
@@ -402,13 +403,13 @@ struct WebRequest
 
 	FILE *f;
 	char *buffer;
-	int totalBytes;
-	int sentBytes;
+	uint64_t totalBytes;
+	uint64_t sentBytes;
 	int tsi;
 	struct packetheader *p;
 	void *Range;
 	char *ct;
-	int cl;
+	uint64_t cl;
 };
 
 char MungeHexDigit(char* one_hexdigit)
@@ -531,7 +532,8 @@ void HandleSendOK(struct ILibWebServer_Session *session)
 						if(rr->MultiRange!=0)
 						{
 							buf = (char*)malloc(1024);
-							sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %d-%d/%d\r\n\r\n",MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
+							sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %" PRIu64 "-%" PRIu64 "/%" PRIu64 "\r\n\r\n",
+							        MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
 							ILibWebServer_StreamBody(session,buf,(int)strlen(buf),0,0);
 						}
 						continue;
@@ -568,14 +570,14 @@ void* HandleWebRequest(void* webRequest)
 	int k;
 	char* ext;
 	char* ct;
-	int cl = 0;
+	uint64_t cl = 0;
 	char *buf;
 	int bufLen;
 	int dirEntryType = 0;
 	void* f;
-	int totalSent;
+	uint64_t totalSent;
 	int sendStatus;
-	int numRead;
+	uint64_t numRead;
 	int fpLen,fpSize;
 	int transferStatIndex = -1;
 	struct ILibWebServer_Session *session = (struct ILibWebServer_Session*)wr->UpnpToken;
@@ -825,7 +827,7 @@ void* HandleWebRequest(void* webRequest)
 					if(rr->MultiRange==0)
 					{
 						// Single Range Request
-						bufLen = sprintf(buf, "\r\nServer: Next Dimension Innovations/TV-Now %s\r\nContent-Range: bytes %d-%d/%d\r\nContent-Type: %s",
+						bufLen = sprintf(buf,"\r\nServer: Next Dimension Innovations/TV-Now %s\r\nContent-Range: bytes %" PRIu64 "-%" PRIu64 "/%" PRIu64 "\r\nContent-Type: %s",
 						                 TV_NOW_VERSION, rr->StartIndex,rr->BytesLeft,cl,ct);
 					}
 					else
@@ -865,7 +867,8 @@ void* HandleWebRequest(void* webRequest)
 					if(rr->MultiRange!=0)
 					{
 						buf = (char*)malloc(1024);
-						bufLen = sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %d-%d/%d\r\n\r\n",MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
+						bufLen = sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %" PRIu64 "-%" PRIu64 "/%" PRIu64 "\r\n\r\n",
+						                 MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
 						ILibWebServer_StreamBody(session,buf,(int)strlen(buf),0,0);
 					}
 				}
@@ -919,7 +922,8 @@ void* HandleWebRequest(void* webRequest)
 								if(rr->MultiRange!=0)
 								{
 									buf = (char*)malloc(1024);
-									bufLen = sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %d-%d/%d\r\n\r\n",MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
+									bufLen = sprintf(buf,"%s\r\nContent-Type: %s\r\nContent-Range: bytes %" PRIu64 "-%" PRIu64 "/%" PRIu64 "\r\n\r\n",
+									                 MULTIPART_RANGE_DELIMITER,wr->ct,rr->StartIndex,rr->BytesLeft,wr->cl);
 									ILibWebServer_StreamBody(session,buf,(int)strlen(buf),0,0);
 								}
 								continue;
@@ -1381,7 +1385,7 @@ void BrowseMetadata(void* upnpToken, char* pathName, char* Filter, char* baseUri
 	struct FNTD fntd;
 	struct FNTD fntd2;
 	char numResult[30];
-	int filesize;
+	uint64_t filesize;
 
 	/*
 	if (EndsWith(pathName, DIRDELIMITER))

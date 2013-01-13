@@ -54,6 +54,8 @@
 /*
  *	Provides the convenient means of manipulating/reading of CdsMediaObject.MediaClass field.
  */
+#include <stdint.h>
+
 #include "CdsMediaClass.h"
 
 /*
@@ -117,7 +119,7 @@ struct CdsMediaResource
 	int Bitrate;				/* the bitrate of the resource. If negative, treat as an unset value. */
 
 	int ColorDepth;				/* the color depth of the resource. If negative, treat as an unset value. */
-	long Size;					/* the file size of the resource. If negative, treat as an unset value. */
+	uint64_t Size;				/* the file size of the resource. If negative, treat as an unset value. */
 
 	int BitsPerSample;			/* the number of bits per sample - should always accompany a valid SampleFrequency. Negative if unknown. */
 	int SampleFrequency;		/* the sampling frequency - should always accompany BitsPerSample. Negative if unknown. */

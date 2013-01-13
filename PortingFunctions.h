@@ -51,6 +51,8 @@
 #ifndef PORTINGFUNCTIONS_H
 #define PORTINGFUNCTIONS
 
+#include <inttypes.h>
+
 #define NDi_LiveTV 1
 
 void PCRandomize();
@@ -80,13 +82,13 @@ int PCFileRead(void *dest, int itemSize, int itemCount, void *fileHandle);
  *		fileHandle returned from PCFileOpen.
  *		Other arguments behave exactly like fread().
  */
-int PCFileSeek(void *fileHandle, long offset, int origin);
+int PCFileSeek(void *fileHandle, uint64_t offset, int origin);
 
 /*
  *	Use to obtain the current file pointer position.
  *		fileHandle returned from PCFileOpen.
  */
-int PCFileTell(void *fileHandle);
+uint64_t PCFileTell(void *fileHandle);
 
 /*
  *	Returns a state number for the file system.
@@ -129,7 +131,7 @@ void PCCloseDir(void* dirHandle);
  *		filenamelength	the number of bytes available in filename
  *		fileSize		the size of the file (specified by dirName+filename)
  */
-void* PCGetDirFirstFile(const char* dirName, /*INOUT*/char* filename, /*IN*/int filenamelength, /*INOUT*/int* fileSize);
+void* PCGetDirFirstFile(const char* dirName, /*INOUT*/char* filename, /*IN*/int filenamelength, /*INOUT*/uint64_t* fileSize);
 
 /*
  *	Obtains the next entry in the directory.
@@ -139,12 +141,12 @@ void* PCGetDirFirstFile(const char* dirName, /*INOUT*/char* filename, /*IN*/int 
  *		filenamelength	the number of bytes available in filename
  *		fileSize		the size of the file (specified by dirName+filename)
  */
-int PCGetDirNextFile(void* dirHandle, const char* dirName, /*INOUT*/char* filename, int filenamelength, int* fileSize);
+int PCGetDirNextFile(void* dirHandle, const char* dirName, /*INOUT*/char* filename, int filenamelength, uint64_t* fileSize);
 
 /*
  *	Obtains the filesize of the file specified by fullpath.
  */
-int PCGetFileSize(const char* fullPath);
+uint64_t PCGetFileSize(const char* fullPath);
 
 /*
  *	Returns the number of entries specified in fullPath.

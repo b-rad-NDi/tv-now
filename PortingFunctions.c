@@ -136,7 +136,7 @@ void* PCFileOpen(const char* fullPath, const char *mode)
 {
 	printf("%s\n", __func__);
 	/* TODO: Modify to enable unicode char support */
-	return (void*) fopen(fullPath, mode);
+	return (void*) fopen64(fullPath, mode);
 }
 
 int PCFileRead(void*dest, int itemSize, int itemCount, void *fileHandle)
@@ -146,23 +146,23 @@ int PCFileRead(void*dest, int itemSize, int itemCount, void *fileHandle)
 	return (int) fread(dest, itemSize, itemCount, (FILE*)fileHandle);
 }
 
-int PCFileSeek(void *fileHandle, long offset, int origin)
+int PCFileSeek(void *fileHandle, uint64_t offset, int origin)
 {
 	printf("%s\n", __func__);
 	/* TODO: Modify to enable unicode char support */
 	return fseek((FILE*)fileHandle, offset, origin);
 }
 
-int PCFileTell(void *fileHandle)
+uint64_t PCFileTell(void *fileHandle)
 {
 	printf("%s\n", __func__);
 	/* TODO: Modify to enable unicode char support */
-	return ftell((FILE*)fileHandle);
+	return ftello((FILE*)fileHandle);
 }
 
-void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, int* filesize)
+void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(%s, filename (out), %d, %d)\n", __func__, directory, filenamelength, *filesize);
+	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, *filesize);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	HANDLE* hSearch;
@@ -276,7 +276,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 #ifdef _POSIX
 	DIR* dirObj;
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
-	struct stat _si;
+	struct stat64 _si;
 	char fullPath[1024];
 #if NDi_LiveTV	
 	struct dvb_channel* tmpC = firstchannel();
@@ -304,7 +304,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 
 				if (filesize != NULL)
 				{
-					if (stat(fullPath, &_si) != -1)
+					if (stat64(fullPath, &_si) != -1)
 					{
 						if ((_si.st_mode & S_IFDIR) == S_IFDIR)
 						{
@@ -328,9 +328,9 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 // Windows Version
 // 0 = No More Files
 // 1 = Next File
-int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int filenamelength, int* filesize)
+int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(void*, %s, filename (out), %d, %d)\n", __func__, dirName, filenamelength, *filesize);
+	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, *filesize);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	
@@ -366,7 +366,7 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 #ifdef _POSIX
 	DIR* dirObj;
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
-	struct stat _si;
+	struct stat64 _si;
 	char fullPath[1024];
 #if NDi_LiveTV
 	struct dvb_channel* tmpC = nextchannel();
@@ -390,7 +390,7 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 		if (filesize != NULL)
 		{
 			/* WTF? Cygwin has a memory leak with stat. */
-			if (stat(fullPath, &_si) != -1)
+			if (stat64(fullPath, &_si) != -1)
 			{
 				if ((_si.st_mode & S_IFDIR) == S_IFDIR)
 				{
@@ -505,7 +505,7 @@ int PCGetFileDirType(char* directory)
 	else
 		return 0;
 #endif
-	struct stat _si;
+	struct stat64 _si;
 
 	int dirLen,dirSize;
 	char *fullpath;
@@ -517,7 +517,7 @@ int PCGetFileDirType(char* directory)
 	fullpath = (char*) malloc(dirSize);
 	Utf8ToAnsi(fullpath, directory, dirSize);
 
-	pathExists = stat(fullpath, &_si);
+	pathExists = stat64(fullpath, &_si);
 
 	free(fullpath);
 
@@ -606,17 +606,17 @@ void* SpawnNormalThread(void* method, void* arg)
 #endif
 }
 
-int PCGetFileSize(const char* fullPath)
+uint64_t PCGetFileSize(const char* fullPath)
 {
 	printf("%s\n", __func__);
-	int filesize = -1;
+	uint64_t filesize = -1;
 
 #ifdef _POSIX
 #if NDi_LiveTV
 	if (strcmp(fullPath, "./") == 0) return filesize;
 	return 2147483647;
 #endif
-	struct stat _si;
+	struct stat64 _si;
 
 	int pathLen,pathSize;
 	char *fp;
@@ -626,7 +626,7 @@ int PCGetFileSize(const char* fullPath)
 	fp = (char*) malloc(pathSize);
 	Utf8ToAnsi(fp, fullPath, pathSize);
 
-	if (stat(fp, &_si) != -1)
+	if (stat64(fp, &_si) != -1)
 	{
 		if (!((_si.st_mode & S_IFDIR) == S_IFDIR))
 		{
