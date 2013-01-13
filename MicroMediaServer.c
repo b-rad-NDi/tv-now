@@ -1146,9 +1146,12 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			}
 		}
 
+		char channel_title[256];
+		channel_name(title, channel_title);
+
 		/* get object id: full path, where root=0 */
 		ddLen = (int) strlen(fntd->DirDelimiter);
-		idLen = fnLen - fntd->RootLength + 1 + ddLen;
+		idLen = 2 + 1 + ddLen + strlen(channel_title) + strlen(ext);
 		id = (char*) malloc (idLen+1);
 		j = fntd->RootLength;
 		pchar = pathName+j;
@@ -1159,7 +1162,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		}
 		else
 		{
-			sprintf(id, "0%s%s", fntd->DirDelimiter, pchar);
+			sprintf(id, "0%s%s%s", fntd->DirDelimiter, channel_title, ext);
 		}
 
 		/* determine if directory or file */
@@ -1167,7 +1170,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		{
 
 			/* get a copy of the id - ensure that it does not end with a directory delimiter */
-			cpIdLen = idLen;
+			cpIdLen = strlen(id);
 			cpId = (char*) malloc(cpIdLen+1);
 			memcpy(cpId, id, cpIdLen);
 			cpId[cpIdLen] = '\0';
@@ -1237,7 +1240,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					)
 				{
 					cdsObj = CDS_AllocateObject();
-					cdsObj->Title = title;
+					cdsObj->Title = channel_title;
 					cdsObj->ID = cpId;
 					cdsObj->ParentID = cpParentId;
 					cdsObj->MediaClass = FileExtensionToClassCode(ext, 0);
@@ -1251,11 +1254,11 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 						
 						cpPath[strlen(cpPath) - 4] = '\0';
 						cpPathLen -= 4;
-						(*cdsRes)->Value = (char*) malloc(82+cpPathLen);
-						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d:%d/tune=%s&stream/",
+						(*cdsRes)->Value = (char*) malloc(82+strlen(channel_title) + 128);
+						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d:%d/tune=%s&stream/%s.mpg",
 						        (fntd->AddressList[ri]&0xFF), ((fntd->AddressList[ri]>>8)&0xFF),
 						        ((fntd->AddressList[ri]>>16)&0xFF), ((fntd->AddressList[ri]>>24)&0xFF),
-						        62080, cpPath);
+						        62080, title, channel_title);
 
 						cdsRes = &((*cdsRes)->Next);
 					}
