@@ -164,7 +164,7 @@ uint64_t PCFileTell(void *fileHandle)
 
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, *filesize);
+	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	HANDLE* hSearch;
@@ -332,7 +332,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 // 1 = Next File
 int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, *filesize);
+	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	
