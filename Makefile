@@ -28,7 +28,7 @@ DVBTEE_SERVER = dvbteeserver
 
 IWEBLIB = libIWeb
 
-DEBUG = -D_DEBUG -D_VERBOSE
+DEBUG = -D_DEBUG -D_VERBOSE -g -ggdb
 # Compiler flags applied to all files
 # Optional flags: -D_VERBOSE -D_DEBUG -DSPAWN_BROWSE_THREAD -D_TEMPDEBUG
 # -g puts debug symbols
