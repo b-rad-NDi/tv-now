@@ -1255,9 +1255,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 						(*cdsRes) = CDS_AllocateResource();
 						(*cdsRes)->Size = fntd->FileSize;
 						(*cdsRes)->ProtocolInfo = FileExtensionToProtocolInfo(ext, 0);
-						
-						cpPath[strlen(cpPath) - 4] = '\0';
-						cpPathLen -= 4;
+
 						(*cdsRes)->Value = (char*) malloc(82+strlen(channel_title) + 128);
 						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d:%d/tune=%s&stream/%s.mpg",
 						        (fntd->AddressList[ri]&0xFF), ((fntd->AddressList[ri]>>8)&0xFF),
