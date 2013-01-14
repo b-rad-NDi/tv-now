@@ -48,7 +48,7 @@
  *
  *****************************************************************************/
 
-#define LIVETV_FILESIZE 9384503541759
+#define LIVETV_FILESIZE 9384503541759 / 10
 
 #define _CRTDBG_MAP_ALLOC
 #include <stdio.h>
