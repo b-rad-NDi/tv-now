@@ -1288,6 +1288,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		/* print the entry to the file, socket, and string */
 		if (entry != NULL)
 		{
+			printf("#########################################################\n%s\n#########################################################\n", entry);
 			if (fntd->File != NULL)
 			{
 				fprintf(fntd->File, "%s", entry);
