@@ -167,7 +167,7 @@ struct MSEARCH_state
 };
 
 #define UPNP_XML_LOCATION "./%s"
-#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
+#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
 
 void SendXML(struct ILibWebServer_Session *session, char* location)
 {
@@ -199,17 +199,17 @@ void* UpnpGetWebServerToken(const void *MicroStackToken)
 
 #define UpnpBuildSsdpResponsePacket(outpacket,outlenght,ipaddr,port,EmbeddedDeviceNumber,USN,USNex,ST,NTex,NotifyTime)\
 {\
-	*outlenght = sprintf(outpacket,"HTTP/1.1 200 OK\r\nLOCATION: http://%d.%d.%d.%d:%d/\r\nEXT:\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations/"TV_NOW_VERSION"\r\nUSN: uuid:%s%s\r\nCACHE-CONTROL: max-age=%d\r\nST: %s%s\r\n\r\n" ,(ipaddr&0xFF),((ipaddr>>8)&0xFF),((ipaddr>>16)&0xFF),((ipaddr>>24)&0xFF),port,USN,USNex,NotifyTime,ST,NTex);\
+	*outlenght = sprintf(outpacket,"HTTP/1.1 200 OK\r\nLOCATION: http://%d.%d.%d.%d:%d/\r\nEXT:\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nUSN: uuid:%s%s\r\nCACHE-CONTROL: max-age=%d\r\nST: %s%s\r\n\r\n" ,(ipaddr&0xFF),((ipaddr>>8)&0xFF),((ipaddr>>16)&0xFF),((ipaddr>>24)&0xFF),port,USN,USNex,NotifyTime,ST,NTex);\
 }
 
 #define UpnpBuildSsdpNotifyPacket(outpacket,outlenght,ipaddr,port,EmbeddedDeviceNumber,USN,USNex,NT,NTex,NotifyTime)\
 {\
-	*outlenght = sprintf(outpacket,"NOTIFY * HTTP/1.1\r\nLOCATION: http://%d.%d.%d.%d:%d/\r\nHOST: 239.255.255.250:1900\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations/"TV_NOW_VERSION"\r\nNTS: ssdp:alive\r\nUSN: uuid:%s%s\r\nCACHE-CONTROL: max-age=%d\r\nNT: %s%s\r\n\r\n",(ipaddr&0xFF),((ipaddr>>8)&0xFF),((ipaddr>>16)&0xFF),((ipaddr>>24)&0xFF),port,USN,USNex,NotifyTime,NT,NTex);\
+	*outlenght = sprintf(outpacket,"NOTIFY * HTTP/1.1\r\nLOCATION: http://%d.%d.%d.%d:%d/\r\nHOST: 239.255.255.250:1900\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nNTS: ssdp:alive\r\nUSN: uuid:%s%s\r\nCACHE-CONTROL: max-age=%d\r\nNT: %s%s\r\n\r\n",(ipaddr&0xFF),((ipaddr>>8)&0xFF),((ipaddr>>16)&0xFF),((ipaddr>>24)&0xFF),port,USN,USNex,NotifyTime,NT,NTex);\
 }
 
 void UpnpAsyncResponse_START(const void* UPnPToken, const char* actionName, const char* serviceUrnWithVersion)
 {
-	char* RESPONSE_HEADER = "\r\nEXT:\r\nCONTENT-TYPE: text/xml\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/"TV_NOW_VERSION;
+	char* RESPONSE_HEADER = "\r\nEXT:\r\nCONTENT-TYPE: text/xml\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION;
 	char* RESPONSE_BODY = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n<s:Body>\r\n<u:%sResponse xmlns:u=\"%s\">";
 	struct ILibWebServer_Session *session = (struct ILibWebServer_Session*)UPnPToken;
 
@@ -1188,7 +1188,7 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		                 (NewSubscriber->Address>>16)&0xFF,(NewSubscriber->Address>>24)&0xFF,NewSubscriber->Port,Timeout);)
 		LVL3DEBUG(printf("TIMESTAMP: %d <%d>\r\n\r\n",(NewSubscriber->RenewByTime).tv_sec-Timeout,NewSubscriber);)
 		packet = (char*)MALLOC(132 + (int)strlen(SID) + 4);
-		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations %s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
+		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/%s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
 		                       TV_NOW_VERSION, SID, Timeout);
 		if(strcmp(ServiceName,"ConnectionManager")==0)
 		{
@@ -1266,7 +1266,7 @@ void UpnpRenewEvents(char* path,int pathlength,char *_SID,int SIDLength, char* T
 		gettimeofday(&tv,NULL);
 		(info->RenewByTime).tv_sec = tv.tv_sec + TimeoutVal;
 		packet = (char*)MALLOC(132 + (int)strlen(SID) + 4);
-		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations/%s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
+		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/%s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
 		                       TV_NOW_VERSION, SID, TimeoutVal);
 		ILibWebServer_Send_Raw(ReaderObject,packet,packetlength,0,1);
 		LVL3DEBUG(printf("OK] {%d} <%d>\r\n\r\n",TimeoutVal,info);)
@@ -1349,7 +1349,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 
 {
 	struct UpnpDataObject *dataObject = (struct UpnpDataObject*)session->User;
-	char *responseHeader = 	"\r\nCONTENT-TYPE:  text/xml\r\nServer: POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/"TV_NOW_VERSION;
+	char *responseHeader = 	"\r\nCONTENT-TYPE:  text/xml\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION;
 	char *errorTemplate = "HTTP/1.1 %d %s\r\nServer: %s\r\nContent-Length: 0\r\n\r\n";
 	char *errorPacket;
 	int errorPacketLength;
@@ -1401,7 +1401,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 		else
 		{
 			errorPacket = (char*)MALLOC(128);
-			errorPacketLength = sprintf(errorPacket,errorTemplate,404,"File Not Found","POSIX, UPnP/1.0, Next Dimension Innovations/%s", TV_NOW_VERSION);
+			errorPacketLength = sprintf(errorPacket,errorTemplate,404,"File Not Found","POSIX, UPnP/1.0, NDi TV-Now/%s", TV_NOW_VERSION);
 			ILibWebServer_Send_Raw(session,errorPacket,errorPacketLength,0,1);
 			return;
 		}
@@ -1421,7 +1421,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 	else
 	{
 		errorPacket = (char*)MALLOC(128);
-		errorPacketLength = sprintf(errorPacket,errorTemplate,400,"Bad Request","POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/%s", TV_NOW_VERSION);
+		errorPacketLength = sprintf(errorPacket,errorTemplate,400,"Bad Request","POSIX, UPnP/1.0, NDi TV-Now/%s", TV_NOW_VERSION);
 		ILibWebServer_Send_Raw(session,errorPacket,errorPacketLength,1,1);
 		return;
 	}
@@ -1648,7 +1648,7 @@ void UpnpResponseGeneric(const void* UPnPToken,const char* ServiceURI,const char
 
 	packet = (char*)MALLOC(239+strlen(ServiceURI)+strlen(Params)+(strlen(MethodName)*2));
 	packetlength = sprintf(packet,"<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<s:Envelope s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\" xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\"><s:Body><u:%sResponse xmlns:u=\"%s\">%s</u:%sResponse></s:Body></s:Envelope>",MethodName,ServiceURI,Params,MethodName);
-	RVAL=ILibWebServer_StreamHeader_Raw(session,200,"OK","\r\nEXT:\r\nCONTENT-TYPE: text/xml\r\nSERVER: POSIX, UPnP/1.0, Next Dimension Innovations/"TV_NOW_VERSION, 1);
+	RVAL=ILibWebServer_StreamHeader_Raw(session,200,"OK","\r\nEXT:\r\nCONTENT-TYPE: text/xml\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION, 1);
 	if(RVAL!=ILibAsyncSocket_SEND_ON_CLOSED_SOCKET_ERROR && RVAL != ILibWebServer_SEND_RESULTED_IN_DISCONNECT)
 	{
 		RVAL=ILibWebServer_StreamBody(session,packet,packetlength,0,1);
