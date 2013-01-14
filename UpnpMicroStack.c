@@ -1401,7 +1401,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 		else
 		{
 			errorPacket = (char*)MALLOC(128);
-			errorPacketLength = sprintf(errorPacket,errorTemplate,404,"File Not Found","POSIX, UPnP/1.0, Next Dimension Innovations/", TV_NOW_VERSION);
+			errorPacketLength = sprintf(errorPacket,errorTemplate,404,"File Not Found","POSIX, UPnP/1.0, Next Dimension Innovations/%s", TV_NOW_VERSION);
 			ILibWebServer_Send_Raw(session,errorPacket,errorPacketLength,0,1);
 			return;
 		}
