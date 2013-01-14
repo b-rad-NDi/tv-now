@@ -167,7 +167,7 @@ struct MSEARCH_state
 };
 
 #define UPNP_XML_LOCATION "./%s"
-#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n"
+#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, Next Dimension Innovations TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
 
 void SendXML(struct ILibWebServer_Session *session, char* location)
 {
