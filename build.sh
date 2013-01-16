@@ -2,7 +2,6 @@
 
 if [ ! -d libdvbtee ] ; then
 	git clone git://github.com/mkrufky/libdvbtee.git
-	patch -p0 -i libdvbtee.patch
 fi
 cd libdvbtee
 touch .x86
