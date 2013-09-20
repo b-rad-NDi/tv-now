@@ -59,14 +59,23 @@
 #include <list>
 
 #include "feed.h"
+#define LINUXTV 1
+#if LINUXTV
 #include "linuxtv_tuner.h"
+#else
+#include "hdhr_tuner.h"
+#endif
 #include "serve.h"
 
 #include "atsctext.h"
 
 struct dvbtee_context
 {
+#if LINUXTV
 	linuxtv_tuner tuner;
+#else
+	hdhr_tuner tuner;
+#endif
 	serve *server;
 };
 
@@ -315,7 +324,6 @@ extern "C" void dvbtee_start(void* nothing)
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
-	context->tuner.set_device_ids(dvb_adap, fe_id, demux_id, dvr_id, false);
 	context->tuner.feeder.parser.limit_eit(-1);
 
 	start_server(context, scan_flags, 62080, 62081);
