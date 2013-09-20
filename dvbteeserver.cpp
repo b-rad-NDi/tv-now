@@ -266,7 +266,7 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 void epg_callback(void *context, decoded_event_t *e)
 {
 	printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
-	        e->event_id, e->channel_name, e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name, e->text, e->start_time, e->length_sec);
+	        e->event_id, e->channel_name.c_str(), e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name.c_str(), e->text.c_str(), e->start_time, e->length_sec);
 
 	char channelno[16];
 	if (e->chan_major + e->chan_minor > 1)
@@ -291,15 +291,15 @@ void epg_callback(void *context, decoded_event_t *e)
 			{
 				(*it)->now.start = e->start_time;
 				(*it)->now.duration = e->length_sec;
-				snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e->name);
-				snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e->text);
+				snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e->name.c_str());
+				snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e->text.c_str());
 			}
 			else if ( (e->start_time > t) && (((*it)->next.start == 0) || (e->start_time < (*it)->next.start)) )
 			{
 				(*it)->next.start = e->start_time;
 				(*it)->next.duration = e->length_sec;
-				snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e->name);
-				snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e->text);
+				snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e->name.c_str());
+				snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e->text.c_str());
 			}
 		}
 	}
