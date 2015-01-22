@@ -213,44 +213,52 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 	return 0;
 }
 
-const char* chandump(void *context, parsed_channel_info_t *c)
+class server_parse_iface : public parse_iface
 {
-	char channelno[16]; /* XXX.XXX */
-	if (c->major + c->minor > 1)
-		sprintf(channelno, "%02d.%02d", c->major, c->minor);
-	else if (c->lcn)
-		sprintf(channelno, "%d", c->lcn);
-	else
-		sprintf(channelno, "%d", c->physical_channel);
+public:
+	server_parse_iface() {}
 
-	struct dvb_channel* tmp;
-	tmp = new dvb_channel;
-	if (tmp == NULL)
-		return NULL;
+	virtual void chandump(parsed_channel_info_t *c)
+	{
+		char channelno[16]; /* XXX.XXX */
+		if (c->major + c->minor > 1)
+			sprintf(channelno, "%02d.%02d", c->major, c->minor);
+		else if (c->lcn)
+			sprintf(channelno, "%d", c->lcn);
+		else
+			sprintf(channelno, "%d", c->physical_channel);
 
-	sprintf(tmp->channelID, "%d~%d", c->physical_channel, c->program_number);
-	sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
+		struct dvb_channel* tmp;
+		tmp = new dvb_channel;
+		if (tmp == NULL)
+			return;
 
-	insert_sorted(channel_list, tmp);
+		sprintf(tmp->channelID, "%d~%d", c->physical_channel, c->program_number);
+		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
 
-	/* xine format */
-/*
-	fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
-	        channelno,
-	        c->service_name,
-	        c->freq,
-	        c->modulation,
-	        c->vpid, c->apid, c->program_number);
-*/
-	return NULL;
-}
+		insert_sorted(channel_list, tmp);
+
+		/* xine format */
+	/*
+		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
+		        channelno,
+		        c->service_name,
+		        c->freq,
+		        c->modulation,
+		        c->vpid, c->apid, c->program_number);
+	*/
+		return;
+	}
+};
 
 bool list_channels(serve *server)
 {
 	if (!server)
 		return false;
 
-	return server->get_channels(chandump, NULL);
+	server_parse_iface iface;
+
+	return server->get_channels(&iface);
 }
 
 bool start_async_channel_scan(serve *server, unsigned int flags = 0)
@@ -260,7 +268,9 @@ bool start_async_channel_scan(serve *server, unsigned int flags = 0)
 
 bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
-	server->scan(flags, chandump, NULL);
+	server_parse_iface iface;
+
+	server->scan(flags, &iface);
 }
 
 void epg_callback(void *context, decoded_event_t *e)
