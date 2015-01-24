@@ -273,47 +273,53 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 	server->scan(flags, &iface);
 }
 
-void epg_callback(void *context, decoded_event_t *e)
+class server_decode_report : public decode_report
 {
-	printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
-	        e->event_id, e->channel_name.c_str(), e->chan_major, e->chan_minor, e->chan_physical, e->chan_svc_id, e->name.c_str(), e->text.c_str(), e->start_time, e->length_sec);
-
-	char channelno[16];
-	if (e->chan_major + e->chan_minor > 1)
-		sprintf(channelno, "%02d.%02d", e->chan_major, e->chan_minor);
-/*
-	else if (e->lcn)
-		sprintf(channelno, "%d", e->lcn);
-*/
-	else
-		sprintf(channelno, "%d", e->chan_physical);
-
-	std::list<dvb_channel*>::iterator it;
-	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+public:
+	virtual void epg_event(decoded_event_t &e)
 	{
-		if (strcmp((*it)->channelID, channelno) == 0) {
-			time_t t;
-			time(&t);
-			if ((*it)->next.start < t)
-				(*it)->next.start = 0;
+		printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
+		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
-			if ((e->start_time < t) && (e->start_time + e->length_sec) < t)
-			{
-				(*it)->now.start = e->start_time;
-				(*it)->now.duration = e->length_sec;
-				snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e->name.c_str());
-				snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e->text.c_str());
-			}
-			else if ( (e->start_time > t) && (((*it)->next.start == 0) || (e->start_time < (*it)->next.start)) )
-			{
-				(*it)->next.start = e->start_time;
-				(*it)->next.duration = e->length_sec;
-				snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e->name.c_str());
-				snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e->text.c_str());
+		char channelno[16];
+		if (e.chan_major + e.chan_minor > 1)
+			sprintf(channelno, "%02d.%02d", e.chan_major, e.chan_minor);
+/*
+		else if (e.lcn)
+			sprintf(channelno, "%d", e.lcn);
+*/
+		else
+			sprintf(channelno, "%d", e.chan_physical);
+
+		std::list<dvb_channel*>::iterator it;
+		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+		{
+			if (strcmp((*it)->channelID, channelno) == 0) {
+				time_t t;
+				time(&t);
+				if ((*it)->next.start < t)
+					(*it)->next.start = 0;
+
+				if ((e.start_time < t) && (e.start_time + e.length_sec) < t)
+				{
+					(*it)->now.start = e.start_time;
+					(*it)->now.duration = e.length_sec;
+					snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e.name.c_str());
+					snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e.text.c_str());
+				}
+				else if ( (e.start_time > t) && (((*it)->next.start == 0) || (e.start_time < (*it)->next.start)) )
+				{
+					(*it)->next.start = e.start_time;
+					(*it)->next.duration = e.length_sec;
+					snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e.name.c_str());
+					snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e.text.c_str());
+				}
 			}
 		}
 	}
-}
+	virtual void epg_header_footer(bool header, bool channel) {}
+	virtual void print(const char *, ...) {}
+};
 extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
@@ -343,7 +349,8 @@ extern "C" void dvbtee_start(void* nothing)
 	list_channels(context->server);
 #endif
 
-	context->server->get_epg(NULL, epg_callback, NULL);
+	server_decode_report reporter;
+	context->server->get_epg(&reporter);
 
 	if (context->server) {
 		while (context->server->is_running() && killServer != 1) sleep(1);
