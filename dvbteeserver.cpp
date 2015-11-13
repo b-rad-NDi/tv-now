@@ -92,8 +92,6 @@ extern "C" struct dvb_channel
 	char channelID[32];
 	char callSign[64];
 	std::list<struct program_info*> program_list;
-	program_info now;
-	program_info next;
 };
 
 static std::list<struct dvb_channel*> channel_list;
@@ -312,27 +310,7 @@ public:
 				tmp->duration = e.length_sec;
 				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
 				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
-#if 0
-				time_t t;
-				time(&t);
-				if ((*it)->next.start < t)
-					(*it)->next.start = 0;
 
-				if ((e.start_time < t) && (e.start_time + e.length_sec) < t)
-				{
-					(*it)->now.start = e.start_time;
-					(*it)->now.duration = e.length_sec;
-					snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e.name.c_str());
-					snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e.text.c_str());
-				}
-				else if ( (e.start_time > t) && (((*it)->next.start == 0) || (e.start_time < (*it)->next.start)) )
-				{
-					(*it)->next.start = e.start_time;
-					(*it)->next.duration = e.length_sec;
-					snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e.name.c_str());
-					snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e.text.c_str());
-				}
-#endif
 				insert_sorted_epg((*it)->program_list, tmp);
 			}
 		}
