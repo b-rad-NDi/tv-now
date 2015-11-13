@@ -249,7 +249,7 @@ public:
 		else if (c->lcn)
 			sprintf(channelno, "%d", c->lcn);
 		else
-			sprintf(channelno, "%d", c->physical_channel);
+			sprintf(channelno, "%02d.%02d", c->physical_channel, c->program_number);
 
 		struct dvb_channel* tmp;
 		tmp = new dvb_channel;
