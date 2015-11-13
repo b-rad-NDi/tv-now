@@ -91,6 +91,7 @@ extern "C" struct dvb_channel
 {
 	char channelID[32];
 	char callSign[64];
+	std::list<struct program_info*> program_list;
 	program_info now;
 	program_info next;
 };
@@ -311,6 +312,16 @@ public:
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
 		{
 			if (strcmp((*it)->channelID, channelno) == 0) {
+				struct program_info* tmp;
+				tmp = new program_info;
+				if (tmp == NULL)
+					return;
+
+				tmp->start = e.start_time;
+				tmp->duration = e.length_sec;
+				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
+				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
+#if 0
 				time_t t;
 				time(&t);
 				if ((*it)->next.start < t)
@@ -330,6 +341,8 @@ public:
 					snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e.name.c_str());
 					snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e.text.c_str());
 				}
+#endif
+				insert_sorted_epg((*it)->program_list, tmp);
 			}
 		}
 	}
