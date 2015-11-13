@@ -262,15 +262,6 @@ public:
 
 		insert_sorted(channel_list, tmp);
 
-		/* xine format */
-	/*
-		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
-		        channelno,
-		        c->service_name,
-		        c->freq,
-		        c->modulation,
-		        c->vpid, c->apid, c->program_number);
-	*/
 		return;
 	}
 };
