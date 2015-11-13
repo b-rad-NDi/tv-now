@@ -256,7 +256,7 @@ public:
 		if (tmp == NULL)
 			return;
 
-		sprintf(tmp->channelID, "%02d~%02d", c->physical_channel, c->program_number);
+		sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
 		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
 
 		insert_sorted(channel_list, tmp);
@@ -305,7 +305,7 @@ public:
 		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
 		char channelno[16];
-		sprintf(channelno, "%02d~%02d", e.chan_physical, e.chan_svc_id);
+		sprintf(channelno, "%d%02d", e.chan_physical, e.chan_svc_id);
 
 		std::list<dvb_channel*>::iterator it;
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
