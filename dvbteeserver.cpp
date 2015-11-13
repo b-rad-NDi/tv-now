@@ -118,6 +118,29 @@ void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channe
 	channels.push_back(channel);
 }
 
+void insert_sorted_epg(std::list<struct program_info*> &programs, program_info *program)
+{
+	std::list<program_info*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+	for(it=programs.begin(); it!=programs.end(); )
+	{
+		if ((*it)->start+(*it)->duration <= cur_t)
+		{
+			it = programs.erase(it);
+			continue;
+		}
+		if ((*it)->start > program->start)
+		{
+			programs.insert(it,program);
+			return;
+		}
+		++it;
+	}
+	programs.push_back(program);
+}
+
 void cleanup(struct dvbtee_context* context, bool quick = false)
 {
 	if (context->server)
