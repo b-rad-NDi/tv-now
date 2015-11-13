@@ -53,16 +53,15 @@ struct program_info
 {
 	char title[128];
 	char longDesc[1024];
-	int  start;
-	int  end;
+	time_t  start;
+	int  duration;
 };
 
 struct dvb_channel
 {
 	char channelID[32];
 	char callSign[64];
-	struct program_info now;
-	struct program_info next;
+	void* program_list;
 };
 
 
