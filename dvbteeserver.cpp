@@ -91,8 +91,7 @@ extern "C" struct dvb_channel
 {
 	char channelID[32];
 	char callSign[64];
-	program_info now;
-	program_info next;
+	std::list<struct program_info*> program_list;
 };
 
 static std::list<struct dvb_channel*> channel_list;
@@ -116,6 +115,29 @@ void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channe
 		}
 	}
 	channels.push_back(channel);
+}
+
+void insert_sorted_epg(std::list<struct program_info*> &programs, program_info *program)
+{
+	std::list<program_info*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+	for(it=programs.begin(); it!=programs.end(); )
+	{
+		if ((*it)->start+(*it)->duration <= cur_t)
+		{
+			it = programs.erase(it);
+			continue;
+		}
+		if ((*it)->start > program->start)
+		{
+			programs.insert(it,program);
+			return;
+		}
+		++it;
+	}
+	programs.push_back(program);
 }
 
 void cleanup(struct dvbtee_context* context, bool quick = false)
@@ -226,27 +248,18 @@ public:
 		else if (c->lcn)
 			sprintf(channelno, "%d", c->lcn);
 		else
-			sprintf(channelno, "%d", c->physical_channel);
+			sprintf(channelno, "%02d.%02d", c->physical_channel, c->program_number);
 
 		struct dvb_channel* tmp;
 		tmp = new dvb_channel;
 		if (tmp == NULL)
 			return;
 
-		sprintf(tmp->channelID, "%d~%d", c->physical_channel, c->program_number);
+		sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
 		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
 
 		insert_sorted(channel_list, tmp);
 
-		/* xine format */
-	/*
-		fprintf(stdout, "%s-%s:%d:%s:%d:%d:%d\n",
-		        channelno,
-		        c->service_name,
-		        c->freq,
-		        c->modulation,
-		        c->vpid, c->apid, c->program_number);
-	*/
 		return;
 	}
 };
@@ -282,38 +295,23 @@ public:
 		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
 		char channelno[16];
-		if (e.chan_major + e.chan_minor > 1)
-			sprintf(channelno, "%02d.%02d", e.chan_major, e.chan_minor);
-/*
-		else if (e.lcn)
-			sprintf(channelno, "%d", e.lcn);
-*/
-		else
-			sprintf(channelno, "%d", e.chan_physical);
+		sprintf(channelno, "%d%02d", e.chan_physical, e.chan_svc_id);
 
 		std::list<dvb_channel*>::iterator it;
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
 		{
 			if (strcmp((*it)->channelID, channelno) == 0) {
-				time_t t;
-				time(&t);
-				if ((*it)->next.start < t)
-					(*it)->next.start = 0;
+				struct program_info* tmp;
+				tmp = new program_info;
+				if (tmp == NULL)
+					return;
 
-				if ((e.start_time < t) && (e.start_time + e.length_sec) < t)
-				{
-					(*it)->now.start = e.start_time;
-					(*it)->now.duration = e.length_sec;
-					snprintf((*it)->now.title, sizeof((*it)->now.title), "%s", e.name.c_str());
-					snprintf((*it)->now.description, sizeof((*it)->now.description), "%s", e.text.c_str());
-				}
-				else if ( (e.start_time > t) && (((*it)->next.start == 0) || (e.start_time < (*it)->next.start)) )
-				{
-					(*it)->next.start = e.start_time;
-					(*it)->next.duration = e.length_sec;
-					snprintf((*it)->next.title, sizeof((*it)->next.title), "%s", e.name.c_str());
-					snprintf((*it)->next.description, sizeof((*it)->next.description), "%s", e.text.c_str());
-				}
+				tmp->start = e.start_time;
+				tmp->duration = e.length_sec;
+				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
+				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
+
+				insert_sorted_epg((*it)->program_list, tmp);
 			}
 		}
 	}
