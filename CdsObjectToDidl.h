@@ -112,6 +112,33 @@ enum CdsFilterBits
 	CdsFilter_nrAudioChannels	= 0x00002000,
 	CdsFilter_Protection		= 0x00004000,
 
+	/* Broadcast Item related */
+	CdsFilter_ChannelNr			= 0x00010000,
+	CdsFilter_ChannelName		= 0x00020000,
+	CdsFilter_ChannelID			= 0x00040000,
+
+	/* EPG related */
+	CdsFilter_epgProviderName	= 0x00060000,
+	CdsFilter_ServiceProvider	= 0x00080000,
+	CdsFilter_CallSign			= 0x000A0000,
+	CdsFilter_NetworkAffil		= 0x000C0000,
+	CdsFilter_Recordable		= 0x000E0000,
+	CdsFilter_DateTimeRange		= 0x00100000,
+	CdsFilter_SchedStartTime	= 0x00200000,
+	CdsFilter_SchedEndTime		= 0x00400000,
+	CdsFilter_SchedDurationTime = 0x00600000,
+	CdsFilter_ProgramID			= 0x00800000,
+	CdsFilter_SeriesID			= 0x00A00000,
+	CdsFilter_EpisodeNumber		= 0x00C00000,
+	CdsFilter_EpisodeSeason		= 0x00E00000,
+	CdsFilter_EpisodeType		= 0x01000000,
+	CdsFilter_LongDescription	= 0x02000000,
+	CdsFilter_Date				= 0x04000000,
+	CdsFilter_Rating			= 0x06000000,
+	CdsFilter_Language			= 0x08000000,
+	CdsFilter_Actor				= 0x0A000000,
+	CdsFilter_AlbumArtURI		= 0x0C000000,
+
 	CdsFilter_ResAllAttribs = 
 			CdsFilter_Res | 
 			CdsFilter_Resolution | 
