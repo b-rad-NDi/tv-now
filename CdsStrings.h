@@ -276,6 +276,10 @@
 #define CDS_DIDL_START_TIME2					"&lt;/upnp:scheduledStartTime&gt;"
 #define CDS_DIDL_START_TIME_LEN					65
 
+#define CDS_DIDL_START_TIME_USE1				"\r\n&lt;upnp:scheduledStartTime usage=\"%s\"&gt;"
+#define CDS_DIDL_START_TIME_USE2				"&lt;/upnp:scheduledStartTime&gt;"
+#define CDS_DIDL_START_TIME_USE_LEN				76
+
 #define CDS_DIDL_END_TIME1						"\r\n&lt;upnp:scheduledEndTime&gt;"
 #define CDS_DIDL_END_TIME2						"&lt;/upnp:scheduledEndTime&gt;"
 #define CDS_DIDL_END_TIME_LEN					61
@@ -287,6 +291,10 @@
 #define CDS_DIDL_PROGRAM_ID1					"\r\n&lt;upnp:programID&gt;"
 #define CDS_DIDL_PROGRAM_ID2					"&lt;/upnp:programID&gt;"
 #define CDS_DIDL_PROGRAM_ID_LEN					47
+
+#define CDS_DIDL_PROGRAM_ID_TYPE1				"\r\n&lt;upnp:programID type=\"%s\"&gt;"
+#define CDS_DIDL_PROGRAM_ID_TYPE2				"&lt;/upnp:programID&gt;"
+#define CDS_DIDL_PROGRAM_ID_TYPE_LEN			57
 
 #define CDS_DIDL_SERIES_ID1						"\r\n&lt;upnp:seriesID&gt;"
 #define CDS_DIDL_SERIES_ID2						"&lt;/upnp:seriesID&gt;"
