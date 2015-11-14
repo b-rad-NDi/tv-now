@@ -343,9 +343,6 @@
 #define CDS_FILTER_RATING						"upnp:rating"
 #define CDS_FILTER_RATING_LEN					11
 
-#define CDS_FILTER_GENRE						"upnp:genre"
-#define CDS_FILTER_GENRE_LEN					10
-
 #define CDS_FILTER_LANGUAGE						"dc:language"
 #define CDS_FILTER_LANGUAGE_LEN					11
 
