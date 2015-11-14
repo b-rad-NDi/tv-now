@@ -352,5 +352,10 @@
 #define CDS_FILTER_ACTOR						"upnp:actor"
 #define CDS_FILTER_ACTOR_LEN					10
 
+#define CDS_FILTER_THUMB						"upnp:albumArtURI"
+#define CDS_FILTER_THUMB_LEN					16
+
+#define CDS_FILTER_THUMB2						"upnp:albumArtURI@dlna:profileID"
+#define CDS_FILTER_THUMB2_LEN					31
 
 #endif
