@@ -3,4 +3,6 @@ libdvbtee
 *.a
 *.so*
 tv-now
+.project
+.cproject
 
