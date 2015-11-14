@@ -60,6 +60,6 @@
  *	It should be noted that none of these strings should EVER need to be change for XML escaping.
  */
 const char* CDS_CLASS_OBJECT_TYPE[] = {"", "object.item", "object.container"};
-const char* CDS_CLASS_MAJOR_TYPE[] = {"", "imageItem", "audioItem", "videoItem", "playlistItem", "textItem", "person", "playlistContainer", "album", "genre", "storageSystem", "storageVolume", "storageFolder"};
-const char* CDS_CLASS_MINOR1_TYPE[] = {"", "photo", "musicTrack", "audioBroadcast", "audioBook", "movie", "videoBroadcast", "musicVideClip", "musicArtist", "musicAlbum", "photoAlbum", "musicGenre", "movieGenre"};
+const char* CDS_CLASS_MAJOR_TYPE[] = {"", "imageItem", "audioItem", "videoItem", "playlistItem", "textItem", "person", "playlistContainer", "album", "genre", "storageSystem", "storageVolume", "storageFolder", "epgContainer", "epgItem"};
+const char* CDS_CLASS_MINOR1_TYPE[] = {"", "photo", "musicTrack", "audioBroadcast", "audioBook", "movie", "videoBroadcast", "musicVideClip", "musicArtist", "musicAlbum", "photoAlbum", "musicGenre", "movieGenre", "videoProgram", "audioProgram"};
 const char* CDS_CLASS_MINOR2_TYPE[] = {""};
