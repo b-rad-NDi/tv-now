@@ -283,4 +283,74 @@
 #define CDS_FILTER_SEARCHABLE					"@searchable"
 #define CDS_FILTER_SEARCHABLE_LEN				11
 
+#define CDS_FILTER_CH_NUMBER					"upnp:channelNr"
+#define CDS_FILTER_CH_NUMBER_LEN				14
+
+#define CDS_FILTER_CH_NAME						"upnp:channelName"
+#define CDS_FILTER_CH_NAME_LEN					16
+
+#define CDS_FILTER_EPG_PROVIDER					"upnp:epgProviderName"
+#define CDS_FILTER_EPG_PROVIDER_LEN				20
+
+#define CDS_FILTER_SVC_PROVIDER					"upnp:serviceProvider"
+#define CDS_FILTER_SVC_PROVIDER_LEN				20
+
+#define CDS_FILTER_CH_ID						"upnp:channelID"
+#define CDS_FILTER_CH_ID_LEN					14
+
+#define CDS_FILTER_CALL_SIGN					"upnp:callSign"
+#define CDS_FILTER_CALL_SIGN_LEN				13
+
+#define CDS_FILTER_NETWORK_AFFIL				"upnp:networkAffiliation"
+#define CDS_FILTER_NETWORK_AFFIL_LEN			24
+
+#define CDS_FILTER_RECORDABLE					"upnp:recordable"
+#define CDS_FILTER_RECORDABLE_LEN				15
+
+#define CDS_FILTER_DATE_RANGE					"upnp:dateTimeRange"
+#define CDS_FILTER_DATE_RANGE_LEN				18
+
+#define CDS_FILTER_START_TIME					"upnp:scheduledStartTime"
+#define CDS_FILTER_START_TIME_LEN				23
+
+#define CDS_FILTER_END_TIME						"upnp:scheduledEndTime"
+#define CDS_FILTER_END_TIME_LEN					21
+
+#define CDS_FILTER_DURATION						"upnp:scheduledDurationTime"
+#define CDS_FILTER_DURATION_LEN					27
+
+#define CDS_FILTER_PROGRAM_ID					"upnp:programID"
+#define CDS_FILTER_PROGRAM_ID_LEN				14
+
+#define CDS_FILTER_SERIES_ID					"upnp:seriesID"
+#define CDS_FILTER_SERIES_ID_LEN				13
+
+#define CDS_FILTER_EPISODE_NR					"upnp:episodeNumber"
+#define CDS_FILTER_EPISODE_NR_LEN				18
+
+#define CDS_FILTER_EPISODE_SEASON				"upnp:episodeSeason"
+#define CDS_FILTER_EPISODE_SEASON_LEN			18
+
+#define CDS_FILTER_EPISODE_TYPE					"upnp:episodeType"
+#define CDS_FILTER_EPISODE_TYPE_LEN				16
+
+#define CDS_FILTER_LONG_DESCR					"upnp:longDescription"
+#define CDS_FILTER_LONG_DESCR_LEN				20
+
+#define CDS_FILTER_DATE							"dc:date"
+#define CDS_FILTER_DATE_LEN						7
+
+#define CDS_FILTER_RATING						"upnp:rating"
+#define CDS_FILTER_RATING_LEN					11
+
+#define CDS_FILTER_GENRE						"upnp:genre"
+#define CDS_FILTER_GENRE_LEN					10
+
+#define CDS_FILTER_LANGUAGE						"dc:language"
+#define CDS_FILTER_LANGUAGE_LEN					11
+
+#define CDS_FILTER_ACTOR						"upnp:actor"
+#define CDS_FILTER_ACTOR_LEN					10
+
+
 #endif
