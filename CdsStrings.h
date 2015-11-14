@@ -150,6 +150,10 @@
 #define CDS_DIDL_GENRE1_ESCAPED					"\r\n&lt;upnp:genre&gt;"
 #define CDS_DIDL_GENRE2_ESCAPED					"&lt;/upnp:genre&gt;"
 
+#define CDS_DIDL_GENRE_EXT1_ESCAPED				"\r\n&lt;upnp:genre extended=\"%s\"&gt;"
+#define CDS_DIDL_GENRE_EXT2_ESCAPED				"&lt;/upnp:genre&gt;"
+#define CDS_DIDL_GENRE_EXT2_ESCAPED_LEN			55
+
 #define CDS_DIDL_CLASS_ESCAPED					"\r\n&lt;upnp:class&gt;%s&lt;/upnp:class&gt;"
 #define CDS_DIDL_CLASS_ESCAPED_LEN				39
 
