@@ -412,6 +412,11 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 #endif
 }
 
+/* returns
+ * 0 - does not exist
+ * 1 - 'file'
+ * 2 - directory
+ */
 int PCGetFileDirType(char* directory)
 {
 	printf("%s(%s)\n", __func__, directory);
