@@ -149,7 +149,22 @@ enum CdsFilterBits
 			CdsFilter_SampleFrequency |
 			CdsFilter_nrAudioChannels |
 			CdsFilter_Protection |
-			CdsFilter_Size
+			CdsFilter_Size,
+
+	CdsFilter_EPG_AllAttribs =
+			CdsFilter_ChannelID |
+			CdsFilter_epgProviderName |
+			CdsFilter_CallSign |
+			CdsFilter_SchedStartTime |
+			CdsFilter_SchedDurationTime |
+			CdsFilter_ProgramID |
+			CdsFilter_SeriesID |
+			CdsFilter_EpisodeNumber |
+			CdsFilter_EpisodeSeason |
+			CdsFilter_EpisodeType |
+			CdsFilter_Date |
+			CdsFilter_Rating,
+
 };
 
 /*
