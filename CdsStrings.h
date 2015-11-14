@@ -385,11 +385,11 @@
 #define CDS_FILTER_SEARCHABLE					"@searchable"
 #define CDS_FILTER_SEARCHABLE_LEN				11
 
-#define CDS_FILTER_CH_NUMBER					"upnp:channelNr"
-#define CDS_FILTER_CH_NUMBER_LEN				14
+#define CDS_FILTER_CHANNEL_NUMBER				"upnp:channelNr"
+#define CDS_FILTER_CHANNEL_NUMBER_LEN			14
 
-#define CDS_FILTER_CH_NAME						"upnp:channelName"
-#define CDS_FILTER_CH_NAME_LEN					16
+#define CDS_FILTER_CHANNEL_NAME					"upnp:channelName"
+#define CDS_FILTER_CHANNEL_NAME_LEN				16
 
 #define CDS_FILTER_EPG_PROVIDER					"upnp:epgProviderName"
 #define CDS_FILTER_EPG_PROVIDER_LEN				20
@@ -397,8 +397,8 @@
 #define CDS_FILTER_SVC_PROVIDER					"upnp:serviceProvider"
 #define CDS_FILTER_SVC_PROVIDER_LEN				20
 
-#define CDS_FILTER_CH_ID						"upnp:channelID"
-#define CDS_FILTER_CH_ID_LEN					14
+#define CDS_FILTER_CHANNEL_ID					"upnp:channelID"
+#define CDS_FILTER_CHANNEL_ID_LEN				14
 
 #define CDS_FILTER_CALL_SIGN					"upnp:callSign"
 #define CDS_FILTER_CALL_SIGN_LEN				13
