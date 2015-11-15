@@ -591,6 +591,122 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 								}
 							}
 
+							if (mediaObj->ChannelNr != NULL && filter & CdsFilter_ChannelNr)
+							{
+								printThese |= CdsFilter_ChannelNr;
+								size += CDS_DIDL_CHANNEL_NUM_LEN;
+								size += fnEscapeLength(mediaObj->ChannelNr);
+							}
+							if (mediaObj->ChannelName != NULL && filter & CdsFilter_ChannelName)
+							{
+								printThese |= CdsFilter_ChannelName;
+								size += CDS_DIDL_CHANNEL_NAME_LEN;
+								size += fnEscapeLength(mediaObj->ChannelName);
+							}
+							if (mediaObj->ChannelID != NULL && filter & CdsFilter_ChannelID)
+							{
+								printThese |= CdsFilter_ChannelID;
+								size += CDS_DIDL_CHANNEL_ID_LEN;
+								size += fnEscapeLength(mediaObj->ChannelID);
+							}
+							if (mediaObj->CallSign != NULL && filter & CdsFilter_CallSign)
+							{
+								printThese |= CdsFilter_CallSign;
+								size += CDS_DIDL_CALL_SIGN_LEN;
+								size += fnEscapeLength(mediaObj->CallSign);
+							}
+							if (mediaObj->NetworkAffiliation != NULL && filter & CdsFilter_NetworkAffil)
+							{
+								printThese |= CdsFilter_NetworkAffil;
+								size += CDS_DIDL_NETWORK_AFFIL_LEN;
+								size += fnEscapeLength(mediaObj->NetworkAffiliation);
+							}
+							if (mediaObj->Recordable >= 0 && filter & CdsFilter_Recordable)
+							{
+								printThese |= CdsFilter_Recordable;
+								size += CDS_DIDL_RECORDABLE_LEN + 3;
+							}
+							if (mediaObj->Date > 0 && filter & CdsFilter_Date)
+							{
+								printThese |= CdsFilter_Date;
+								size += CDS_DIDL_DATE_LEN + 32;
+							}
+							if (mediaObj->ScheduledStartTime > 0 && filter & CdsFilter_SchedStartTime)
+							{
+								printThese |= ;
+								size += CDS_DIDL_START_TIME_LEN + 32;
+							}
+							if (mediaObj->ScheduledEndTime > 0 && filter & CdsFilter_SchedEndTime)
+							{
+								printThese |= CdsFilter_SchedEndTime;
+								size += CDS_DIDL_END_TIME_LEN + 32;
+							}
+							if (mediaObj->ScheduledDurationTime > 0 && filter & CdsFilter_SchedDurationTime)
+							{
+								printThese |= CdsFilter_SchedDurationTime;
+								size += CDS_DIDL_DURATION_LEN + 16;
+							}
+							if (mediaObj->ProgramID != NULL && filter & CdsFilter_ProgramID)
+							{
+								printThese |= CdsFilter_ProgramID;
+								size += CDS_DIDL_PROGRAM_ID_LEN;
+								size += fnEscapeLength(mediaObj->ProgramID);
+							}
+							if (mediaObj->SeriesID != NULL && filter & CdsFilter_SeriesID)
+							{
+								printThese |= CdsFilter_SeriesID;
+								size += CDS_DIDL_SERIES_ID_LEN;
+								size += fnEscapeLength(mediaObj->);
+							}
+							if (mediaObj->EpisodeNumber != NULL && filter & CdsFilter_EpisodeNumber)
+							{
+								printThese |= CdsFilter_EpisodeNumber;
+								size += CDS_DIDL_EPISODE_NR_LEN;
+								size += fnEscapeLength(mediaObj->EpisodeNumber);
+							}
+							if (mediaObj->EpisodeSeason != NULL && filter & CdsFilter_EpisodeSeason)
+							{
+								printThese |= CdsFilter_EpisodeSeason;
+								size += CDS_DIDL_EPISODE_SEASON_LEN;
+								size += fnEscapeLength(mediaObj->EpisodeSeason);
+							}
+							if (mediaObj->EpisodeType != NULL && filter & CdsFilter_EpisodeType)
+							{
+								printThese |= CdsFilter_EpisodeType;
+								size += CDS_DIDL_EPISODE_TYPE_LEN;
+								size += fnEscapeLength(mediaObj->EpisodeType);
+							}
+							if (mediaObj->LongDescription != NULL && filter & CdsFilter_LongDescription)
+							{
+								printThese |= CdsFilter_LongDescription;
+								size += CDS_DIDL_LONG_DESCR_LEN;
+								size += fnEscapeLength(mediaObj->LongDescription);
+							}
+							if (mediaObj->Rating != NULL && filter & CdsFilter_Rating)
+							{
+								printThese |= CdsFilter_Rating;
+								size += CDS_DIDL_RATING_LEN;
+								size += fnEscapeLength(mediaObj->Rating);
+							}
+							if (mediaObj->Language != NULL && filter & CdsFilter_Language)
+							{
+								printThese |= CdsFilter_Language;
+								size += CDS_DIDL_LANGUAGE_LEN;
+								size += fnEscapeLength(mediaObj->Language);
+							}
+							if (mediaObj->Actor != NULL && filter & CdsFilter_Actor)
+							{
+								/* TODO: support multiple actors */
+								printThese |= CdsFilter_Actor;
+								size += CDS_DIDL_ACTOR_LEN;
+								size += fnEscapeLength(mediaObj->Actor);
+							}
+							if (mediaObj->AlbumArtURI != NULL && filter & CdsFilter_AlbumArtURI)
+							{
+								printThese |= CdsFilter_AlbumArtURI;
+								size += CDS_DIDL_RES_THUMBNAIL_LEN;
+								size += fnEscapeLength(mediaObj->AlbumArtURI);
+							}
 
 							if (includeHeaderFooter != 0)
 							{
