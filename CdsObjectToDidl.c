@@ -967,9 +967,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		}
 		if (printThese & CdsFilter_Recordable)
 		{
-			cp += sprintf(cp, CDS_DIDL_RECORDABLE1);
 			cp += sprintf(cp, "%s%d%s", CDS_DIDL_RECORDABLE1, mediaObj->Recordable, CDS_DIDL_RECORDABLE2);
-			cp += sprintf(cp, CDS_DIDL_RECORDABLE2);
 		}
 		if (printThese & CdsFilter_LongDescription)
 		{
