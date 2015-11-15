@@ -475,6 +475,35 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 								size +=10; /* bytes for childCount attribute */
 								size += CDS_DIDL_CONTAINER_START_ESCAPED_LEN;
 								size += CDS_DIDL_CONTAINER_END_ESCAPED_LEN;
+
+								if ((mediaObj->MediaClass & CDS_MEDIACLASS_EPGCONTAINER) != 0)
+								{
+									if (mediaObj->epgProviderName != NULL && filter & CdsFilter_epgProviderName)
+									{
+										size += CDS_DIDL_EPG_PROVIDER_LEN;
+										size += fnEscapeLength(mediaObj->epgProviderName);
+										printThese |= CdsFilter_epgProviderName;
+									}
+									if (mediaObj->serviceProvider && filter & CdsFilter_ServiceProvider)
+									{
+										printThese |= CdsFilter_ServiceProvider;
+										size += CDS_DIDL_SVC_PROVIDER_LEN;
+										size += fnEscapeLength(mediaObj->serviceProvider);
+									}
+									if (mediaObj->ChannelID && filter & CdsFilter_ChannelID)
+									{
+										printThese |= CdsFilter_ChannelID;
+										size += CDS_DIDL_CHANNEL_ID_LEN;
+										size += fnEscapeLength(mediaObj->ChannelID);
+									}
+									if (mediaObj->DateTimeRange.start > 0 && mediaObj->DateTimeRange.duration > 0 &&
+									    filter & CdsFilter_DateTimeRange)
+									{
+										printThese |= CdsFilter_DateTimeRange;
+										size += CDS_DIDL_DATE_RANGE_LEN;
+										size += 64; /* length should be 41, pad for various formats */
+									}
+								}
 							}
 							else if ((mediaObj->MediaClass & CDS_CLASS_MASK_ITEM) != 0)
 							{
