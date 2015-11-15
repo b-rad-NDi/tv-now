@@ -349,7 +349,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 	unsigned int printThese = 0;		/* similar to filter, except indicates which fields will actually get printed */
 	char *cp = NULL;
 	char timeString[MAX_TIME_STRING_SIZE];
-
+	char dateString[128] = { 0 };
 	CdsToDidl_Fn_XmlEscapeLength fnEscapeLength;
 	CdsToDidl_Fn_XmlEscape		 fnEscape;
 
@@ -418,6 +418,8 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 				{
 					size += (CDS_DIDL_GENRE_ESCAPED_LEN + fnEscapeLength(mediaObj->Genre));
 					printThese |= CdsFilter_Genre;
+
+					/* TODO: support genre@extended */
 				}
 
 				/* validate the media class */
@@ -687,6 +689,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 								printThese |= CdsFilter_Rating;
 								size += CDS_DIDL_RATING_LEN;
 								size += fnEscapeLength(mediaObj->Rating);
+								/* TODO: support rating@type */
 							}
 							if (mediaObj->Language != NULL && filter & CdsFilter_Language)
 							{
@@ -932,37 +935,159 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, mediaObj->ChannelID);
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID2);
 		}
-		if (printThese & CdsFilter_DateTimeRange)
+		if (printThese & CdsFilter_ChannelNr)
 		{
-			cp += sprintf(cp, CDS_DIDL_DATE_RANGE1);
-			/* TODO: format date range */
-			cp += fnEscape(cp, "");
-			cp += sprintf(cp, CDS_DIDL_DATE_RANGE2);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
+			cp += fnEscape(cp, mediaObj->ChannelNr);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
 		}
-
-		/* print creator */
+		if (printThese & CdsFilter_ChannelName)
+		{
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_NAME1);
+			cp += fnEscape(cp, mediaObj->ChannelName);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_NAME2);
+		}
+		if (printThese & CdsFilter_ChannelID)
+		{
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID1);
+			cp += fnEscape(cp, mediaObj->ChannelID);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID2);
+		}
+		if (printThese & CdsFilter_CallSign)
+		{
+			cp += sprintf(cp, CDS_DIDL_CALL_SIGN1);
+			cp += fnEscape(cp, mediaObj->CallSign);
+			cp += sprintf(cp, CDS_DIDL_CALL_SIGN2);
+		}
+		if (printThese & CdsFilter_NetworkAffil)
+		{
+			cp += sprintf(cp, CDS_DIDL_NETWORK_AFFIL1);
+			cp += fnEscape(cp, mediaObj->NetworkAffiliation);
+			cp += sprintf(cp, CDS_DIDL_NETWORK_AFFIL2);
+		}
+		if (printThese & CdsFilter_Recordable)
+		{
+			cp += sprintf(cp, CDS_DIDL_RECORDABLE1);
+			cp += sprintf(cp, "%s%d%s", CDS_DIDL_RECORDABLE1, mediaObj->Recordable, CDS_DIDL_RECORDABLE2);
+			cp += sprintf(cp, CDS_DIDL_RECORDABLE2);
+		}
+		if (printThese & CdsFilter_LongDescription)
+		{
+			cp += sprintf(cp, CDS_DIDL_LONG_DESCR1);
+			cp += fnEscape(cp, mediaObj->LongDescription);
+			cp += sprintf(cp, CDS_DIDL_LONG_DESCR2);
+		}
+		if (printThese & CdsFilter_Rating)
+		{
+			/* TODO: support rating@type */
+			cp += sprintf(cp, CDS_DIDL_RATING1);
+			cp += fnEscape(cp, mediaObj->Rating);
+			cp += sprintf(cp, CDS_DIDL_RATING2);
+		}
 		if (printThese & CdsFilter_Creator)
 		{
 			cp += sprintf(cp, CDS_DIDL_CREATOR1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Creator);
 			cp += sprintf(cp, CDS_DIDL_CREATOR2_ESCAPED);
 		}
-
-		/* print genre */
 		if (printThese & CdsFilter_Genre)
 		{
-			/* TODO: check for mediaObj->GenreExtended */
+			/* TODO: support genre@extended */
 			cp += sprintf(cp, CDS_DIDL_GENRE1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Genre);
 			cp += sprintf(cp, CDS_DIDL_GENRE2_ESCAPED);
 		}
-
-		/* print album */
 		if (printThese & CdsFilter_Album)
 		{
 			cp += sprintf(cp, CDS_DIDL_ALBUM1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Album);
 			cp += sprintf(cp, CDS_DIDL_ALBUM2_ESCAPED);
+		}
+		if (printThese & CdsFilter_DateTimeRange)
+		{
+			cp += sprintf(cp, CDS_DIDL_DATE_RANGE1);
+			/* TODO: format date range */
+			cp += fnEscape(cp, dateString);
+			cp += sprintf(cp, CDS_DIDL_DATE_RANGE2);
+		}
+		if (printThese & CdsFilter_SchedStartTime)
+		{
+			/* TODO: support scheduledStartTime@use */
+			cp += sprintf(cp, CDS_DIDL_START_TIME1);
+			/* TODO: format date */
+			cp += fnEscape(cp, dateString);
+			cp += sprintf(cp,CDS_DIDL_START_TIME2 );
+		}
+		if (printThese & CdsFilter_SchedEndTime)
+		{
+			cp += sprintf(cp, CDS_DIDL_END_TIME1);
+			/* TODO: format date */
+			cp += fnEscape(cp, dateString);
+			cp += sprintf(cp, CDS_DIDL_END_TIME2);
+		}
+		if (printThese & CdsFilter_SchedDurationTime)
+		{
+			cp += sprintf(cp, CDS_DIDL_DURATION1);
+			/* TODO: format date */
+			cp += fnEscape(cp, dateString);
+			cp += sprintf(cp, CDS_DIDL_DURATION2);
+		}
+		if (printThese & CdsFilter_ProgramID)
+		{
+			/* TODO: support programID@type */
+			cp += sprintf(cp, CDS_DIDL_PROGRAM_ID1);
+			cp += fnEscape(cp, mediaObj->ProgramID);
+			cp += sprintf(cp, CDS_DIDL_PROGRAM_ID2);
+		}
+		if (printThese & CdsFilter_SeriesID)
+		{
+			cp += sprintf(cp, CDS_DIDL_SERIES_ID1);
+			cp += fnEscape(cp, mediaObj->SeriesID);
+			cp += sprintf(cp, CDS_DIDL_SERIES_ID2);
+		}
+		if (printThese & CdsFilter_EpisodeNumber)
+		{
+			cp += sprintf(cp, CDS_DIDL_EPISODE_NR1);
+			cp += fnEscape(cp, mediaObj->EpisodeNumber);
+			cp += sprintf(cp, CDS_DIDL_EPISODE_NR2);
+		}
+		if (printThese & CdsFilter_EpisodeSeason)
+		{
+			cp += sprintf(cp, CDS_DIDL_EPISODE_SEASON1);
+			cp += fnEscape(cp, mediaObj->EpisodeSeason);
+			cp += sprintf(cp, CDS_DIDL_EPISODE_SEASON2);
+		}
+		if (printThese & CdsFilter_EpisodeType)
+		{
+			cp += sprintf(cp, CDS_DIDL_EPISODE_TYPE1);
+			cp += fnEscape(cp, mediaObj->EpisodeType);
+			cp += sprintf(cp, CDS_DIDL_EPISODE_TYPE2);
+		}
+		if (printThese & CdsFilter_Actor)
+		{
+			/* TODO: support multiple actors */
+			cp += sprintf(cp, CDS_DIDL_ACTOR1);
+			cp += fnEscape(cp, mediaObj->Actor);
+			cp += sprintf(cp, CDS_DIDL_ACTOR2);
+		}
+		if (printThese & CdsFilter_Language)
+		{
+			cp += sprintf(cp, CDS_DIDL_LANGUAGE1);
+			cp += fnEscape(cp, mediaObj->Language);
+			cp += sprintf(cp, CDS_DIDL_LANGUAGE2);
+		}
+		if (printThese & CdsFilter_Date)
+		{
+			cp += sprintf(cp, CDS_DIDL_DATE1);
+			/* TODO: format date range */
+			cp += fnEscape(cp, dateString);
+			cp += sprintf(cp, CDS_DIDL_DATE1);
+		}
+		if (printThese & CdsFilter_AlbumArtURI)
+		{
+			cp += sprintf(cp, CDS_DIDL_RES_THUMBNAIL);
+			cp += fnEscape(cp, mediaObj->AlbumArtURI);
+			cp += sprintf(cp, CDS_DIDL_RES_THUMBNAIL2);
 		}
 
 		if ((mediaObj->MediaClass & CDS_CLASS_MASK_CONTAINER) != 0)
