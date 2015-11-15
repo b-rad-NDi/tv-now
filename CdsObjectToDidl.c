@@ -1012,7 +1012,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			tmpTime = mediaObj->DateTimeRange.start + mediaObj->DateTimeRange.duration;
 			tmDate = localtime(&tmpTime);
 			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
-			cp += sprintf(cp, "-%s%s", dateString, CDS_DIDL_DATE_RANGE2);
+			cp += sprintf(cp, "/%s%s", dateString, CDS_DIDL_DATE_RANGE2);
 		}
 		if (printThese & CdsFilter_SchedStartTime)
 		{
