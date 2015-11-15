@@ -841,30 +841,6 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		if (imc_Minor2 > 0) { cp += sprintf(cp, ".%s", CDS_CLASS_MINOR2_TYPE[imc_Minor2]); }
 		cp += sprintf(cp, CDS_DIDL_CLASS2_ESCAPED);
 
-		/* print creator */
-		if (printThese & CdsFilter_Creator)
-		{
-			cp += sprintf(cp, CDS_DIDL_CREATOR1_ESCAPED);
-			cp += fnEscape(cp, mediaObj->Creator);
-			cp += sprintf(cp, CDS_DIDL_CREATOR2_ESCAPED);
-		}
-
-		/* print genre */
-		if (printThese & CdsFilter_Genre)
-		{
-			cp += sprintf(cp, CDS_DIDL_GENRE1_ESCAPED);
-			cp += fnEscape(cp, mediaObj->Genre);
-			cp += sprintf(cp, CDS_DIDL_GENRE2_ESCAPED);
-		}
-
-		/* print album */
-		if (printThese & CdsFilter_Album)
-		{
-			cp += sprintf(cp, CDS_DIDL_ALBUM1_ESCAPED);
-			cp += fnEscape(cp, mediaObj->Album);
-			cp += sprintf(cp, CDS_DIDL_ALBUM2_ESCAPED);
-		}
-
 		/* print resource and appropriate fields */
 		if (printThese & CdsFilter_Res)
 		{
@@ -937,6 +913,31 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 
 				res = res->Next;
 			}
+		}
+
+		/* print creator */
+		if (printThese & CdsFilter_Creator)
+		{
+			cp += sprintf(cp, CDS_DIDL_CREATOR1_ESCAPED);
+			cp += fnEscape(cp, mediaObj->Creator);
+			cp += sprintf(cp, CDS_DIDL_CREATOR2_ESCAPED);
+		}
+
+		/* print genre */
+		if (printThese & CdsFilter_Genre)
+		{
+			/* TODO: check for mediaObj->GenreExtended */
+			cp += sprintf(cp, CDS_DIDL_GENRE1_ESCAPED);
+			cp += fnEscape(cp, mediaObj->Genre);
+			cp += sprintf(cp, CDS_DIDL_GENRE2_ESCAPED);
+		}
+
+		/* print album */
+		if (printThese & CdsFilter_Album)
+		{
+			cp += sprintf(cp, CDS_DIDL_ALBUM1_ESCAPED);
+			cp += fnEscape(cp, mediaObj->Album);
+			cp += sprintf(cp, CDS_DIDL_ALBUM2_ESCAPED);
 		}
 
 		if ((mediaObj->MediaClass & CDS_CLASS_MASK_CONTAINER) != 0)
