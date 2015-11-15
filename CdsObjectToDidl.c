@@ -53,6 +53,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <time.h>
 #include "CdsObjectToDidl.h"
 #include "CdsStrings.h"
 #include "CdsMediaClass.h"
@@ -350,6 +351,8 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 	char *cp = NULL;
 	char timeString[MAX_TIME_STRING_SIZE];
 	char dateString[128] = { 0 };
+	time_t tmpTime;
+	struct tm *tmDate;
 	CdsToDidl_Fn_XmlEscapeLength fnEscapeLength;
 	CdsToDidl_Fn_XmlEscape		 fnEscape;
 
@@ -1003,23 +1006,29 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		}
 		if (printThese & CdsFilter_DateTimeRange)
 		{
-			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->DateTimeRange.start);
+			tmDate = localtime(&mediaObj->DateTimeRange.start);
+			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += sprintf(cp, "%s%s", CDS_DIDL_DATE_RANGE1, dateString);
-			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->DateTimeRange.start + mediaObj->DateTimeRange.duration);
+			tmpTime = mediaObj->DateTimeRange.start + mediaObj->DateTimeRange.duration;
+			tmDate = localtime(&tmpTime);
+			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += sprintf(cp, "-%s%s", dateString, CDS_DIDL_DATE_RANGE2);
 		}
 		if (printThese & CdsFilter_SchedStartTime)
 		{
 			/* TODO: support scheduledStartTime@use */
 			cp += sprintf(cp, CDS_DIDL_START_TIME1);
-			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->ScheduledStartTime);
+			tmDate = localtime(&mediaObj->ScheduledStartTime);
+			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp,CDS_DIDL_START_TIME2 );
 		}
 		if (printThese & CdsFilter_SchedEndTime)
 		{
 			cp += sprintf(cp, CDS_DIDL_END_TIME1);
-			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->ScheduledStartTime + mediaObj->ScheduledDurationTime);
+			tmpTime = mediaObj->ScheduledStartTime + mediaObj->ScheduledDurationTime;
+			tmDate = localtime(&tmpTime);
+			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_END_TIME2);
 		}
@@ -1084,7 +1093,8 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		if (printThese & CdsFilter_Date)
 		{
 			cp += sprintf(cp, CDS_DIDL_DATE1);
-			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->Date);
+			tmDate = localtime(&mediaObj->Date);
+			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_DATE1);
 		}
