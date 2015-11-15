@@ -147,10 +147,48 @@ struct CdsMediaObject
 	char *RefID;		/* Object ID of underlying item: for reference item only*/
 
 	char *Title;		/* Title metadata */
-	char *Creator;		/* Creator metadata */
+	char *LongDescription;
 
+	char *Creator;		/* Creator metadata */
 	char *Album;		/* Album metadata */
+	char *AlbumArtURI;
+	int Recordable;
+
+	char *epgProviderName;
+	char *serviceProvider;
+
 	char *Genre;		/* Genre metadata */
+	char *GenreExtended;
+
+	char *Language;
+	char *Rating;
+	char *RatingType;
+
+	/* EPG related */
+	time_t Date;
+	time_t ScheduledStartTime;
+	time_t ScheduledEndTime;
+	time_t ScheduledDurationTime;
+	struct {
+		time_t start;
+		time_t duration;
+	} DateTimeRange;
+
+	/* VideoBroadcast related */
+	char *ChannelID;
+	char *ChannelNr;
+	char *ChannelName;
+	char *CallSign;
+	char *NetworkAffiliation;
+
+	char *ProgramID;
+	char *SeriesID;
+	char *EpisodeType;
+	char *EpisodeSeason;
+	char *EpisodeNumber;
+
+	/* TODO: support multiple actors */
+	char *Actor;
 
 	/* media class of object. See [CdsMediaObject.h] */
 	unsigned int MediaClass;
