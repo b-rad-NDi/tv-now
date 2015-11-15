@@ -914,6 +914,31 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 				res = res->Next;
 			}
 		}
+		if (printThese & CdsFilter_epgProviderName)
+		{
+			cp += sprintf(cp, CDS_DIDL_EPG_PROVIDER1);
+			cp += fnEscape(cp, mediaObj->epgProviderName);
+			cp += sprintf(cp, CDS_DIDL_EPG_PROVIDER2);
+		}
+		if (printThese & CdsFilter_ServiceProvider)
+		{
+			cp += sprintf(cp, CDS_DIDL_SVC_PROVIDER1);
+			cp += fnEscape(cp, mediaObj->serviceProvider);
+			cp += sprintf(cp, CDS_DIDL_SVC_PROVIDER2);
+		}
+		if (printThese & CdsFilter_ChannelID)
+		{
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID1);
+			cp += fnEscape(cp, mediaObj->ChannelID);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID2);
+		}
+		if (printThese & CdsFilter_DateTimeRange)
+		{
+			cp += sprintf(cp, CDS_DIDL_DATE_RANGE1);
+			/* TODO: format date range */
+			cp += fnEscape(cp, "");
+			cp += sprintf(cp, CDS_DIDL_DATE_RANGE2);
+		}
 
 		/* print creator */
 		if (printThese & CdsFilter_Creator)
