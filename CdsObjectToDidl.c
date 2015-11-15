@@ -1003,32 +1003,39 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		}
 		if (printThese & CdsFilter_DateTimeRange)
 		{
-			cp += sprintf(cp, CDS_DIDL_DATE_RANGE1);
-			/* TODO: format date range */
-			cp += fnEscape(cp, dateString);
-			cp += sprintf(cp, CDS_DIDL_DATE_RANGE2);
+			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->DateTimeRange.start);
+			cp += sprintf(cp, "%s%s", CDS_DIDL_DATE_RANGE1, dateString);
+			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->DateTimeRange.start + mediaObj->DateTimeRange.duration);
+			cp += sprintf(cp, "-%s%s", dateString, CDS_DIDL_DATE_RANGE2);
 		}
 		if (printThese & CdsFilter_SchedStartTime)
 		{
 			/* TODO: support scheduledStartTime@use */
 			cp += sprintf(cp, CDS_DIDL_START_TIME1);
-			/* TODO: format date */
+			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->ScheduledStartTime);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp,CDS_DIDL_START_TIME2 );
 		}
 		if (printThese & CdsFilter_SchedEndTime)
 		{
 			cp += sprintf(cp, CDS_DIDL_END_TIME1);
-			/* TODO: format date */
+			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->ScheduledStartTime + mediaObj->ScheduledDurationTime);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_END_TIME2);
 		}
 		if (printThese & CdsFilter_SchedDurationTime)
 		{
-			cp += sprintf(cp, CDS_DIDL_DURATION1);
-			/* TODO: format date */
-			cp += fnEscape(cp, dateString);
-			cp += sprintf(cp, CDS_DIDL_DURATION2);
+			if (mediaObj->ScheduledDurationTime >= 86400)
+			{
+				int days = mediaObj->ScheduledDurationTime / 86400;
+				CdsObjectToDidl_Helper_WriteTimeString(timeString, mediaObj->ScheduledDurationTime % 86400);
+				cp += sprintf(cp, "%s%P%dD%s%s", CDS_DIDL_DURATION1, days, timeString, CDS_DIDL_DURATION2);
+			}
+			else
+			{
+				CdsObjectToDidl_Helper_WriteTimeString(timeString, mediaObj->ScheduledDurationTime);
+				cp += sprintf(cp, "%s%P%s%s", CDS_DIDL_DURATION1, timeString, CDS_DIDL_DURATION2);
+			}
 		}
 		if (printThese & CdsFilter_ProgramID)
 		{
@@ -1077,7 +1084,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		if (printThese & CdsFilter_Date)
 		{
 			cp += sprintf(cp, CDS_DIDL_DATE1);
-			/* TODO: format date range */
+			strtftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", mediaObj->Date);
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_DATE1);
 		}
