@@ -1038,12 +1038,12 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			{
 				int days = mediaObj->ScheduledDurationTime / 86400;
 				CdsObjectToDidl_Helper_WriteTimeString(timeString, mediaObj->ScheduledDurationTime % 86400);
-				cp += sprintf(cp, "%s%P%dD%s%s", CDS_DIDL_DURATION1, days, timeString, CDS_DIDL_DURATION2);
+				cp += sprintf(cp, "%sP%dD%s%s", CDS_DIDL_DURATION1, days, timeString, CDS_DIDL_DURATION2);
 			}
 			else
 			{
 				CdsObjectToDidl_Helper_WriteTimeString(timeString, mediaObj->ScheduledDurationTime);
-				cp += sprintf(cp, "%s%P%s%s", CDS_DIDL_DURATION1, timeString, CDS_DIDL_DURATION2);
+				cp += sprintf(cp, "%sP%s%s", CDS_DIDL_DURATION1, timeString, CDS_DIDL_DURATION2);
 			}
 		}
 		if (printThese & CdsFilter_ProgramID)
