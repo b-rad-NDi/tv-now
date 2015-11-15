@@ -633,7 +633,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 							}
 							if (mediaObj->ScheduledStartTime > 0 && filter & CdsFilter_SchedStartTime)
 							{
-								printThese |= ;
+								printThese |= CdsFilter_SchedStartTime;
 								size += CDS_DIDL_START_TIME_LEN + 32;
 							}
 							if (mediaObj->ScheduledEndTime > 0 && filter & CdsFilter_SchedEndTime)
@@ -656,7 +656,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 							{
 								printThese |= CdsFilter_SeriesID;
 								size += CDS_DIDL_SERIES_ID_LEN;
-								size += fnEscapeLength(mediaObj->);
+								size += fnEscapeLength(mediaObj->SeriesID);
 							}
 							if (mediaObj->EpisodeNumber != NULL && filter & CdsFilter_EpisodeNumber)
 							{
