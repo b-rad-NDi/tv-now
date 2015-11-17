@@ -142,10 +142,10 @@ extern const char* CDS_CLASS_MINOR2_TYPE[];
 #define CDS_CLASS_OBJECT_TYPE_LEN	3
 
 /* The number of strings in CDS_CLASS_MAJOR_TYPE */
-#define CDS_CLASS_MAJOR_TYPE_LEN	13 
+#define CDS_CLASS_MAJOR_TYPE_LEN	15
 
 /* The number of strings in CDS_CLASS_MINOR1_TYPE */
-#define CDS_CLASS_MINOR1_TYPE_LEN	13
+#define CDS_CLASS_MINOR1_TYPE_LEN	15
 
 /* The number of string in CDS_CLASS_MINOR2_TYPE */
 #define CDS_CLASS_MINOR2_TYPE_LEN	1
