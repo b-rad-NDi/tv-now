@@ -60,6 +60,7 @@ struct CdsMediaObject* CDS_AllocateObject()
 {
 	struct CdsMediaObject *cdsObj = (struct CdsMediaObject *) malloc (sizeof(struct CdsMediaObject));
 	memset(cdsObj, 0, sizeof(struct CdsMediaObject));
+	cdsObj->Recordable = -1;
 	return cdsObj;
 }
 
