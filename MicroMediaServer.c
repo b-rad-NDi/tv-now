@@ -1231,6 +1231,8 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					cdsObj->ChildCount = PCGetGetDirEntryCount(pathName, DIRDELIMITER);
 					cdsObj->MediaClass = mediaClass;
 
+					GetMetaData(pathName, cdsObj);
+
 					entry = CdsToDidl_GetMediaObjectDidlEscaped(cdsObj, 0, filterMask, 0, &entryLen);
 					ext = "NOT-NULL";
 				}
@@ -1264,6 +1266,8 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 
 						cdsRes = &((*cdsRes)->Next);
 					}
+
+					GetMetaData(pathName, cdsObj);
 
 					entry = CdsToDidl_GetMediaObjectDidlEscaped(cdsObj, 0, filterMask, 0, &entryLen);
 				}
