@@ -54,6 +54,7 @@
 #include <inttypes.h>
 
 #define NDi_LiveTV 1
+struct CdsMediaObject;
 
 void PCRandomize();
 
@@ -89,6 +90,13 @@ int PCFileSeek(void *fileHandle, uint64_t offset, int origin);
  *		fileHandle returned from PCFileOpen.
  */
 uint64_t PCFileTell(void *fileHandle);
+
+/*
+ *   Use to obtain expanded metadata fields.
+ *      path is analyzed, cdsObj is filled where desired
+ */
+void GetMetaData(const char* path, struct CdsMediaObject *cdsObj);
+
 
 /*
  *	Returns a state number for the file system.

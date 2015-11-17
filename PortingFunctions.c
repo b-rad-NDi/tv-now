@@ -57,6 +57,7 @@
 
 #include "MyString.h"
 #include "MicroMediaServer.h"
+#include "CdsMediaObject.h"
 
 #include "PortingFunctions.h"
 
@@ -160,6 +161,12 @@ uint64_t PCFileTell(void *fileHandle)
 	printf("%s\n", __func__);
 	/* TODO: Modify to enable unicode char support */
 	return ftello((FILE*)fileHandle);
+}
+
+/* Analyze cdsObj and allocate+fill in all desired metadata fields */
+void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
+{
+
 }
 
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
