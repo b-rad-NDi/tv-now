@@ -86,6 +86,11 @@
 #include <unistd.h>
 #endif
 
+/* tv-now root directories */
+#define TVNOW_ROOT_ITEMS 3
+static int rootIter = 0;
+static char rootDirs[TVNOW_ROOT_ITEMS][12] = { "Channels", "EPG", "VOD" };
+
 #define MAX_PATH_LENGTH 1024
 
 void PCRandomize()
@@ -303,16 +308,35 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
 	struct stat64 _si;
 	char fullPath[1024];
-#if NDi_LiveTV	
-	struct dvb_channel* tmpC = firstchannel();
-	if (tmpC != NULL) {
-		printf("%s/%s.mpg\n",directory,tmpC->channelID);
-		sprintf(filename, "%s.mpg", tmpC->channelID);
-		if (filename != NULL && filesize != NULL) {
-			*filesize = LIVETV_FILESIZE;
-		}
+	char *title      = NULL;
+	char *parentDir  = NULL;
+	char *parentTitle = NULL;
+	char *parentDir2 = NULL;
+
+#if NDi_LiveTV
+	if (strcmp(directory, "./") == 0)
+	{
+		/* TODO: do better */
+		rootIter = 0;
+		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
+		if (filesize != NULL) *filesize = 0;
+		printf("%s(%s, filename (%s), %d, %" PRIu64 ")\n", __func__, directory, filename == NULL ? "" : filename, filenamelength, filesize != NULL ? *filesize : 0);
+		return &rootIter;
 	}
-	return (void*)tmpC;
+	else if (strncmp(directory, "./Channels", 10) == 0)
+	{
+		struct dvb_channel* tmpC = firstchannel();
+		if (tmpC != NULL) {
+			printf("%s/%s.ts\n",directory,tmpC->channelID);
+			if (filename != NULL) sprintf(filename, "%s.mpg", tmpC->channelID);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+		}
+		return (void*)tmpC;
+	}
+	else
+		return NULL;
 #endif	
 	dirObj = opendir(directory);
 
@@ -393,16 +417,43 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
 	struct stat64 _si;
 	char fullPath[1024];
+	int retval = 0;
+	char *title      = NULL;
+	char *parentDir  = NULL;
+	char *parentTitle = NULL;
+	char *parentDir2 = NULL;
+	char *parentTitle2 = NULL;
+
 #if NDi_LiveTV
-	struct dvb_channel* tmpC = nextchannel();
-	if (tmpC != NULL) {
-		sprintf(filename, "%s.mpg", tmpC->channelID);
-		if (filesize != NULL) {
-			*filesize = LIVETV_FILESIZE;
-		}
-		return 1;
+	if (strcmp(dirName, "./") == 0)
+	{
+		if (rootIter == 3) return 0;
+		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
+		if (filesize != NULL) *filesize = 0;
+		retval = 1;
 	}
-	return 0;
+	else if (strncmp(dirName, "./Channels/", 11) == 0)
+	{
+		struct dvb_channel* tmpC = nextchannel();
+		if (tmpC != NULL) {
+			if (filename != NULL) sprintf(filename, "%s.mpg", tmpC->channelID);
+
+			print_epg(tmpC);
+
+			if (filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+			retval = 1;
+		}
+	}
+
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
+
+	return retval;
 #endif
 	dirObj = (DIR*) handle;
 	dirEntry = readdir(dirObj);
