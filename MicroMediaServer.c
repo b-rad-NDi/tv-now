@@ -1131,7 +1131,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			else
 			{
 				parentID = (char*) malloc((int) strlen(parentDir) + 3);
-				sprintf(parentID, "0%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
+				sprintf(parentID, "%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
 				pidLen = (int) strlen(parentID);
 				parentID [pidLen-1] = '\0';
 				pidLen = pidLen - 1;
@@ -1171,7 +1171,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		}
 		else
 		{
-			sprintf(id, "0%s%s%s", fntd->DirDelimiter, channel_title, ext);
+			sprintf(id, "%s%s%s", fntd->DirDelimiter, channel_title, ext);
 		}
 
 		/* determine if directory or file */
