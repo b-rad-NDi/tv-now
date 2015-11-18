@@ -630,6 +630,36 @@ int PCGetFileDirType(char* directory)
 			retval = 1;
 		}
 	}
+	else if (strncmp(directory, "./EPG", 5) == 0)
+	{
+		if ( (strcmp(directory, "./EPG") == 0) ||
+		    (strcmp(directory, "./EPG/") == 0) )
+		{
+			retval = 2;
+		}
+		else if (strcmp(parentDir, "./EPG/") == 0)
+		{
+			if (ischannel(title)) {
+				printf("Channel Aggregation EPG\n");
+				retval = 2;
+			}
+		}
+		else if (parentTitle2 != NULL && ischannel(parentTitle2) &&
+		         parentTitle != NULL && isDate(parentTitle))
+		{
+			if (1) // TODO: isListing(title)
+			{
+				printf("Individual EPG listing\n");
+				retval = 1;
+			}
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2, "./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+			printf("Channel Day of the Week EPG Listing\n");
+			retval = 2;
+		}
+	}
 
 	if (title != NULL) free(title);
 	if (parentDir != NULL) free(parentDir);
