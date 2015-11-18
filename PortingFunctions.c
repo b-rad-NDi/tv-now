@@ -187,7 +187,36 @@ static int isDate(const char* date_string)
 /* Analyze cdsObj and allocate+fill in all desired metadata fields */
 void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 {
+	int fdType;
+	char *title = GetFileName(path, "/", 0);
+//	printf("%s(%s, ... )\n", __func__, path);
 
+	if (strncmp(path, "./Channels/", 11) == 0)
+	{
+		fdType = PCGetFileDirType(path);
+
+		if (fdType == 2)
+		{
+//			cdsObj->MediaClass = CDS_MEDIACLASS_TUNERCONTAINER;
+		}
+		else if (fdType == 1)
+		{
+			cdsObj->MediaClass = CDS_MEDIACLASS_VIDEOBROADCAST;
+		}
+	}
+	else if (strncmp(path, "./EPG/", 6) == 0)
+	{
+		fdType = PCGetFileDirType(path);
+
+		if (fdType == 2)
+		{
+			cdsObj->MediaClass = CDS_MEDIACLASS_EPGCONTAINER;
+		}
+		else
+		{
+			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
+		}
+	}
 }
 
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
