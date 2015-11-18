@@ -163,6 +163,22 @@ uint64_t PCFileTell(void *fileHandle)
 	return ftello((FILE*)fileHandle);
 }
 
+static int isDate(const char* date_string)
+{
+	const char *time_details = date_string;
+	char* endPtr;
+	struct tm tm;
+	printf("%s( %s )\n", __func__, date_string);
+
+	endPtr = strptime(time_details, "%m-%d-%Y", &tm);
+	if (endPtr == NULL || *endPtr != '\0')
+	{
+		printf("%s( %s ) - Error\n", __func__, date_string);
+		return 0;
+	}
+	return 1;
+}
+
 /* Analyze cdsObj and allocate+fill in all desired metadata fields */
 void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 {
