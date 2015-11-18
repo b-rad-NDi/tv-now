@@ -289,7 +289,7 @@ char* GetFileName(char* pathName, char* dirDelimiter, int returnExtension)
 	int pLen = (int) strlen(pathName);
 	int len = pLen - pos;
 	int dotPos;
-	char* name;
+	char* name = NULL;
 	int i,j;
 	int nlen;
 
