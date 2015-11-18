@@ -493,8 +493,6 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
  */
 int PCGetFileDirType(char* directory)
 {
-	printf("%s(%s)\n", __func__, directory);
-
 #ifdef WIN32
 	DWORD _si;
 	int dirLen,dirSize;
@@ -573,18 +571,45 @@ int PCGetFileDirType(char* directory)
 #endif
 
 #ifdef _POSIX
+	int retval = 0;
+//	printf("%s(%s)\n", __func__, directory);
 #if NDi_LiveTV
 	if (strcmp(directory, "./") == 0)
 		return 2;
-	char chanName[128];
-	strcpy(chanName,directory);
-	chanName[IndexOf(directory, ".mpg")] = '\0';
-	if (ischannel(chanName+2)) {
-		printf("its a file\n");
-		return 1;
+
+	char *title      = GetFileName(directory, "/", 0);
+	char *parentDir  = GetParentPath(directory, "/", 1);
+	char *parentTitle = GetFileName(parentDir, "/", 0);
+	char *parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+	char *parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
+/*
+	printf("%s() title = %s\n", __func__, title = NULL ? "" : title);
+	printf("%s() parentDir = %s\n", __func__, parentDir == NULL ? "" : parentDir);
+	printf("%s() parentTitle = %s\n", __func__, parentTitle == NULL ? "" : parentTitle);
+	printf("%s() parentDir2 = %s\n", __func__, parentDir2 == NULL ? "" : parentDir2);
+	printf("%s() parentTitle2 = %s\n", __func__, parentTitle2 == NULL ? "" : parentTitle2);
+*/
+	if (strncmp(directory, "./Channels", 10) == 0)
+	{
+		if ( (strcmp(directory, "./Channels") == 0) ||
+		    (strcmp(directory, "./Channels/") == 0) )
+		{
+			retval = 2;
+		}
+		if (ischannel(title)) {
+			printf("its a channel\n");
+			retval = 1;
+		}
 	}
-	else
-		return 0;
+
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
+
+	return retval;
+
 #endif
 	struct stat64 _si;
 
