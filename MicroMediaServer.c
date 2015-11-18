@@ -1099,6 +1099,11 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		{
 			mime = (char*) FileExtensionToMimeType(ext, 0);
 		}
+		else
+		{
+			ext = "";
+			mime = "";
+		}
 	}
 
 	if ((fntd->CI >= fntd->SI) && ((fntd->NR < fntd->RC) || (fntd->RC == 0)))
