@@ -519,6 +519,60 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 			retval = 1;
 		}
 	}
+	else if (strncmp(dirName, "./EPG/", 6) == 0)
+	{
+		title       = GetFileName(dirName, "/", 0);
+		parentDir   = GetParentPath(dirName, "/", 1);
+		parentTitle = GetFileName(parentDir, "/", 0);
+		parentDir2  = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+		parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
+
+		if (strcmp(dirName, "./EPG/") == 0)
+		{
+			struct dvb_channel* tmpC = nextchannel();
+			if (tmpC != NULL) {
+				if (filename != NULL) sprintf(filename, "%s.mpg", tmpC->channelID);
+
+				printf("Channel %s - %s\n", tmpC->channelID, tmpC->callSign);
+				print_epg(tmpC);
+
+				if (filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+				retval = 1;
+			}
+		}
+		else if (parentDir != NULL && strcmp(parentDir,"./EPG/") == 0 && ischannel(title))
+		{
+			char day_string[128] = { 0 };
+			if (nextEpgDay(handle, title, day_string) != NULL)
+			{
+				if (filename != NULL) sprintf(filename, "%s", day_string);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = 0;
+				}
+				retval = 1;
+			}
+			else
+				retval = 0;
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+			char event_string[128] = { 0 };
+			if (nextEpgEvent(handle, parentTitle, title, event_string) != NULL)
+			{
+				if (filename != NULL) sprintf(filename, "%s", event_string);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+				retval = 1;
+			}
+			else
+				retval = 0;
+		}
+
+	}
 
 	if (title != NULL) free(title);
 	if (parentDir != NULL) free(parentDir);
