@@ -364,6 +364,50 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		}
 		return (void*)tmpC;
 	}
+	else if (strncmp(directory, "./EPG", 5) == 0)
+	{
+		title      = GetFileName(directory, "/", 0);
+		parentDir  = GetParentPath(directory, "/", 1);
+		parentTitle = GetFileName(parentDir, "/", 0);
+		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+
+		if (strcmp(directory, "./EPG/") == 0)
+		{
+			char channelName[64] = { 0 };
+			struct dvb_channel* tmpC = firstchannel();
+			if (tmpC != NULL) {
+				printf("%s/%s\n",directory,tmpC->channelID);
+				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+			}
+			return (void*)tmpC;
+		}
+		else if (parentDir != NULL && strcmp(parentDir,"./EPG/") == 0 && ischannel(title))
+		{
+			char day_string[64] = { 0 };
+			void *x = firstEpgDay(title, day_string);
+
+			if (filename != NULL) sprintf(filename, "%s", day_string);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = 0;
+			}
+			return x;
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+			char event_string[64] = { 0 };
+			void* x = firstEpgEvent(parentTitle, title, event_string);
+
+			if (filename != NULL) sprintf(filename, "%s", event_string);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+			return x;
+		}
+	}
 	else
 		return NULL;
 #endif	
