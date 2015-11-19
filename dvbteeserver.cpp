@@ -235,6 +235,27 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 	return 0;
 }
 
+extern "C" void* firstEpgDay(const char* channel, char* day_string)
+{
+	return NULL;
+}
+
+extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
+{
+	return NULL;
+}
+
+extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* event_string)
+{
+
+	return NULL;
+}
+
+extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_string, char* event_string)
+{
+	return NULL;
+}
+
 class server_parse_iface : public parse_iface
 {
 public:
