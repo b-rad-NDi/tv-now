@@ -192,7 +192,9 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 	char *parentDir  = NULL;
 	char *parentDir2 = NULL;
 
-	if (strncmp(path, "./Channels/", 11) == 0)
+//	printf("%s(%s, ... )\n", __func__, path);
+
+	if (strncmp(path, "./Channels", 10) == 0)
 	{
 		fdType = PCGetFileDirType(path);
 
@@ -205,7 +207,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			cdsObj->MediaClass = CDS_MEDIACLASS_VIDEOBROADCAST;
 		}
 	}
-	else if (strncmp(path, "./EPG/", 6) == 0)
+	else if (strncmp(path, "./EPG", 5) == 0)
 	{
 		fdType = PCGetFileDirType(path);
 
