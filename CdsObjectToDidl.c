@@ -962,7 +962,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, mediaObj->NetworkAffiliation);
 			cp += sprintf(cp, CDS_DIDL_NETWORK_AFFIL2);
 		}
-		if (printThese & CdsFilter_Recordable)
+		if (mediaObj->Recordable >= 0 && printThese & CdsFilter_Recordable)
 		{
 			cp += sprintf(cp, "%s%d%s", CDS_DIDL_RECORDABLE1, mediaObj->Recordable, CDS_DIDL_RECORDABLE2);
 		}
@@ -998,7 +998,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, mediaObj->Album);
 			cp += sprintf(cp, CDS_DIDL_ALBUM2_ESCAPED);
 		}
-		if (printThese & CdsFilter_DateTimeRange)
+		if (mediaObj->DateTimeRange.start > 0 && printThese & CdsFilter_DateTimeRange)
 		{
 			tmDate = localtime(&mediaObj->DateTimeRange.start);
 			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
@@ -1008,7 +1008,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			strftime(&dateString[0], 128, "%Y-%m-%dT%H:%M:%SZ", tmDate);
 			cp += sprintf(cp, "/%s%s", dateString, CDS_DIDL_DATE_RANGE2);
 		}
-		if (printThese & CdsFilter_SchedStartTime)
+		if (mediaObj->ScheduledStartTime > 0 && printThese & CdsFilter_SchedStartTime)
 		{
 			/* TODO: support scheduledStartTime@use */
 			cp += sprintf(cp, CDS_DIDL_START_TIME1);
@@ -1017,7 +1017,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp,CDS_DIDL_START_TIME2 );
 		}
-		if (printThese & CdsFilter_SchedEndTime)
+		if (mediaObj->ScheduledStartTime > 0 && printThese & CdsFilter_SchedEndTime)
 		{
 			cp += sprintf(cp, CDS_DIDL_END_TIME1);
 			tmpTime = mediaObj->ScheduledStartTime + mediaObj->ScheduledDurationTime;
@@ -1026,7 +1026,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_END_TIME2);
 		}
-		if (printThese & CdsFilter_SchedDurationTime)
+		if (mediaObj->ScheduledDurationTime > 0 && printThese & CdsFilter_SchedDurationTime)
 		{
 			if (mediaObj->ScheduledDurationTime >= 86400)
 			{
