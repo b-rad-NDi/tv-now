@@ -249,9 +249,24 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0) /*  /EPG/ch/day  */
 			{
 				/*
+				 * <dc:title>channel # callsign : date</dc:title>
 				 * <upnp:channelID>19654</upnp:channelID>
 				 * <upnp:dateTimeRange>2015-11-12T00:00:00Z/2015-11-13T00:00:00Z</upnp:dateTimeRange>
 				 */
+
+				cdsObj->ChannelID = malloc(128);
+				sprintf(cdsObj->ChannelID, "%s", parentTitle);
+				free(cdsObj->Title);
+				cdsObj->Title = malloc(64);
+				sprintf(cdsObj->Title, "Channel %s -CallSign- : %s", parentTitle, title);
+				struct tm tm = { 0 };
+				strptime(title, "%m-%d-%Y", &tm);
+				tm.tm_hour = 0;
+				tm.tm_min = 0;
+				tm.tm_sec = 0;
+				time_t t_time = mktime(&tm);
+				cdsObj->DateTimeRange.start = t_time;
+				cdsObj->DateTimeRange.duration = (24 * 60 * 60);
 			}
 			cdsObj->MediaClass = CDS_MEDIACLASS_EPGCONTAINER;
 		}
