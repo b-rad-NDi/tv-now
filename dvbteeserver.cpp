@@ -318,6 +318,30 @@ extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
 
 extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* event_string)
 {
+	std::list<dvb_channel*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+//	printf("%s( %s, %s )\n", __func__, channel, day_string);
+
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+			print_epg((*it));
+			epg_iter *e_iter = new epg_iter;
+			e_iter->program_list = &(*it)->program_list;
+			for(e_iter->it=(*it)->program_list.begin(); e_iter->it!=(*it)->program_list.end();)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+
+				struct tm tm = { 0 };
+				strptime(day_string, "%m-%d-%Y", &tm);
+				tm.tm_hour = 0;
+				tm.tm_min = 0;
+				tm.tm_sec = 0;
+				time_t t_time = mktime(&tm);
+				t_time += 86400;
 
 	return NULL;
 }
