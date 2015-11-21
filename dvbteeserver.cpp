@@ -347,7 +347,7 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				tm.tm_min = 0;
 				tm.tm_sec = 0;
 				time_t t_time = mktime(&tm);
-				time_t t_time2 = t_time + ( 24 * 3600 * 3600 );
+				time_t t_time2 = t_time + ( 24 * 60 * 60 );
 
 				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
 				{
@@ -384,7 +384,7 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 	tm.tm_min = 0;
 	tm.tm_sec = 0;
 	next_day = mktime(&tm);
-	next_day += ( 24 * 3600 * 3600 );
+	next_day += ( 24 * 60 * 60 );
 
 	e_iter->it++;
 	while (e_iter->it != e_iter->program_list->end())
