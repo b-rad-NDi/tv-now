@@ -347,14 +347,14 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				tm.tm_min = 0;
 				tm.tm_sec = 0;
 				time_t t_time = mktime(&tm);
-				t_time += 86400;
+				time_t t_time2 = t_time + ( 24 * 3600 * 3600 );
 
 				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
 				{
 					e_iter->it = e_iter->program_list->erase(e_iter->it);
 					continue;
 				}
-				if ((*e_iter->it)->start < t_time)
+				if ((*e_iter->it)->start >= t_time && (*e_iter->it)->start < t_time2)
 				{
 					sprintf(event_string, (*e_iter->it)->title);
 					return (void*)e_iter;
