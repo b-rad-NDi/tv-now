@@ -978,7 +978,7 @@ uint64_t PCGetFileSize(const char* fullPath)
 
 int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 {
-	printf("%s\n", __func__);
+	printf("%s( %s )\n", __func__, fullPath);
 	char fn[MAX_PATH_LENGTH];
 	void *dirObj;
 	int retVal = 0;
@@ -1010,7 +1010,7 @@ int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 		PCCloseDir(dirObj);
 	}
 
-	printf("entries: %d\n", retVal);
+//	printf("%s( %s ) entries : %d\n", __func__, fullPath, retVal);
 	if (rFullPath != fullPath) {
 		free(rFullPath);
 	}
