@@ -130,6 +130,11 @@ void insert_sorted_epg(std::list<struct program_info*> &programs, program_info *
 			it = programs.erase(it);
 			continue;
 		}
+		if ((*it)->start == program->start)
+		{
+			it = programs.erase(it);
+			continue;
+		}
 		if ((*it)->start > program->start)
 		{
 			programs.insert(it,program);
