@@ -289,6 +289,9 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			 * <dc:language>English</dc:language>
 			 * <upnp:rating type="TVGUIDELINES.ORG">TVG</upnp:rating>
 			 */
+			cdsObj->ChannelID = malloc(128);
+			sprintf(cdsObj->ChannelID, "%s", parentTitle2);
+
 			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
 		}
 	}
