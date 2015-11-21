@@ -237,11 +237,77 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 
 extern "C" void* firstEpgDay(const char* channel, char* day_string)
 {
+	std::list<dvb_channel*>::iterator it;
+
+//	printf("%s( %s )\n", __func__, channel);
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+			epg_iter *e_iter = new epg_iter;
+			e_iter->program_list = &(*it)->program_list;
+			for(e_iter->it=e_iter->program_list->begin(); e_iter->it!=e_iter->program_list->end(); e_iter->it++)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+
+				time_t cur_t;
+				time(&cur_t);
+
+				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				{
+					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					continue;
+				}
+				if (cur_t >= (*e_iter->it)->start)
+				{
+					struct tm* tmDate = localtime(&(*e_iter->it)->start);
+					if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
+					return (void*)e_iter;
+				}
+			}
+			delete e_iter;
+		}
+	}
 	return NULL;
 }
 
 extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
 {
+	epg_iter *e_iter = (epg_iter*)handle;
+
+	if (e_iter->it == e_iter->program_list->end())
+	{
+		return NULL;
+	}
+
+	time_t cur_t;
+	time(&cur_t);
+	time_t cur_day = (*e_iter->it)->start;
+	struct tm* tm = localtime(&cur_day);
+	tm->tm_hour = 0;
+	tm->tm_min = 0;
+	tm->tm_sec = 0;
+	next_day = mktime(tm);
+	next_day += 24 * 60 * 60;
+
+	e_iter->it++;
+	while (e_iter->it != e_iter->program_list->end())
+	{
+//		printf("%s() - %s : %s - %d - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), mktime(tm), ctime(&next_day));
+		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		{
+			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			continue;
+		}
+		if ((*e_iter->it)->start >= next_day) /* TODO: plus duration? */
+		{
+			struct tm* tmDate = localtime(&(*e_iter->it)->start);
+			if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
+
+			return (void*)e_iter;
+		}
+		e_iter->it++;
+	}
 	return NULL;
 }
 
