@@ -204,6 +204,15 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 		}
 		else if (fdType == 1)
 		{
+			/*
+			 * <dc:title></dc:title>
+			 * <upnp:channelNr>19</upnp:channelNr>
+			 * <upnp:callSign></upnp:callSign>
+			 * <upnp:networkAffiliation></upnp:networkAffiliation>
+			 * <upnp:channelID>19654</upnp:channelID>
+			 * <upnp:recordable>1</upnp:recordable>
+			 */
+
 			cdsObj->MediaClass = CDS_MEDIACLASS_VIDEOBROADCAST;
 		}
 	}
