@@ -328,7 +328,7 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 	{
 		if (strcmp((*it)->channelID, channel) == 0)
 		{
-			print_epg((*it));
+//			print_epg((*it));
 			epg_iter *e_iter = new epg_iter;
 			e_iter->program_list = &(*it)->program_list;
 			for(e_iter->it=(*it)->program_list.begin(); e_iter->it!=(*it)->program_list.end();)
