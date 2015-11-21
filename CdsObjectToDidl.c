@@ -920,43 +920,43 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 				res = res->Next;
 			}
 		}
-		if (printThese & CdsFilter_epgProviderName)
+		if (mediaObj->epgProviderName && printThese & CdsFilter_epgProviderName)
 		{
 			cp += sprintf(cp, CDS_DIDL_EPG_PROVIDER1);
 			cp += fnEscape(cp, mediaObj->epgProviderName);
 			cp += sprintf(cp, CDS_DIDL_EPG_PROVIDER2);
 		}
-		if (printThese & CdsFilter_ServiceProvider)
+		if (mediaObj->serviceProvider && printThese & CdsFilter_ServiceProvider)
 		{
 			cp += sprintf(cp, CDS_DIDL_SVC_PROVIDER1);
 			cp += fnEscape(cp, mediaObj->serviceProvider);
 			cp += sprintf(cp, CDS_DIDL_SVC_PROVIDER2);
 		}
-		if (printThese & CdsFilter_ChannelID)
+		if (mediaObj->ChannelID && printThese & CdsFilter_ChannelID)
 		{
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID1);
 			cp += fnEscape(cp, mediaObj->ChannelID);
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID2);
 		}
-		if (printThese & CdsFilter_ChannelNr)
+		if (mediaObj->ChannelNr && printThese & CdsFilter_ChannelNr)
 		{
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
 			cp += fnEscape(cp, mediaObj->ChannelNr);
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
 		}
-		if (printThese & CdsFilter_ChannelName)
+		if (mediaObj->ChannelName && printThese & CdsFilter_ChannelName)
 		{
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NAME1);
 			cp += fnEscape(cp, mediaObj->ChannelName);
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NAME2);
 		}
-		if (printThese & CdsFilter_CallSign)
+		if (mediaObj->CallSign && printThese & CdsFilter_CallSign)
 		{
 			cp += sprintf(cp, CDS_DIDL_CALL_SIGN1);
 			cp += fnEscape(cp, mediaObj->CallSign);
 			cp += sprintf(cp, CDS_DIDL_CALL_SIGN2);
 		}
-		if (printThese & CdsFilter_NetworkAffil)
+		if (mediaObj->NetworkAffiliation && printThese & CdsFilter_NetworkAffil)
 		{
 			cp += sprintf(cp, CDS_DIDL_NETWORK_AFFIL1);
 			cp += fnEscape(cp, mediaObj->NetworkAffiliation);
@@ -966,33 +966,33 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		{
 			cp += sprintf(cp, "%s%d%s", CDS_DIDL_RECORDABLE1, mediaObj->Recordable, CDS_DIDL_RECORDABLE2);
 		}
-		if (printThese & CdsFilter_LongDescription)
+		if (mediaObj->LongDescription && printThese & CdsFilter_LongDescription)
 		{
 			cp += sprintf(cp, CDS_DIDL_LONG_DESCR1);
 			cp += fnEscape(cp, mediaObj->LongDescription);
 			cp += sprintf(cp, CDS_DIDL_LONG_DESCR2);
 		}
-		if (printThese & CdsFilter_Rating)
+		if (mediaObj->Rating && printThese & CdsFilter_Rating)
 		{
 			/* TODO: support rating@type */
 			cp += sprintf(cp, CDS_DIDL_RATING1);
 			cp += fnEscape(cp, mediaObj->Rating);
 			cp += sprintf(cp, CDS_DIDL_RATING2);
 		}
-		if (printThese & CdsFilter_Creator)
+		if (mediaObj->Creator && printThese & CdsFilter_Creator)
 		{
 			cp += sprintf(cp, CDS_DIDL_CREATOR1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Creator);
 			cp += sprintf(cp, CDS_DIDL_CREATOR2_ESCAPED);
 		}
-		if (printThese & CdsFilter_Genre)
+		if (mediaObj->Genre && printThese & CdsFilter_Genre)
 		{
 			/* TODO: support genre@extended */
 			cp += sprintf(cp, CDS_DIDL_GENRE1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Genre);
 			cp += sprintf(cp, CDS_DIDL_GENRE2_ESCAPED);
 		}
-		if (printThese & CdsFilter_Album)
+		if (mediaObj->Album && printThese & CdsFilter_Album)
 		{
 			cp += sprintf(cp, CDS_DIDL_ALBUM1_ESCAPED);
 			cp += fnEscape(cp, mediaObj->Album);
@@ -1040,45 +1040,45 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 				cp += sprintf(cp, "%sP%s%s", CDS_DIDL_DURATION1, timeString, CDS_DIDL_DURATION2);
 			}
 		}
-		if (printThese & CdsFilter_ProgramID)
+		if (mediaObj->ProgramID && printThese & CdsFilter_ProgramID)
 		{
 			/* TODO: support programID@type */
 			cp += sprintf(cp, CDS_DIDL_PROGRAM_ID1);
 			cp += fnEscape(cp, mediaObj->ProgramID);
 			cp += sprintf(cp, CDS_DIDL_PROGRAM_ID2);
 		}
-		if (printThese & CdsFilter_SeriesID)
+		if (mediaObj->SeriesID && printThese & CdsFilter_SeriesID)
 		{
 			cp += sprintf(cp, CDS_DIDL_SERIES_ID1);
 			cp += fnEscape(cp, mediaObj->SeriesID);
 			cp += sprintf(cp, CDS_DIDL_SERIES_ID2);
 		}
-		if (printThese & CdsFilter_EpisodeNumber)
+		if (mediaObj->EpisodeNumber && printThese & CdsFilter_EpisodeNumber)
 		{
 			cp += sprintf(cp, CDS_DIDL_EPISODE_NR1);
 			cp += fnEscape(cp, mediaObj->EpisodeNumber);
 			cp += sprintf(cp, CDS_DIDL_EPISODE_NR2);
 		}
-		if (printThese & CdsFilter_EpisodeSeason)
+		if (mediaObj->EpisodeSeason && printThese & CdsFilter_EpisodeSeason)
 		{
 			cp += sprintf(cp, CDS_DIDL_EPISODE_SEASON1);
 			cp += fnEscape(cp, mediaObj->EpisodeSeason);
 			cp += sprintf(cp, CDS_DIDL_EPISODE_SEASON2);
 		}
-		if (printThese & CdsFilter_EpisodeType)
+		if (mediaObj->EpisodeType && printThese & CdsFilter_EpisodeType)
 		{
 			cp += sprintf(cp, CDS_DIDL_EPISODE_TYPE1);
 			cp += fnEscape(cp, mediaObj->EpisodeType);
 			cp += sprintf(cp, CDS_DIDL_EPISODE_TYPE2);
 		}
-		if (printThese & CdsFilter_Actor)
+		if (mediaObj->Actor && printThese & CdsFilter_Actor)
 		{
 			/* TODO: support multiple actors */
 			cp += sprintf(cp, CDS_DIDL_ACTOR1);
 			cp += fnEscape(cp, mediaObj->Actor);
 			cp += sprintf(cp, CDS_DIDL_ACTOR2);
 		}
-		if (printThese & CdsFilter_Language)
+		if (mediaObj->Language && printThese & CdsFilter_Language)
 		{
 			cp += sprintf(cp, CDS_DIDL_LANGUAGE1);
 			cp += fnEscape(cp, mediaObj->Language);
@@ -1092,7 +1092,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, dateString);
 			cp += sprintf(cp, CDS_DIDL_DATE1);
 		}
-		if (printThese & CdsFilter_AlbumArtURI)
+		if (mediaObj->AlbumArtURI && printThese & CdsFilter_AlbumArtURI)
 		{
 			cp += sprintf(cp, CDS_DIDL_RES_THUMBNAIL);
 			cp += fnEscape(cp, mediaObj->AlbumArtURI);
