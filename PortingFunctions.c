@@ -189,7 +189,8 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 {
 	int fdType;
 	char *title = GetFileName(path, "/", 0);
-//	printf("%s(%s, ... )\n", __func__, path);
+	char *parentDir  = NULL;
+	char *parentDir2 = NULL;
 
 	if (strncmp(path, "./Channels/", 11) == 0)
 	{
@@ -210,6 +211,30 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 
 		if (fdType == 2)
 		{
+			parentDir  = GetParentPath(path, "/", 1);
+			parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+
+			if (strcmp(path, "./EPG"))
+			{
+			/*
+			 * <upnp:epgProviderName></upnp:epgProviderName>
+			 * <upnp:serviceProvider></upnp:serviceProvider>
+			 */
+			}
+			else if (parentDir != NULL && strcmp(parentDir, "./EPG") == 0) /*  /EPG/ch  */
+			{
+			/*
+			 * <dc:title>channel callsign</dc:title>
+			 * <upnp:channelID>19654</upnp:channelID>
+			 */
+			}
+			else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0) /*  /EPG/ch/day  */
+			{
+				/*
+				 * <upnp:channelID>19654</upnp:channelID>
+				 * <upnp:dateTimeRange>2015-11-12T00:00:00Z/2015-11-13T00:00:00Z</upnp:dateTimeRange>
+				 */
+			}
 			cdsObj->MediaClass = CDS_MEDIACLASS_EPGCONTAINER;
 		}
 		else
