@@ -950,12 +950,6 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, mediaObj->ChannelName);
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NAME2);
 		}
-		if (printThese & CdsFilter_ChannelID)
-		{
-			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID1);
-			cp += fnEscape(cp, mediaObj->ChannelID);
-			cp += sprintf(cp, CDS_DIDL_CHANNEL_ID2);
-		}
 		if (printThese & CdsFilter_CallSign)
 		{
 			cp += sprintf(cp, CDS_DIDL_CALL_SIGN1);
