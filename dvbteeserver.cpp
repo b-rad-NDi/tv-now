@@ -479,8 +479,13 @@ public:
 		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
 		char channelno[16];
-//		sprintf(channelno, "%d%02d", e.chan_physical, e.chan_svc_id);
-		sprintf(channelno, "%d%02d", e.chan_major, e.chan_minor);
+
+		if (e.chan_major + e.chan_minor > 1)
+			sprintf(channelno, "%d%02d", e.chan_major, e.chan_minor);
+//		else if (c->lcn)
+//			sprintf(channelno, "%d", c->lcn);
+		else
+			sprintf(channelno, "%d%02d", e.chan_physical, e.chan_svc_id);
 
 		std::list<dvb_channel*>::iterator it;
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
