@@ -192,6 +192,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 	char *parentDir  = NULL;
 	char *parentTitle = NULL;
 	char *parentDir2 = NULL;
+	char *parentTitle2 = NULL;
 
 //	printf("%s(%s, ... )\n", __func__, path);
 
