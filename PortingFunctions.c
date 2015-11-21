@@ -190,6 +190,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 	int fdType;
 	char *title = GetFileName(path, "/", 0);
 	char *parentDir  = NULL;
+	char *parentTitle = NULL;
 	char *parentDir2 = NULL;
 
 //	printf("%s(%s, ... )\n", __func__, path);
@@ -223,6 +224,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 		if (fdType == 2)
 		{
 			parentDir  = GetParentPath(path, "/", 1);
+			parentTitle = (parentDir != NULL) ? GetFileName(parentDir, "/", 1) : NULL;
 			parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 
 			if (strcmp(path, "./EPG") == 0)
@@ -238,6 +240,11 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			 * <dc:title>channel callsign</dc:title>
 			 * <upnp:channelID>19654</upnp:channelID>
 			 */
+				cdsObj->ChannelID = malloc(128);
+				sprintf(cdsObj->ChannelID, "%s", title);
+				free(cdsObj->Title);
+				cdsObj->Title = malloc(128);
+				sprintf(cdsObj->Title, "Channel %s -CallSign-", title);
 			}
 			else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0) /*  /EPG/ch/day  */
 			{
