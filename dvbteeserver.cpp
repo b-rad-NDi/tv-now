@@ -343,6 +343,20 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				time_t t_time = mktime(&tm);
 				t_time += 86400;
 
+				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				{
+					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					continue;
+				}
+				if ((*e_iter->it)->start < t_time)
+				{
+					sprintf(event_string, (*e_iter->it)->title);
+					return (void*)e_iter;
+				}
+				e_iter->it++;
+			}
+		}
+	}
 	return NULL;
 }
 
