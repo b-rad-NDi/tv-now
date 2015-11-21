@@ -224,23 +224,19 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 
 		if (fdType == 2)
 		{
-			parentDir  = GetParentPath(path, "/", 1);
-			parentTitle = (parentDir != NULL) ? GetFileName(parentDir, "/", 1) : NULL;
-			parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
-
 			if (strcmp(path, "./EPG") == 0)
 			{
-			/*
-			 * <upnp:epgProviderName></upnp:epgProviderName>
-			 * <upnp:serviceProvider></upnp:serviceProvider>
-			 */
+				/*
+				 * <upnp:epgProviderName></upnp:epgProviderName>
+				 * <upnp:serviceProvider></upnp:serviceProvider>
+				 */
 			}
 			else if (parentDir != NULL && strcmp(parentDir, "./EPG/") == 0) /*  /EPG/ch  */
 			{
-			/*
-			 * <dc:title>channel callsign</dc:title>
-			 * <upnp:channelID>19654</upnp:channelID>
-			 */
+				/*
+				 * <dc:title>channel callsign</dc:title>
+				 * <upnp:channelID>19654</upnp:channelID>
+				 */
 				cdsObj->ChannelID = malloc(128);
 				sprintf(cdsObj->ChannelID, "%s", title);
 				cdsObj->Title = malloc(128);
@@ -254,7 +250,6 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				 * <upnp:channelID>19654</upnp:channelID>
 				 * <upnp:dateTimeRange>2015-11-12T00:00:00Z/2015-11-13T00:00:00Z</upnp:dateTimeRange>
 				 */
-
 				cdsObj->ChannelID = malloc(128);
 				sprintf(cdsObj->ChannelID, "%s", parentTitle);
 				cdsObj->Title = malloc(128);
