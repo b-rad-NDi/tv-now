@@ -1147,11 +1147,13 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			free(title);
 			if (strnicmp(pathName, fntd->Root, (int) strlen(pathName)) == 0)
 			{
-				title = MMS_STRING_ROOT;
+				title = malloc(strlen(MMS_STRING_ROOT));
+				sprintf(title, "%s", MMS_STRING_ROOT);
 			}
 			else
 			{
-				title = MMS_STRING_UNKNOWN;
+				title = malloc(strlen(MMS_STRING_UNKNOWN));
+				sprintf(title, "%s", MMS_STRING_UNKNOWN);
 			}
 		}
 
