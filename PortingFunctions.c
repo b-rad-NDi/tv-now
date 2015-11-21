@@ -239,6 +239,27 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 		}
 		else
 		{
+			/*
+			 * id="EPG/Airings/15242959"
+			 *
+			 * <dc:title></dc:title>
+			 * <upnp:channelID>19654</upnp:channelID>
+			 * <upnp:scheduledStartTime usage="SCHEDULED_PROGRAM">2015-11-12T00:00:00Z</upnp:scheduledStartTime>
+			 * <upnp:scheduledEndTime>2015-11-12T00:30:00Z</upnp:scheduledEndTime>
+			 * <upnp:scheduledDurationTime>P0:30:00</upnp:scheduledDurationTime>
+			 * <upnp:longDescription></upnp:longDescription>
+			 * <upnp:programID type="xxx.COM"></upnp:programID>
+			 * <upnp:actor></upnp:actor>
+			 * <upnp:actor></upnp:actor>
+			 * <upnp:episodeNumber></upnp:episodeNumber>
+			 * <upnp:episodeSeason></upnp:episodeSeason>
+			 * <upnp:episodeType>FIRST-RUN</upnp:episodeType>
+			 * <upnp:seriesID></upnp:seriesID>
+			 * <dc:date>2015-11-11T18:00:00Z</dc:date>
+			 * <upnp:genre extended="Talk,Interview">Talk</upnp:genre>
+			 * <dc:language>English</dc:language>
+			 * <upnp:rating type="TVGUIDELINES.ORG">TVG</upnp:rating>
+			 */
 			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
 		}
 	}
