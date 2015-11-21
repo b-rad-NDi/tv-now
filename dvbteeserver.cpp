@@ -419,20 +419,27 @@ public:
 	virtual void chandump(parsed_channel_info_t *c)
 	{
 		char channelno[16]; /* XXX.XXX */
-		if (c->major + c->minor > 1)
-			sprintf(channelno, "%02d.%02d", c->major, c->minor);
-		else if (c->lcn)
-			sprintf(channelno, "%d", c->lcn);
-		else
-			sprintf(channelno, "%02d.%02d", c->physical_channel, c->program_number);
-
 		struct dvb_channel* tmp;
 		tmp = new dvb_channel;
 		if (tmp == NULL)
 			return;
 
-//		sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
-		sprintf(tmp->channelID, "%d%02d", c->major, c->minor);
+		if (c->major + c->minor > 1)
+		{
+			sprintf(channelno, "%02d.%02d", c->major, c->minor);
+			sprintf(tmp->channelID, "%d%02d", c->major, c->minor);
+		}
+		else if (c->lcn)
+		{
+			sprintf(channelno, "%d", c->lcn);
+			sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
+		}
+		else
+		{
+			sprintf(channelno, "%02d.%02d", c->physical_channel, c->program_number);
+			sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
+		}
+
 		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
 
 		insert_sorted(channel_list, tmp);
