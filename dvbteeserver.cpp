@@ -368,6 +368,46 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 
 extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_string, char* event_string)
 {
+	epg_iter *e_iter = (epg_iter*)handle;
+
+	char* endPtr;
+	time_t next_day;
+
+	time_t cur_t;
+	time(&cur_t);
+
+//	printf("%s( %p, %s, %s )\n", __func__, handle, channel, day_string);
+
+	struct tm tm = { 0 };
+	strptime(day_string, "%m-%d-%Y", &tm);
+	tm.tm_hour = 0;
+	tm.tm_min = 0;
+	tm.tm_sec = 0;
+	next_day = mktime(&tm);
+	next_day += 86400;
+
+	e_iter->it++;
+	while (e_iter->it != e_iter->program_list->end())
+	{
+//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), ctime(&next_day));
+
+		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		{
+			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			continue;
+		}
+		if ((*e_iter->it)->start < next_day)
+		{
+			sprintf(event_string, (*e_iter->it)->title);
+			return (void*)e_iter;
+		}
+		else
+		{
+			return NULL;
+		}
+		e_iter->it++;
+	}
+
 	return NULL;
 }
 
