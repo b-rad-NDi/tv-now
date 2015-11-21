@@ -225,14 +225,14 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			parentDir  = GetParentPath(path, "/", 1);
 			parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 
-			if (strcmp(path, "./EPG"))
+			if (strcmp(path, "./EPG") == 0)
 			{
 			/*
 			 * <upnp:epgProviderName></upnp:epgProviderName>
 			 * <upnp:serviceProvider></upnp:serviceProvider>
 			 */
 			}
-			else if (parentDir != NULL && strcmp(parentDir, "./EPG") == 0) /*  /EPG/ch  */
+			else if (parentDir != NULL && strcmp(parentDir, "./EPG/") == 0) /*  /EPG/ch  */
 			{
 			/*
 			 * <dc:title>channel callsign</dc:title>
