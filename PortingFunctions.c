@@ -283,7 +283,6 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			 * <upnp:longDescription></upnp:longDescription>
 			 * <upnp:programID type="xxx.COM"></upnp:programID>
 			 * <upnp:actor></upnp:actor>
-			 * <upnp:actor></upnp:actor>
 			 * <upnp:episodeNumber></upnp:episodeNumber>
 			 * <upnp:episodeSeason></upnp:episodeSeason>
 			 * <upnp:episodeType>FIRST-RUN</upnp:episodeType>
