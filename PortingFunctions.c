@@ -221,6 +221,10 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 	else if (strncmp(path, "./EPG", 5) == 0)
 	{
 		fdType = PCGetFileDirType(path);
+		parentDir  = GetParentPath(path, "/", 1);
+		parentTitle = (parentDir != NULL) ? GetFileName(parentDir, "/", 1) : NULL;
+		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+		parentTitle2 = (parentDir2 != NULL) ? GetParentPath(parentDir2, "/", 1) : NULL;
 
 		if (fdType == 2)
 		{
