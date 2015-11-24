@@ -216,6 +216,14 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			 */
 
 			cdsObj->MediaClass = CDS_MEDIACLASS_VIDEOBROADCAST;
+
+			cdsObj->CallSign = malloc(64);
+			channel_name(title, cdsObj->CallSign);
+
+			cdsObj->ChannelID = malloc(128);
+			sprintf(cdsObj->ChannelID, "%s", title);
+
+			cdsObj->Recordable = 1;
 		}
 	}
 	else if (strncmp(path, "./EPG", 5) == 0)
