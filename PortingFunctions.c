@@ -300,10 +300,21 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			 * <dc:language>English</dc:language>
 			 * <upnp:rating type="TVGUIDELINES.ORG">TVG</upnp:rating>
 			 */
+			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
 			cdsObj->ChannelID = malloc(128);
 			sprintf(cdsObj->ChannelID, "%s", parentTitle2);
 
-			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
+			char *epg_id = GetFileName(cdsObj->ID, "/", 1)
+			char *old_title = cdsObj->Title;
+
+			if (get_epg_data_simple(epg_id, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			{
+				if (cdsObj->Title != NULL)
+					free(old_title);
+				else
+					cdsObj->Title = old_title;
+			}
+
 		}
 	}
 }
