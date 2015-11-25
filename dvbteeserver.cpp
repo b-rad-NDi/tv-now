@@ -414,6 +414,42 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 /* if epg_id is NULL return first current item */
 extern "C" int get_epg_data_simple(const char* channel, const char* epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
 {
+	std::list<dvb_channel*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+	printf("%s( %s, %s )\n", __func__, channel);
+
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+//			printf("%s() - %s\n", __func__, (*it)->channelID);
+
+			std::list<struct program_info*>::iterator it2;
+
+			for(it2=(*it)->program_list.begin(); it2!=(*it)->program_list.end();)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*it2)->title, ctime(&(*it2)->start));
+				if ((*it2)->start+(*it2)->duration <= cur_t)
+				{
+					it2 = (*it)->program_list.erase(it2);
+					continue;
+				}
+				if (epg_id == NULL)
+				{
+					*title = (char*)malloc(strlen((*it2)->title));
+					*description = (char*)malloc(strlen((*it2)->description));
+					sprintf(*title, "%s", (*it2)->title);
+					sprintf(*description, "%s", (*it2)->description);
+					*start_t = (*it2)->start;
+					*duration_t = (*it2)->duration;
+					*end_t = (*it2)->start + (*it2)->duration;
+				}
+				it2++;
+			}
+		}
+	}
 
 	return 0;
 }
