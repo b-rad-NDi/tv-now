@@ -481,7 +481,6 @@ public:
 
 	virtual void chandump(parsed_channel_info_t *c)
 	{
-		char channelno[16]; /* XXX.XXX */
 		struct dvb_channel* tmp;
 		tmp = new dvb_channel;
 		if (tmp == NULL)
@@ -489,21 +488,21 @@ public:
 
 		if (c->major + c->minor > 1)
 		{
-			sprintf(channelno, "%02d.%02d", c->major, c->minor);
-			sprintf(tmp->channelID, "%d%02d", c->major, c->minor);
+			sprintf(tmp->channelNr, "%02d.%02d", c->major, c->minor);
+			sprintf(tmp->channelID, "%03d%02d", c->physical_channel, c->program_number);
 		}
 		else if (c->lcn)
 		{
-			sprintf(channelno, "%d", c->lcn);
-			sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
+			sprintf(tmp->channelNr, "%d", c->lcn);
+			sprintf(tmp->channelID, "%03d%02d", c->physical_channel, c->program_number);
 		}
 		else
 		{
-			sprintf(channelno, "%02d.%02d", c->physical_channel, c->program_number);
-			sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
+			sprintf(tmp->channelNr, "%02d.%02d", c->physical_channel, c->program_number);
+			sprintf(tmp->channelID, "%03d%02d", c->physical_channel, c->program_number);
 		}
 
-		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
+		sprintf(tmp->callSign, "%s", c->service_name);
 
 		insert_sorted(channel_list, tmp);
 
@@ -543,17 +542,14 @@ public:
 
 		char channelno[16];
 
-		if (e.chan_major + e.chan_minor > 1)
-			sprintf(channelno, "%d%02d", e.chan_major, e.chan_minor);
-//		else if (c->lcn)
-//			sprintf(channelno, "%d", c->lcn);
-		else
-			sprintf(channelno, "%d%02d", e.chan_physical, e.chan_svc_id);
+		char channelID[16];
+
+		sprintf(channelID, "%03d%02d", e.chan_physical, e.chan_svc_id);
 
 		std::list<dvb_channel*>::iterator it;
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
 		{
-			if (strcmp((*it)->channelID, channelno) == 0) {
+			if (strcmp((*it)->channelID, channelID) == 0) {
 				struct program_info* tmp;
 				tmp = new program_info;
 				if (tmp == NULL)
