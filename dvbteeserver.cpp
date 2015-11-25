@@ -91,6 +91,7 @@ extern "C" struct program_info
 extern "C" struct dvb_channel
 {
 	char channelID[32];
+	char channelNr[16];
 	char callSign[64];
 	std::list<struct program_info*> program_list;
 };
