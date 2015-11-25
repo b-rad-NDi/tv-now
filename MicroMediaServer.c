@@ -1157,8 +1157,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			}
 		}
 
-		char channel_title[256];
-		channel_name(title, channel_title);
+		char* channel_title = title;
 
 		/* get object id: full path, where root=0 */
 		ddLen = (int) strlen(fntd->DirDelimiter);
