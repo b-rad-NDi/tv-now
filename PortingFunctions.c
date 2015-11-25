@@ -223,6 +223,21 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			cdsObj->ChannelID = malloc(128);
 			sprintf(cdsObj->ChannelID, "%s", title);
 
+			cdsObj->ChannelNr = (char*)malloc(16);
+			channel_number(title, cdsObj->ChannelNr);
+
+			char *old_title = cdsObj->Title;
+			cdsObj->Title = NULL;
+			cdsObj->ProgramID = NULL;
+
+			if (get_epg_data_simple(parentTitle2, &cdsObj->ProgramID, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			{
+				if (cdsObj->Title != NULL)
+					free(old_title);
+				else
+					cdsObj->Title = old_title;
+			}
+
 			cdsObj->Recordable = 1;
 		}
 	}
