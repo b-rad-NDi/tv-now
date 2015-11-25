@@ -463,8 +463,8 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 					*duration_t = (*it2)->duration;
 					*end_t = (*it2)->start + (*it2)->duration;
 
-					*epg_id = (char*)malloc(strlen((*it2)->id) + 1);
-					sprintf(*epg_id, "%s", (*it2)->id);
+					*epg_id = (char*)malloc(strlen((*it2)->event_id) + 1);
+					sprintf(*epg_id, "%s", (*it2)->event_id);
 				}
 				it2++;
 			}
