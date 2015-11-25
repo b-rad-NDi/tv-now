@@ -429,7 +429,7 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 
 /* if *epg_id is NULL return first current item */
 /* epg_id is in/out */
-extern "C" int get_epg_data_simple(const char* channel, const char** epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
+extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
 {
 	std::list<dvb_channel*>::iterator it;
 	time_t cur_t;
