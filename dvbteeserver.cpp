@@ -81,6 +81,7 @@ struct dvbtee_context
 
 extern "C" struct program_info
 {
+	char event_id[128];
 	char title[128];
 	char description[1024];
 	time_t  start;
@@ -543,7 +544,7 @@ public:
 				tmp->duration = e.length_sec;
 				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
 				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
-
+				snprintf(tmp->event_id, sizeof(tmp->event_id), "%d", e.event_id);
 				insert_sorted_epg((*it)->program_list, tmp);
 			}
 		}
