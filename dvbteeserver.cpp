@@ -372,7 +372,7 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				}
 				if ((*e_iter->it)->start >= t_time && (*e_iter->it)->start < t_time2)
 				{
-					sprintf(event_string, (*e_iter->it)->title);
+					sprintf(event_string, (*e_iter->it)->event_id);
 					return (void*)e_iter;
 				}
 				e_iter->it++;
@@ -414,7 +414,7 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 		}
 		if ((*e_iter->it)->start < next_day)
 		{
-			sprintf(event_string, (*e_iter->it)->title);
+			sprintf(event_string, (*e_iter->it)->event_id);
 			return (void*)e_iter;
 		}
 		else
