@@ -942,7 +942,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		{
 			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
 			cp += fnEscape(cp, mediaObj->ChannelNr);
-			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM1);
+			cp += sprintf(cp, CDS_DIDL_CHANNEL_NUM2);
 		}
 		if (mediaObj->ChannelName && printThese & CdsFilter_ChannelName)
 		{
