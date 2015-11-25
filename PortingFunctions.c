@@ -289,9 +289,20 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				 */
 				cdsObj->ChannelID = malloc(128);
 				sprintf(cdsObj->ChannelID, "%s", parentTitle);
-				cdsObj->Title = malloc(128);
+
+				cdsObj->CallSign = malloc(64);
+				channel_name(title, cdsObj->CallSign);
+
+				char channel_nr[16] = { 0 };
+				channel_number(title, &channel_nr);
+
 				cdsObj->DeallocateThese &= CDS_ALLOC_Title;
-				sprintf(cdsObj->Title, "Channel %s -CallSign- : %s", parentTitle, title);
+				free(cdsObj->Title);
+				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
+				                              strlen(cdsObj->CallSign) +
+											  strlen(title) + 12);
+				sprintf(cdsObj->Title, "%s - %s : %s", channel_nr, cdsObj->CallSign, title);
+
 				struct tm tm = { 0 };
 				strptime(title, "%m-%d-%Y", &tm);
 				tm.tm_hour = 0;
