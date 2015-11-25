@@ -319,10 +319,10 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			cdsObj->ChannelID = malloc(128);
 			sprintf(cdsObj->ChannelID, "%s", parentTitle2);
 
-			char *epg_id = GetFileName(cdsObj->ID, "/", 1)
 			char *old_title = cdsObj->Title;
+			cdsObj->Title = NULL;
 
-			if (get_epg_data_simple(epg_id, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			if (get_epg_data_simple(parentTitle2, title, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
 			{
 				if (cdsObj->Title != NULL)
 					free(old_title);
