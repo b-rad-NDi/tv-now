@@ -242,6 +242,20 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 	return 0;
 }
 
+extern "C" const int channel_number(char* channelID, char* chan_nr) {
+	std::list<dvb_channel*>::iterator it;
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channelID) == 0)
+		{
+			sprintf(chan_nr, "%s", (*it)->channelNr);
+			return 1;
+		}
+	}
+	sprintf(chan_nr,"");
+	return 0;
+}
+
 struct epg_iter
 {
 	std::list<struct program_info*> *program_list;
