@@ -411,8 +411,8 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 	return NULL;
 }
 
-
-int get_epg_data_simple(const char* epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
+/* if epg_id is NULL return first current item */
+extern "C" int get_epg_data_simple(const char* channel, const char* epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
 {
 
 	return 0;
