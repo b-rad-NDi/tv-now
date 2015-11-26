@@ -1372,9 +1372,11 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                 deviceDescription = (char*)malloc(dataObject->DeviceDescriptionLength + (40 * 3));
                                 if (hostAddress == NULL || deviceDescription == NULL) exit(254);
                         }
-                        char* tmpHostAddress = ILibGetHeaderLine(header, "Host", 4);
+                        char* tmpHostAddress = NULL;
+                        tmpHostAddress = ILibGetHeaderLine(header, "Host", 4);
                         if (tmpHostAddress != NULL) {
-                                char* colonSpot = rindex(tmpHostAddress, ':');
+                                char* colonSpot = NULL;
+                                colonSpot = rindex(tmpHostAddress, ':');
                                 if (colonSpot != NULL) *colonSpot = '\0';
 
                                 if (strcmp(hostAddress,tmpHostAddress) != 0) {
@@ -1382,6 +1384,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                         //printf("HOST IP IS : %s\n", hostAddress);
                                 }
                                 bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, dataObject->DeviceDescription);
+                                free(tmpHostAddress);
                         }
 
                         buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3);
