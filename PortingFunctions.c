@@ -341,11 +341,10 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			char* old_title = cdsObj->Title;
 			cdsObj->Title = NULL;
 
-			if (get_epg_data_simple(parentTitle2, title, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			if (get_epg_data_simple(parentTitle2, title, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) != 0)
 			{
 				cdsObj->Title = old_title;
 			}
-
 		}
 	}
 }
