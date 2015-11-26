@@ -754,7 +754,8 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 		 *	without any problems.
 		 */
 
-		cp = retVal = (char*) malloc (size);
+		 /* TODO: something is overrunning the buffer FIX THIS */
+		cp = retVal = (char*) malloc (size + 128);
 
 		/* print DIDL-Lite element if requested */
 		if (includeHeaderFooter != 0)
