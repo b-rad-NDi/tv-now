@@ -347,6 +347,11 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			}
 		}
 	}
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
 }
 
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
