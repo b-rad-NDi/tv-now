@@ -233,7 +233,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			cdsObj->ProgramID = NULL;
 			char* descr_ptr = NULL;
 
-			if (get_epg_data_simple(parentTitle2, &cdsObj->ProgramID, &cdsObj->LongDescription, &descr_ptr, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			if (get_epg_data_simple(title, &cdsObj->ProgramID, &cdsObj->LongDescription, &descr_ptr, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
 			{
 				free(descr_ptr);
 			}
