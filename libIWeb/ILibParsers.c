@@ -280,8 +280,9 @@ void ILibForceUnBlockChain(void *Chain)
 	
 	temp = c->Terminate;
 	c->Terminate = ~0;
-	close(temp);
-	
+	if (temp >= 0)
+		close(temp);
+
 	sem_post(&ILibChainLock);
 	
 }
