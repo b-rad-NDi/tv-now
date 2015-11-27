@@ -165,6 +165,20 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 #endif
 }
 
+void destroy_lists()
+{
+	std::list<dvb_channel*>::iterator it;
+	std::list<program_info*>::iterator it2;
+
+	for(it=channel_list.begin(); it!=channel_list.end(); )
+	{
+		for(it2=(*it)->program_list.begin(); it2!=(*it)->program_list.end(); )
+		{
+			it2 = (*it)->program_list.erase(it2);
+		}
+		it = channel_list.erase(it);
+	}
+}
 
 void stop_server(struct dvbtee_context* context)
 {
@@ -196,6 +210,8 @@ extern "C" void dvbtee_stop()
 {
 	killServer = 1;
 	sleep(3);
+
+	destroy_lists();
 }
 
 extern "C" const dvb_channel* firstchannel() {
