@@ -469,7 +469,7 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 					it2 = (*it)->program_list.erase(it2);
 					continue;
 				}
-				if (*epg_id == NULL)
+				if ( *epg_id == NULL || strcmp(*epg_id, (*it2)->event_id) == 0 )
 				{
 					if (strlen((*it2)->description) >= 1)
 					{
@@ -483,8 +483,11 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 					*duration_t = (*it2)->duration;
 					*end_t = (*it2)->start + (*it2)->duration;
 
-					*epg_id = (char*)malloc(strlen((*it2)->event_id) + 1);
-					sprintf(*epg_id, "%s", (*it2)->event_id);
+					if (*epg_id == NULL)
+					{
+						*epg_id = (char*)malloc(strlen((*it2)->event_id) + 1);
+						sprintf(*epg_id, "%s", (*it2)->event_id);
+					}
 					return 0;
 				}
 				it2++;
