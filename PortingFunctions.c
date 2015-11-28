@@ -277,7 +277,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
 				                              strlen(cdsObj->CallSign) + 12);
 
-				sprintf(cdsObj->Title, "%s - %s", channel_nr, cdsObj->CallSign);
+				sprintf(cdsObj->Title, "%s - %s", cdsObj->ChannelNr, cdsObj->CallSign);
 			}
 			else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0) /*  /EPG/ch/day  */
 			{
@@ -296,10 +296,10 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				channel_number(title, &cdsObj->ChannelNr);
 
 				cdsObj->DeallocateThese |= CDS_ALLOC_Title;
-				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelName) +
+				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
 				                              strlen(cdsObj->CallSign) +
 											  strlen(title) + 12);
-				sprintf(cdsObj->Title, "%s - %s : %s", channel_nr, cdsObj->CallSign, title);
+				sprintf(cdsObj->Title, "%s - %s : %s", cdsObj->ChannelNr, cdsObj->CallSign, title);
 
 				struct tm tm = { 0 };
 				strptime(title, "%m-%d-%Y", &tm);
