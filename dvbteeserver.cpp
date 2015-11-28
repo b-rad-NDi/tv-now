@@ -485,13 +485,14 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 
 					*epg_id = (char*)malloc(strlen((*it2)->event_id) + 1);
 					sprintf(*epg_id, "%s", (*it2)->event_id);
+					return 0;
 				}
 				it2++;
 			}
 		}
 	}
 
-	return 0;
+	return 1;
 }
 
 class server_parse_iface : public parse_iface
