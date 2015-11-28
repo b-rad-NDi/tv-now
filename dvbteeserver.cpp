@@ -471,10 +471,14 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 				}
 				if (*epg_id == NULL)
 				{
+					if (strlen((*it2)->description) >= 1)
+					{
+						*description = (char*)malloc(strlen((*it2)->description) + 1);
+						sprintf(*description, "%s", (*it2)->description);
+
+					}
 					*title = (char*)malloc(strlen((*it2)->title) + 1);
-					*description = (char*)malloc(strlen((*it2)->description) + 1);
 					sprintf(*title, "%s", (*it2)->title);
-					sprintf(*description, "%s", (*it2)->description);
 					*start_t = (*it2)->start;
 					*duration_t = (*it2)->duration;
 					*end_t = (*it2)->start + (*it2)->duration;
