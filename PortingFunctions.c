@@ -290,7 +290,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				sprintf(cdsObj->ChannelID, "%s", parentTitle);
 
 				cdsObj->CallSign = malloc(64);
-				channel_name(title, cdsObj->CallSign);
+				channel_name(parentTitle, cdsObj->CallSign);
 
 				char channel_nr[16] = { 0 };
 				channel_number(title, &channel_nr);
