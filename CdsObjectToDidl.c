@@ -1085,7 +1085,7 @@ char* CdsToDidl_GetMediaObjectDidlEscaped (struct CdsMediaObject *mediaObj, int 
 			cp += fnEscape(cp, mediaObj->Language);
 			cp += sprintf(cp, CDS_DIDL_LANGUAGE2);
 		}
-		if (printThese & CdsFilter_Date)
+		if (mediaObj->Date > 0 && printThese & CdsFilter_Date)
 		{
 			cp += sprintf(cp, CDS_DIDL_DATE1);
 			tmDate = localtime(&mediaObj->Date);
