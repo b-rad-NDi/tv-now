@@ -293,7 +293,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 				channel_name(parentTitle, cdsObj->CallSign);
 
 				cdsObj->ChannelNr = malloc(16);
-				channel_number(title, cdsObj->ChannelNr);
+				channel_number(parentTitle, cdsObj->ChannelNr);
 
 				cdsObj->DeallocateThese |= CDS_ALLOC_Title;
 				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
