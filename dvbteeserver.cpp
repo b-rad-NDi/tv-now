@@ -67,11 +67,6 @@
 #endif
 #include "serve.h"
 
-#if TVNOW_TESTDATA
-#include "testdata.cpp"
-static time_t testing_offset = 0;
-#endif
-
 #include "atsctext.h"
 
 struct dvbtee_context
@@ -569,6 +564,10 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 	server->scan(flags, &iface);
 }
 
+#if TVNOW_TESTDATA
+static time_t testing_offset = 0;
+#endif
+
 class server_decode_report : public decode_report
 {
 public:
@@ -613,6 +612,10 @@ public:
 	virtual void epg_header_footer(bool header, bool channel) {}
 	virtual void print(const char *, ...) {}
 };
+
+#if TVNOW_TESTDATA
+#include "testdata.cpp"
+#endif
 
 extern "C" void dvbtee_start(void* nothing)
 {
@@ -660,5 +663,4 @@ extern "C" void dvbtee_start(void* nothing)
 		ATSCMultipleStringsDeInit();
 	#endif
 #endif
-
 }
