@@ -514,7 +514,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		parentTitle = GetFileName(parentDir, "/", 1);
 		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 
-		if (strcmp(directory, "./EPG/") == 0)
+		if (strcmp(directory, "./EPG/") == 0 || strcmp(directory, "./EPG/") == 0)
 		{
 			char channelName[64] = { 0 };
 			struct dvb_channel* tmpC = firstchannel();
