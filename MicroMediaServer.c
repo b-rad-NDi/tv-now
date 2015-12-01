@@ -1257,23 +1257,38 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					cdsObj->ParentID = cpParentId;
 					cdsObj->MediaClass = FileExtensionToClassCode(ext, 0);
 
+					GetMetaData(pathName, cdsObj);
+
+					char target_uri[256] = { 0 };
+					char* prot_info = NULL;
+					if (strlen(cdsObj->uri_target) == 0)
+					{
+						/* :port/target */
+						snprintf(target_uri, 255, ":%d/%s", fntd->Port, title);
+						prot_info = FileExtensionToProtocolInfo(ext, 0);
+					}
+					else
+					{
+						snprintf(target_uri, 255, "%s", cdsObj->uri_target);
+						prot_info = cdsObj->ProtocolInfo;
+					}
+
+
 					cdsRes = &(cdsObj->Res);
 					for (ri = 0; ri < fntd->AddressListLen; ri++)
 					{
 						(*cdsRes) = CDS_AllocateResource();
 						(*cdsRes)->Size = fntd->FileSize;
-						(*cdsRes)->ProtocolInfo = FileExtensionToProtocolInfo(ext, 0);
+						(*cdsRes)->ProtocolInfo = prot_info;
 
-						(*cdsRes)->Value = (char*) malloc(82+strlen(channel_title) + 128);
-						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d:%d/tune=%s&stream/%s.mpg",
+						(*cdsRes)->Value = (char*) malloc(82+strlen(target_uri) + 128);
+						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d%s",
 						        (fntd->AddressList[ri]&0xFF), ((fntd->AddressList[ri]>>8)&0xFF),
 						        ((fntd->AddressList[ri]>>16)&0xFF), ((fntd->AddressList[ri]>>24)&0xFF),
-						        62080, title, channel_title);
+						        target_uri);
 
 						cdsRes = &((*cdsRes)->Next);
 					}
-
-					GetMetaData(pathName, cdsObj);
 
 					entry = CdsToDidl_GetMediaObjectDidlEscaped(cdsObj, 0, filterMask, 0, &entryLen);
 				}
