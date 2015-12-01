@@ -1140,7 +1140,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 
 		/* get title*/
 		fnLen = (int) strlen(pathName);
-		title = GetFileName(pathName, fntd->DirDelimiter, 0);
+		title = GetFileName(pathName, fntd->DirDelimiter, 1);
 
 		if (title[0] == '\0')
 		{
@@ -1172,7 +1172,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		}
 		else
 		{
-			sprintf(id, "%s%s%s", fntd->DirDelimiter, channel_title, ext);
+			sprintf(id, "%s%s", fntd->DirDelimiter, channel_title);
 		}
 
 		/* determine if directory or file */
