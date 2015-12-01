@@ -484,6 +484,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	char *parentDir  = NULL;
 	char *parentTitle = NULL;
 	char *parentDir2 = NULL;
+	void* retval = NULL;
 
 #if NDi_LiveTV
 	if (strcmp(directory, "./") == 0)
@@ -525,7 +526,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 					*filesize = LIVETV_FILESIZE;
 				}
 			}
-			return (void*)tmpC;
+			retval = (void*)tmpC;
 		}
 		else if (parentDir != NULL && strcmp(parentDir,"./EPG/") == 0 && ischannel(title))
 		{
@@ -536,7 +537,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 			if (filename != NULL && filesize != NULL) {
 				*filesize = 0;
 			}
-			return x;
+			retval = (void*)x;
 		}
 		else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0 &&
 		         ischannel(parentTitle) && isDate(title))
@@ -548,8 +549,13 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 			if (filename != NULL && filesize != NULL) {
 				*filesize = LIVETV_FILESIZE;
 			}
-			return x;
+			retval = (void*)x;
 		}
+		if (title != NULL) free(title);
+		if (parentDir != NULL) free(parentDir);
+		if (parentTitle != NULL) free(parentTitle);
+		if (parentDir2 != NULL) free(parentDir2);
+		return retval;
 	}
 	else
 		return NULL;
