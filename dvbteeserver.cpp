@@ -317,6 +317,7 @@ extern "C" void* firstEpgDay(const char* channel, char* day_string)
 extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
 {
 	epg_iter *e_iter = (epg_iter*)handle;
+	time_t next_day;
 
 	if (e_iter->it == e_iter->program_list->end())
 	{
