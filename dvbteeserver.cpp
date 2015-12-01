@@ -527,6 +527,13 @@ public:
 		}
 
 		sprintf(tmp->callSign, "%s", c->service_name);
+		/* right trim the call sign */
+		char* is_space = tmp->callSign + strlen(tmp->callSign);
+		while (is_space >= tmp->callSign && (*is_space == ' ' || *is_space == '\0'))
+		{
+			*is_space = '\0';
+			is_space--;
+		};
 
 		insert_sorted(channel_list, tmp);
 
