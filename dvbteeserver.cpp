@@ -67,6 +67,11 @@
 #endif
 #include "serve.h"
 
+#if TVNOW_TESTDATA
+#include "testdata.cpp"
+static time_t testing_offset = 0;
+#endif
+
 #include "atsctext.h"
 
 struct dvbtee_context
@@ -585,7 +590,18 @@ public:
 				if (tmp == NULL)
 					return;
 
+#if TVNOW_TESTDATA
+				if (testing_offset == 0)
+				{
+					time(&testing_offset);
+					testing_offset = testing_offset - e.start_time - (60 * 60);
+				}
+				tmp->start = testing_offset + e.start_time;
+#else
 				tmp->start = e.start_time;
+#endif
+				tmp->title[0] = '\0';
+				tmp->description[0] = '\0';
 				tmp->duration = e.length_sec;
 				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
 				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
@@ -597,6 +613,7 @@ public:
 	virtual void epg_header_footer(bool header, bool channel) {}
 	virtual void print(const char *, ...) {}
 };
+
 extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
@@ -609,7 +626,9 @@ extern "C" void dvbtee_start(void* nothing)
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
-#if 1
+#if TVNOW_TESTDATA
+	load_test_data();
+#else
 	dvbtee_context tmpContext;
 	context = &tmpContext;
 	context->server = NULL;
@@ -640,8 +659,6 @@ extern "C" void dvbtee_start(void* nothing)
 	#if 1 /* FIXME */
 		ATSCMultipleStringsDeInit();
 	#endif
-#else
-	load_test_data();
 #endif
 
 }
