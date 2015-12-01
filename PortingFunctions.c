@@ -189,7 +189,7 @@ static int isDate(const char* date_string)
 void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 {
 	int fdType;
-	char *title = GetFileName(path, "/", 0);
+	char *title = GetFileName(path, "/", 1);
 	char *parentDir  = NULL;
 	char *parentTitle = NULL;
 	char *parentDir2 = NULL;
@@ -509,9 +509,9 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	}
 	else if (strncmp(directory, "./EPG", 5) == 0)
 	{
-		title      = GetFileName(directory, "/", 0);
+		title      = GetFileName(directory, "/", 1);
 		parentDir  = GetParentPath(directory, "/", 1);
-		parentTitle = GetFileName(parentDir, "/", 0);
+		parentTitle = GetFileName(parentDir, "/", 1);
 		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 
 		if (strcmp(directory, "./EPG/") == 0)
@@ -664,9 +664,9 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 	}
 	else if (strncmp(dirName, "./EPG/", 6) == 0)
 	{
-		title       = GetFileName(dirName, "/", 0);
+		title       = GetFileName(dirName, "/", 1);
 		parentDir   = GetParentPath(dirName, "/", 1);
-		parentTitle = GetFileName(parentDir, "/", 0);
+		parentTitle = GetFileName(parentDir, "/", 1);
 		parentDir2  = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 		parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
 
@@ -847,9 +847,9 @@ int PCGetFileDirType(char* directory)
 	if (strcmp(directory, "./") == 0)
 		return 2;
 
-	char *title      = GetFileName(directory, "/", 0);
+	char *title      = GetFileName(directory, "/", 1);
 	char *parentDir  = GetParentPath(directory, "/", 1);
-	char *parentTitle = GetFileName(parentDir, "/", 0);
+	char *parentTitle = GetFileName(parentDir, "/", 1);
 	char *parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
 	char *parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
 /*
