@@ -601,10 +601,6 @@ extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
 
-	dvbtee_context tmpContext;
-	context = &tmpContext;
-	context->server = NULL;
-
 	/* LinuxDVB context: */
 	int dvb_adap = 0; /* ID X, /dev/dvb/adapterX/ */
 	int demux_id = 0; /* ID Y, /dev/dvb/adapterX/demuxY */
@@ -613,6 +609,10 @@ extern "C" void dvbtee_start(void* nothing)
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
+#if 1
+	dvbtee_context tmpContext;
+	context = &tmpContext;
+	context->server = NULL;
 
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
@@ -620,6 +620,8 @@ extern "C" void dvbtee_start(void* nothing)
 	context->tuner.feeder.parser.limit_eit(-1);
 
 	start_server(context, scan_flags, 62080, 62081);
+	context->tuner.scan_for_services(scan_flags, 0, 0, 1);
+
 #if 0
 	channel_scan_and_dump(context->server, scan_flags);
 #else
@@ -633,9 +635,13 @@ extern "C" void dvbtee_start(void* nothing)
 		while (context->server->is_running() && killServer != 1) sleep(1);
 		stop_server(context);
 	}
-//	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
+
+	//	cleanup(&context);
+	#if 1 /* FIXME */
+		ATSCMultipleStringsDeInit();
+	#endif
+#else
+	load_test_data();
 #endif
 
 }
