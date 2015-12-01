@@ -58,6 +58,7 @@
 #include "MyString.h"
 #include "MicroMediaServer.h"
 #include "CdsMediaObject.h"
+#include "MimeTypes.h"
 
 #include "PortingFunctions.h"
 
@@ -239,6 +240,9 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			}
 
 			cdsObj->Recordable = 1;
+
+			cdsObj->uri_target = (char*)malloc(255);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream", 62080, cdsObj->ChannelID);
 		}
 	}
 	else if (strncmp(path, "./EPG", 5) == 0)
@@ -346,6 +350,9 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			{
 				cdsObj->Title = old_title;
 			}
+
+			cdsObj->uri_target = (char*)malloc(255);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream", 62080, cdsObj->ChannelID);
 		}
 	}
 	if (title != NULL) free(title);
