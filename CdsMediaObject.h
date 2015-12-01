@@ -146,6 +146,9 @@ struct CdsMediaObject
 	char *ParentID;		/* Parent object ID */
 	char *RefID;		/* Object ID of underlying item: for reference item only*/
 
+	char *uri_target;   /* any special formatting the uri requires */
+	char *ProtocolInfo;			/* the protocolInfo of the resource */
+
 	char *Title;		/* Title metadata */
 	char *LongDescription;
 
