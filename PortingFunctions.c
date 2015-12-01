@@ -654,8 +654,6 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 		if (tmpC != NULL) {
 			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
 
-			print_epg(tmpC);
-
 			if (filesize != NULL) {
 				*filesize = LIVETV_FILESIZE;
 			}
@@ -675,9 +673,6 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 			struct dvb_channel* tmpC = nextchannel();
 			if (tmpC != NULL) {
 				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
-
-				printf("Channel %s - %s\n", tmpC->channelID, tmpC->callSign);
-				print_epg(tmpC);
 
 				if (filesize != NULL) {
 					*filesize = LIVETV_FILESIZE;
