@@ -571,8 +571,6 @@ public:
 		printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
 		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
-		char channelno[16];
-
 		char channelID[16];
 
 		sprintf(channelID, "%d.%02d", e.chan_physical, e.chan_svc_id);
