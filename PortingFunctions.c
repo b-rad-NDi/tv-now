@@ -195,7 +195,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 	char *parentDir2 = NULL;
 	char *parentTitle2 = NULL;
 
-//	printf("%s(%s, ... )\n", __func__, path);
+	cdsObj->ProtocolInfo = PROTINFO_VIDEO_MPEG;
 
 	if (strncmp(path, "./Channels", 10) == 0)
 	{
