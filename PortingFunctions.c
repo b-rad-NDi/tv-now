@@ -242,7 +242,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			cdsObj->Recordable = 1;
 
 			cdsObj->uri_target = (char*)malloc(255);
-			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream", 62080, cdsObj->ChannelID);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream/video.mpg", 62080, cdsObj->ChannelID);
 		}
 	}
 	else if (strncmp(path, "./EPG", 5) == 0)
@@ -352,7 +352,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			}
 
 			cdsObj->uri_target = (char*)malloc(255);
-			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream", 62080, cdsObj->ChannelID);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream/video.mpg", 62080, cdsObj->ChannelID);
 		}
 	}
 	if (title != NULL) free(title);
