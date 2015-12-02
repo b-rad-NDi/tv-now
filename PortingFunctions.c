@@ -174,7 +174,7 @@ static int isDate(const char* date_string)
 	const char *time_details = date_string;
 	char* endPtr;
 	struct tm tm;
-	printf("%s( %s )\n", __func__, date_string);
+//	printf("%s( %s )\n", __func__, date_string);
 
 	endPtr = strptime(time_details, "%m-%d-%Y", &tm);
 	if (endPtr == NULL || *endPtr != '\0')
@@ -364,7 +364,7 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, filesize != NULL ? *filesize : 0);
+//	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	HANDLE* hSearch;
@@ -493,7 +493,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		rootIter = 0;
 		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
 		if (filesize != NULL) *filesize = 0;
-		printf("%s(%s, filename (%s), %d, %" PRIu64 ")\n", __func__, directory, filename == NULL ? "" : filename, filenamelength, filesize != NULL ? *filesize : 0);
+//		printf("%s(%s, filename (%s), %d, %" PRIu64 ")\n", __func__, directory, filename == NULL ? "" : filename, filenamelength, filesize != NULL ? *filesize : 0);
 		return &rootIter;
 	}
 	else if (strncmp(directory, "./Channels", 10) == 0)
@@ -868,7 +868,7 @@ int PCGetFileDirType(char* directory)
 			retval = 2;
 		}
 		if (ischannel(title)) {
-			printf("its a channel\n");
+//			printf("its a channel\n");
 			retval = 1;
 		}
 	}
@@ -882,7 +882,7 @@ int PCGetFileDirType(char* directory)
 		else if (strcmp(parentDir, "./EPG/") == 0)
 		{
 			if (ischannel(title)) {
-				printf("Channel Aggregation EPG\n");
+//				printf("Channel Aggregation EPG\n");
 				retval = 2;
 			}
 		}
@@ -891,14 +891,14 @@ int PCGetFileDirType(char* directory)
 		{
 			if (1) // TODO: isListing(title)
 			{
-				printf("Individual EPG listing\n");
+//				printf("Individual EPG listing\n");
 				retval = 1;
 			}
 		}
 		else if (parentDir2 != NULL && strcmp(parentDir2, "./EPG/") == 0 &&
 		         ischannel(parentTitle) && isDate(title))
 		{
-			printf("Channel Day of the Week EPG Listing\n");
+//			printf("Channel Day of the Week EPG Listing\n");
 			retval = 2;
 		}
 	}
@@ -1015,7 +1015,7 @@ void* SpawnNormalThread(void* method, void* arg)
 
 uint64_t PCGetFileSize(const char* fullPath)
 {
-	printf("%s\n", __func__);
+//	printf("%s\n", __func__);
 	uint64_t filesize = -1;
 
 #ifdef _POSIX
@@ -1122,7 +1122,7 @@ uint64_t PCGetFileSize(const char* fullPath)
 
 int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 {
-	printf("%s( %s )\n", __func__, fullPath);
+//	printf("%s( %s )\n", __func__, fullPath);
 	char fn[MAX_PATH_LENGTH];
 	void *dirObj;
 	int retVal = 0;
@@ -1167,7 +1167,7 @@ int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 */
 int ProceedWithDirEntry(const char* dirName, const char* filename, int maxPathLength)
 {
-	printf("%s(%s, %s, %d)\n", __func__, dirName, filename, maxPathLength);
+//	printf("%s(%s, %s, %d)\n", __func__, dirName, filename, maxPathLength);
 	int dirLen;
 	int fnLen;
 	int val;

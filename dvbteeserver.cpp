@@ -452,7 +452,7 @@ extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **ti
 	time_t cur_t;
 	time(&cur_t);
 
-	printf("%s( %s )\n", __func__, channel);
+//	printf("%s( %s )\n", __func__, channel);
 
 	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
 	{
