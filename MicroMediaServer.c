@@ -1471,7 +1471,7 @@ void CdsBrowse(void* upnpToken, char* ObjectID, char* BrowseFlag, char* Filter, 
 	char* filepath;
 	char* errorMsg;
 
-	if (ObjectID[0] != '0')
+	if (0 && ObjectID[0] != '0')
 	{
 		/* error */
 		fprintf(stderr, "\r\nERROR: CdsBrowse() - ObjectID not found.");
@@ -1494,15 +1494,25 @@ void CdsBrowse(void* upnpToken, char* ObjectID, char* BrowseFlag, char* Filter, 
 	objIdLen = ILibInPlaceXmlUnEscape(ObjectID);
 	filepath = (char*)malloc(ROOTPATHLENGTH + objIdLen + 10);
 
-	if (objIdLen > 2) 
+	if (objIdLen > 2)
 	{
 		if (BrowseFlag[6] == 'M')
 		{
-			sprintf(filepath,"%s%s",ROOTPATH,ObjectID+2);
+			if (ObjectID[0] == '0')
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID+2);
+			else if (ObjectID[0] == '/')
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID+1);
+			else
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID);
 		}
 		else
 		{
-			sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+2,DIRDELIMITER);
+			if (ObjectID[0] == '0')
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+2,DIRDELIMITER);
+			else if (ObjectID[0] == '/')
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+1,DIRDELIMITER);
+			else
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID,DIRDELIMITER);
 		}
 	} 
 	else 
