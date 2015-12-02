@@ -1133,7 +1133,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			else
 			{
 				parentID = (char*) malloc((int) strlen(parentDir) + 3);
-				sprintf(parentID, "%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
+				sprintf(parentID, "0%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
 				pidLen = (int) strlen(parentID);
 				parentID [pidLen-1] = '\0';
 //				pidLen = pidLen - 1;
@@ -1477,7 +1477,7 @@ void CdsBrowse(void* upnpToken, char* ObjectID, char* BrowseFlag, char* Filter, 
 	char* filepath;
 	char* errorMsg;
 
-	if (0 && ObjectID[0] != '0')
+	if (ObjectID[0] != '0')
 	{
 		/* error */
 		fprintf(stderr, "\r\nERROR: CdsBrowse() - ObjectID not found.");
