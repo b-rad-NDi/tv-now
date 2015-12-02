@@ -1246,18 +1246,16 @@ int ProceedWithDirEntry(const char* dirName, const char* filename, int maxPathLe
 		return 1;
 }
 
+static unsigned int SystemUpdateID = 0;
+
+void PCIncrementSystemUpdateID()
+{
+	SystemUpdateID++;
+}
+
 unsigned int PCGetSystemUpdateID()
 {
-	/*
-	 *	TODO: Return a number indicating the state of the metadata store.
-	 *	Whenever the metadata in the CDS changes, this value should
-	 *	increase monotomically.
-	 *
-	 *	For file systems, the most reliable method to obtain this value would likely
-	 *	be the most recent file system date.
-	 */
-
-	return 0;
+	return SystemUpdateID;
 }
 
 unsigned int PCGetContainerUpdateID(const char* path)
