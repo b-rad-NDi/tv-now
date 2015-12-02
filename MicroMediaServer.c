@@ -1118,6 +1118,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		{
 			parentID = (char*) malloc(3);
 			strcpy(parentID, "-1");
+			pidLen = 0;
 		}
 		else
 		{
@@ -1127,6 +1128,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			{
 				parentID = (char*) malloc(2);
 				strcpy(parentID, "0");
+				pidLen = 1;
 			}
 			else
 			{
@@ -1134,7 +1136,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 				sprintf(parentID, "%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
 				pidLen = (int) strlen(parentID);
 				parentID [pidLen-1] = '\0';
-				pidLen = pidLen - 1;
+//				pidLen = pidLen - 1;
 			}
 		}
 
@@ -1181,9 +1183,13 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 
 			/* get a copy of the id - ensure that it does not end with a directory delimiter */
 			cpIdLen = strlen(id);
-			cpId = (char*) malloc(cpIdLen+1);
-			memcpy(cpId, id, cpIdLen);
-			cpId[cpIdLen] = '\0';
+			cpId = (char*) malloc(cpIdLen + pidLen + 4);
+
+			if (pidLen == 0)
+				snprintf(cpId, cpIdLen + 1, "%s", id);
+			else
+				snprintf(cpId, cpIdLen + pidLen + 1, "%s%s", parentID, id);
+
 			ewDD = EndsWith(cpId, DIRDELIMITER, 0);
 			if (ewDD != 0)
 			{
