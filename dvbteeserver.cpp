@@ -110,7 +110,7 @@ void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channe
 	std::list<dvb_channel*>::iterator it;
 	for(it=channels.begin(); it!=channels.end(); ++it)
 	{
-		if (strcasecmp((*it)->callSign,channel->callSign) > 0)
+		if (strcasecmp((*it)->channelNr,channel->channelNr) > 0)
 		{
 			channels.insert(it,channel);
 			return;
