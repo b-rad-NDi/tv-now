@@ -255,7 +255,7 @@ public:
 		if (tmp == NULL)
 			return;
 
-		sprintf(tmp->channelID, "%d%02d", c->physical_channel, c->program_number);
+		sprintf(tmp->channelID, "%d.%02d", c->physical_channel, c->program_number);
 		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
 
 		insert_sorted(channel_list, tmp);
