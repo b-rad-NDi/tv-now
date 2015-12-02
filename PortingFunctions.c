@@ -500,7 +500,6 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	{
 		struct dvb_channel* tmpC = firstchannel();
 		if (tmpC != NULL) {
-			printf("%s/%s.ts\n",directory,tmpC->channelID);
 			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
 			if (filename != NULL && filesize != NULL) {
 				*filesize = LIVETV_FILESIZE;
