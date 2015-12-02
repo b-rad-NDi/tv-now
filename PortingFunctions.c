@@ -114,7 +114,7 @@ void PCRandomize()
 // Windows Version
 void PCCloseDir(void* handle)
 {
-	printf("%s\n", __func__);
+//	printf("%s\n", __func__);
 #if NDi_LiveTV
 	return;
 #endif
@@ -601,7 +601,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 // 1 = Next File
 int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, filesize != NULL ? *filesize : 0);
+//	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	
