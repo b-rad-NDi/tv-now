@@ -169,7 +169,9 @@ struct MSEARCH_state
 };
 
 #define UPNP_XML_LOCATION "./%s"
-#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
+#define XML_GET_TEMPLATE "HTTP/1.1 200 OK\r\nEXT:\r\nContent-Type: text/xml; charset=\"utf-8\"\r\nCache-Control: no-cache\r\nPragma: no-cache\r\n%sServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nConnection: close\r\nAccept-Ranges: bytes\r\nDate: %s\r\nContent-Length: %d\r\n\r\n%s"
+
+//#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
 
 void getRFC1123(char* result)
 {
@@ -188,15 +190,27 @@ void getRFC1123(char* result)
 	return;
 }
 
-void SendXML(struct ILibWebServer_Session *session, char* location)
+void SendXML(struct ILibWebServer_Session *session, struct packetheader* header, char* location)
 {
 	char file_location[128];
 	char *file_contents, *buffer;
+	char dateString[64] = { 0 };
+
 	sprintf(file_location, UPNP_XML_LOCATION, location);
 	int len = file_get_contents(file_location, &file_contents);
 	if (len >= 0) {
-		buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3);
-		len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3, XML_GET_TEMPLATE, len, file_contents);
+		getRFC1123(&dateString[0]);
+		char* langHeader = ILibGetHeaderLine(header, "ACCEPT-LANGUAGE", 15);
+		if (langHeader == NULL)
+		{
+			buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3 + 64);
+			len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3 + 64, XML_GET_TEMPLATE, "", dateString, len, file_contents);
+		}
+		else
+		{
+			buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3 + 23 + 64);
+			len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3 + 23 + 64, XML_GET_TEMPLATE, "Content-Language: en\r\n", dateString, len, file_contents);
+		}
 		ILibWebServer_Send_Raw(session, buffer, len, 0, 1);
 		free(file_contents);
 	}
