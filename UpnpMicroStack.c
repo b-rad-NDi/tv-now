@@ -1901,6 +1901,7 @@ void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char
 		if(!UpnpSubscriptionExpired(info))
 		{
 			UpnpSendEvent_Body(upnptoken,body,bodylength,info);
+			info = info->Next;
 		}
 		else
 		{
@@ -1908,9 +1909,11 @@ void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char
 			LVL3DEBUG(gettimeofday(&tv,NULL);)
 			LVL3DEBUG(printf("\r\n\r\nTIMESTAMP: %d\r\n",tv.tv_sec);)
 			LVL3DEBUG(printf("Did not renew [%s] %d.%d.%d.%d:%d UNSUBSCRIBING <%d>\r\n\r\n",((struct SubscriberInfo*)info)->SID,(((struct SubscriberInfo*)info)->Address&0xFF),((((struct SubscriberInfo*)info)->Address>>8)&0xFF),((((struct SubscriberInfo*)info)->Address>>16)&0xFF),((((struct SubscriberInfo*)info)->Address>>24)&0xFF),((struct SubscriberInfo*)info)->Port,info);)
-		}
 
-		info = info->Next;
+			struct SubscriberInfo *tmp = info;
+			info = info->Next;
+			UpnpExpireSubscriberInfo(UPnPObject, tmp);
+		}
 	}
 
 	sem_post(&(UPnPObject->EventLock));
