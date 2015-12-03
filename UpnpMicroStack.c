@@ -1382,6 +1382,8 @@ void UpnpProcessSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Sess
 		}
 		ILibDestructParserResults(p);
 	}
+	struct UpnpDataObject *dataObject = (struct UpnpDataObject*)session->User;
+	sem_wait(&(dataObject->EventLock));
 	if(SID==NULL)
 	{
 		/* Subscribe */
@@ -1392,6 +1394,7 @@ void UpnpProcessSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Sess
 		/* Renew */
 		UpnpRenewEvents(header->DirectiveObj,header->DirectiveObjLength,SID,SIDLength,Timeout,TimeoutLength,session);
 	}
+	sem_post(&(dataObject->EventLock));
 }
 void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packetheader* header, char *bodyBuffer, int offset, int bodyBufferLength)
 
