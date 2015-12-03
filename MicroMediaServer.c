@@ -1765,7 +1765,7 @@ void UpnpConnectionManager_GetCurrentConnectionIDs(void* upnptoken)
   /* TODO: Place Action Code Here... */
 
   /* UpnpResponse_Error(upnptoken,404,"Method Not Implemented"); */
-  UpnpResponse_ConnectionManager_GetCurrentConnectionIDs(upnptoken,"");
+  UpnpResponse_ConnectionManager_GetCurrentConnectionIDs(upnptoken,"0");
 }
 
 void UpnpPresentationRequest(void* upnptoken, struct packetheader *packet)
