@@ -15,7 +15,7 @@
     <modelURL>http://tv-now.nextdimension.cc</modelURL>
     <serialNumber>%s</serialNumber>
     <UDN>uuid:%s</UDN>
-    <presentationURL>/web</presentationURL>
+    <presentationURL>/</presentationURL>
     <serviceList>
       <service>
         <serviceType>urn:schemas-upnp-org:service:ContentDirectory:1</serviceType>
