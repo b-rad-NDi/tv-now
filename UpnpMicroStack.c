@@ -78,6 +78,7 @@
 
 #define UPNP_HTTP_MAXSOCKETS 5
 
+#define MAX_UPNP_SUBSCRIBERS 100
 
 #define UPNP_PORT 1900
 #define UPNP_GROUP "239.255.255.250"
@@ -878,6 +879,12 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 {
 	struct SubscriberInfo *info = *Head;
 	struct SubscriberInfo **ptr = Head;
+	if (*TotalSubscribers <=0 || *TotalSubscribers > MAX_UPNP_SUBSCRIBERS || SIDLength <= 0 || SIDLength > 64)
+	{
+		dprintf(1, "BAD DATA--ignoring\n");
+		return info;
+	}
+
 	while(info!=NULL)
 	{
 		if(info->SIDLength==SIDLength && memcmp(info->SID,SID,SIDLength)==0)
