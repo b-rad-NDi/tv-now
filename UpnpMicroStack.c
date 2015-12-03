@@ -77,7 +77,7 @@
 #include "PortingFunctions.h"
 #include "version.h"
 
-#define UPNP_HTTP_MAXSOCKETS 5
+#define UPNP_HTTP_MAXSOCKETS 64
 
 #define MAX_UPNP_SUBSCRIBERS 100
 
