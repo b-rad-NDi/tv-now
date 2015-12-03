@@ -1448,11 +1448,11 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 		}
 		else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
 		{
-			SendXML(session, "ContentDirectory.xml");
+			SendXML(session, header, "ContentDirectory.xml");
 		}
 		else if(header->DirectiveObjLength==27 && memcmp((header->DirectiveObj)+1,"ConnectionManager/scpd.xml",26)==0)
 		{
-			SendXML(session, "ConnectionManager.xml");
+			SendXML(session, header, "ConnectionManager.xml");
 		}
 		else
 		{
