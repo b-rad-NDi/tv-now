@@ -1423,7 +1423,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                         strncpy(hostAddress, tmpHostAddress, 40);
                                         //printf("HOST IP IS : %s\n", hostAddress);
                                 }
-                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, dataObject->DeviceDescription);
+                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, "%s", dataObject->DeviceDescription);
                                 free(tmpHostAddress);
                         }
 
