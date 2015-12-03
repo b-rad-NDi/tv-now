@@ -67,6 +67,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <semaphore.h>
+#include <time.h>
 
 #include "ILibParsers.h"
 #include "UpnpMicroStack.h"
@@ -169,6 +170,23 @@ struct MSEARCH_state
 
 #define UPNP_XML_LOCATION "./%s"
 #define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
+
+void getRFC1123(char* result)
+{
+	char daysofweek[7][4] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+	char months[12][4] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+	if (result == NULL) return;
+
+	time_t t = time(NULL);
+	struct tm lt = *gmtime(&t);
+
+	sprintf(result, "%s, %02d %s %d %02d:%02d:%02d GMT",
+			daysofweek[lt.tm_wday],
+			lt.tm_mday, months[lt.tm_mon], lt.tm_year + 1900,
+			lt.tm_hour, lt.tm_min, lt.tm_sec);
+	return;
+}
 
 void SendXML(struct ILibWebServer_Session *session, char* location)
 {
