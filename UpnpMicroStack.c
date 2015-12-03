@@ -1410,7 +1410,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                         static int bufferLen = 0;
                         if (hostAddress == NULL) {
                                 hostAddress = (char*)malloc(40);
-                                deviceDescription = (char*)malloc(dataObject->DeviceDescriptionLength + (40 * 3));
+                                deviceDescription = (char*)malloc(dataObject->DeviceDescriptionLength + (40 * 3) + 2);
                                 if (hostAddress == NULL || deviceDescription == NULL) exit(254);
                         }
                         char* tmpHostAddress = NULL;
@@ -1424,7 +1424,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                         strncpy(hostAddress, tmpHostAddress, 40);
                                         //printf("HOST IP IS : %s\n", hostAddress);
                                 }
-                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, "%s", dataObject->DeviceDescription);
+                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength + 1, "%s", dataObject->DeviceDescription);
                                 free(tmpHostAddress);
                         }
             			char* langHeader = ILibGetHeaderLine(header, "ACCEPT-LANGUAGE", 15);
