@@ -1077,42 +1077,36 @@ void UpnpProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Se
 	sem_wait(&(((struct UpnpDataObject*)session->User)->EventLock));
 	if(header->DirectiveObjLength==24 && memcmp(header->DirectiveObj + 1,"ConnectionManager/event",23)==0)
 	{
-		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				UpnpDestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
+		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),
+				&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
+		if(Info!=NULL && Info->RefCount == 1)
+			dprintf(1, "%s( %p  %d  %s  :  %s )\n", __func__, Info, (((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory), header->DirectiveObj, SID);
 	}
 	else if(header->DirectiveObjLength==23 && memcmp(header->DirectiveObj + 1,"ContentDirectory/event",22)==0)
 	{
-		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				UpnpDestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
+		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),
+				&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
+		if(Info != NULL && Info->RefCount == 1)
+				dprintf(1, "%s( %p  %d  %s  :  %s )\n", __func__, Info, (((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager), header->DirectiveObj, SID);
 	}
+
+	if (Info != NULL)
+	{
+		--Info->RefCount;
+		if (Info->RefCount == 0)
+		{
+			UpnpDestructSubscriberInfo(Info);
+			Info = NULL;
+		}
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 200, "OK");
+	}
+	else
+	{
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 412, "Invalid SID");
+	}
+
+	ILibWebServer_Send_Raw(session, packet, packetlength, 0, 1);
+
 	sem_post(&(((struct UpnpDataObject*)session->User)->EventLock));
 }
 void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLength,struct ILibWebServer_Session *session)
