@@ -1066,6 +1066,14 @@ void UpnpProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Se
 		}
 		f = f->NextField;
 	}
+
+	if (SID == NULL)
+	{
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 412, "Invalid SID");
+		ILibWebServer_Send_Raw(session, packet, packetlength, 1, 1);
+		return;
+	}
+
 	sem_wait(&(((struct UpnpDataObject*)session->User)->EventLock));
 	if(header->DirectiveObjLength==24 && memcmp(header->DirectiveObj + 1,"ConnectionManager/event",23)==0)
 	{
