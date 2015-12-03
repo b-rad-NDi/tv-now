@@ -1426,12 +1426,25 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                 bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, "%s", dataObject->DeviceDescription);
                                 free(tmpHostAddress);
                         }
+            			char* langHeader = ILibGetHeaderLine(header, "ACCEPT-LANGUAGE", 15);
+            			char dateString[64] = { 0 };
+            			getRFC1123(&dateString[0]);
+            			if (langHeader == NULL)
+            			{
+            				buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 64);
+            				if (buffer == NULL) exit(1);
 
-                        buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3);
-                        if (buffer == NULL) exit(254);
+            				bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 64, XML_GET_TEMPLATE, "", dateString, bufferLen, deviceDescription);
+            			}
+            			else
+            			{
+            				buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 23 + 64);
+            				if (buffer == NULL) exit(1);
 
-                        bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3, XML_GET_TEMPLATE, bufferLen, deviceDescription);
-                        ILibWebServer_Send_Raw(session, buffer, bufferLen, 0, 1);
+            				bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 23 + 64, XML_GET_TEMPLATE, "Content-Language: en\r\n", dateString, bufferLen, deviceDescription);
+            			}
+
+            			ILibWebServer_Send_Raw(session, buffer, bufferLen, 0, 1);
 		}
 		else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
 		{
