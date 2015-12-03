@@ -986,6 +986,7 @@ void UpnpExpireSubscriberInfo(struct UpnpDataObject *d, struct SubscriberInfo *i
 	if(info->RefCount==0)
 	{
 		UpnpDestructSubscriberInfo(info);
+		info = NULL;
 	}
 }
 
@@ -1015,8 +1016,8 @@ void UpnpProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Se
 {
 	char* SID = NULL;
 	int SIDLength = 0;
-	struct SubscriberInfo *Info;
-	struct packetheader_field_node *f;
+	struct SubscriberInfo *Info = NULL;
+	struct packetheader_field_node *f = NULL;
 	char* packet = (char*)MALLOC(sizeof(char)*50);
 	int packetlength;
 
