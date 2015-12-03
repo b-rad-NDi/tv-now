@@ -1406,11 +1406,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 	int errorPacketLength;
 	char *buffer;
 	/* Virtual Directory Support */
-	if(header->DirectiveObjLength>=4 && memcmp(header->DirectiveObj,"/web",4)==0)
-	{
-		UpnpPresentationRequest((void*)session,header);
-	}
-	else if(header->DirectiveLength==3 && memcmp(header->Directive,"GET",3)==0)
+	if(header->DirectiveLength==3 && memcmp(header->Directive,"GET",3)==0)
 	{
 		if(header->DirectiveObjLength==1 && memcmp(header->DirectiveObj,"/",1)==0)
 		{
