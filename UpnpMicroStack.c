@@ -48,6 +48,7 @@
  *
  *****************************************************************************/
 
+#define ILIBCRITICALEXIT(i) do { printf("%s() Line %d BAD!\n", __func__, 3651); exit(254); } while(0);
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1166,28 +1167,69 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		SIDNumber = ++dataObject->SID;
 		SID = (char*)MALLOC(10 + 6);
 		sprintf(SID,"uuid:%d",SIDNumber);
-		p = ILibParseString(URL,0,URLLength,"://",3);
-		if(p->NumResults==1)
+
+		struct parser_result *p0;
+		p0 = ILibParseString(URL, 0, URLLength, "http://", 7);
+		if (p0->NumResults == 1)
 		{
-			ILibWebServer_Send_Raw(session,"HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n",55,1,1);
-			ILibDestructParserResults(p);
+			ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+			ILibDestructParserResults(p0);
 			return;
 		}
-		TempString = p->LastResult->data;
-		TempStringLength = p->LastResult->datalength;
-		ILibDestructParserResults(p);
-		p = ILibParseString(TempString,0,TempStringLength,"/",1);
-		p2 = ILibParseString(p->FirstResult->data,0,p->FirstResult->datalength,":",1);
-		TempString2 = (char*)MALLOC(1+sizeof(char)*p2->FirstResult->datalength);
-		memcpy(TempString2,p2->FirstResult->data,p2->FirstResult->datalength);
-		TempString2[p2->FirstResult->datalength] = '\0';
-		NewSubscriber->Address = inet_addr(TempString2);
-		if(p2->NumResults==1)
+		/* spin through and find one where the ip address passes */
+
+		/* a = split on http://
+		 * ignore first result (opening <)
+		 * b = split a.i on >
+		 * this should be entire URL
+		 * c = split b.j on / for IP:port/path
+		 * d = split c.k on : for IP:port
+		 * if d.0 is invalid IP go to next result in a
+		 */
+		struct parser_result *close_split;
+		struct parser_result_field *searcher = p0->FirstResult->NextResult;
+		char *ip_tmp = NULL;
+		do
+		{
+			close_split = ILibParseString(searcher->data, 0, searcher->datalength, ">", 1);
+			if (close_split->NumResults == 0)
+			{	/* shouldn't be possible to get in here */
+				ILibDestructParserResults(close_split);
+				ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+				return;
+			}
+			/* in between http:// and first slash--aka ip:port */
+			p = ILibParseString(close_split->FirstResult->data, 0, close_split->FirstResult->datalength,"/", 1);
+			/* splitting up for IP and port in string */
+			p2 = ILibParseString(p->FirstResult->data, 0, p->FirstResult->datalength, ":", 1);
+			ip_tmp = malloc(p2->FirstResult->datalength + 2);
+			snprintf(ip_tmp, p2->FirstResult->datalength + 1, "%s", p2->FirstResult->data);
+			NewSubscriber->Address = inet_addr(ip_tmp);
+			if (NewSubscriber->Address != INADDR_NONE)
+			{
+				break;
+			}
+			ILibDestructParserResults(p);
+			ILibDestructParserResults(p2);
+			searcher = searcher->NextResult;
+		} while (searcher != NULL);
+		ILibDestructParserResults(p0);
+
+		if (NewSubscriber->Address == INADDR_NONE)
+		{
+			ILibDestructParserResults(close_split);
+			ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+			return;
+		}
+		if (p2->NumResults == 1)
 		{
 			NewSubscriber->Port = 80;
-			path = (char*)MALLOC(1+TempStringLength - p2->FirstResult->datalength -1);
-			memcpy(path,TempString + p2->FirstResult->datalength,TempStringLength - p2->FirstResult->datalength -1);
-			path[TempStringLength - p2->FirstResult->datalength - 1] = '\0';
+			if ((path = (char*)malloc(1+close_split->FirstResult->datalength )) == NULL) ILIBCRITICALEXIT(254);
+			memcpy(path,
+					close_split->FirstResult->data + p2->FirstResult->datalength,
+					close_split->FirstResult->datalength - p2->FirstResult->datalength - 1);
+
+			path[close_split->FirstResult->datalength - p2->FirstResult->datalength] = '\0';
 			NewSubscriber->Path = path;
 			NewSubscriber->PathLength = (int)strlen(path);
 		}
@@ -1195,24 +1237,28 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		{
 			ILibGetLong(p2->LastResult->data,p2->LastResult->datalength,&TempLong);
 			NewSubscriber->Port = (unsigned short)TempLong;
-			if(TempStringLength==p->FirstResult->datalength)
+			if (close_split->FirstResult->datalength == p->FirstResult->datalength)
 			{
-				path = (char*)MALLOC(2);
-				memcpy(path,"/",1);
+				if ((path = (char*)malloc(2)) == NULL) ILIBCRITICALEXIT(254);
+				memcpy(path, "/", 1);
 				path[1] = '\0';
 			}
 			else
 			{
-				path = (char*)MALLOC(1+TempStringLength - p->FirstResult->datalength -1);
-				memcpy(path,TempString + p->FirstResult->datalength,TempStringLength - p->FirstResult->datalength -1);
-				path[TempStringLength - p->FirstResult->datalength -1] = '\0';
+				if ((path = (char*)malloc(1 + close_split->FirstResult->datalength )) == NULL) ILIBCRITICALEXIT(254);
+				memcpy(path,
+						close_split->FirstResult->data + p->FirstResult->datalength,
+						close_split->FirstResult->datalength - p->FirstResult->datalength );
+				path[close_split->FirstResult->datalength - p->FirstResult->datalength] = '\0';
 			}
 			NewSubscriber->Path = path;
 			NewSubscriber->PathLength = (int)strlen(path);
 		}
-		ILibDestructParserResults(p);
-		ILibDestructParserResults(p2);
-		FREE(TempString2);
+
+		/* TODO: these should be freeable */
+//		ILibDestructParserResults(p);
+//		ILibDestructParserResults(p2);
+
 		NewSubscriber->RefCount = 1;
 		NewSubscriber->Disposing = 0;
 		NewSubscriber->Previous = NULL;
@@ -1229,6 +1275,7 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		                 NewSubscriber->SID,(NewSubscriber->Address)&0xFF,(NewSubscriber->Address>>8)&0xFF,
 		                 (NewSubscriber->Address>>16)&0xFF,(NewSubscriber->Address>>24)&0xFF,NewSubscriber->Port,Timeout);)
 		LVL3DEBUG(printf("TIMESTAMP: %d <%d>\r\n\r\n",(NewSubscriber->RenewByTime).tv_sec-Timeout,NewSubscriber);)
+
 		packet = (char*)MALLOC(132 + (int)strlen(SID) + 4);
 		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/%s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
 		                       TV_NOW_VERSION, SID, Timeout);
