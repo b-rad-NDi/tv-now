@@ -545,7 +545,15 @@ void UpnpDispatch_ConnectionManager_GetCurrentConnectionInfo(struct parser_resul
 	char *p_ConnectionID = NULL;
 	int p_ConnectionIDLength = 0;
 	int _ConnectionID = 0;
+
 	field = xml->FirstResult;
+
+	if (field->data == NULL || field->datalength == 0)
+	{
+		UpnpResponse_Error(ReaderObject, 501, "Invalid XML");
+		return;
+	}
+
 	while(field!=NULL)
 	{
 		if((memcmp(field->data,"?",1)!=0) && (memcmp(field->data,"/",1)!=0))
@@ -657,7 +665,15 @@ void UpnpDispatch_ContentDirectory_Browse(struct parser_result *xml, struct ILib
 	int p_SortCriteriaLength = 0;
 	char* _SortCriteria = "";
 	int _SortCriteriaLength;
+
 	field = xml->FirstResult;
+
+	if (field->data == NULL || field->datalength == 0)
+	{
+		UpnpResponse_Error(ReaderObject, 501, "Invalid XML");
+		return;
+	}
+
 	while(field!=NULL)
 	{
 		if((memcmp(field->data,"?",1)!=0) && (memcmp(field->data,"/",1)!=0))
