@@ -562,6 +562,10 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
 	char *NSTag;
 	int NSTagLength;
 	
+	if (buffer == NULL || length == 0)
+	{
+		return NULL;
+	}
 	xml = ILibParseString(buffer,offset,length,"<",1);
 	field = xml->FirstResult;
 	while(field!=NULL)
