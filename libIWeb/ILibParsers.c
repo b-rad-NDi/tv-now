@@ -1281,6 +1281,12 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
 	}
 	else
 	{
+		if (StartLine->FirstResult->NextResult == NULL)
+		{
+			ILibDestructParserResults(p);
+			FREE(RetVal);
+			return NULL;
+		}
 		/* Request Packet */
 		RetVal->Directive = StartLine->FirstResult->data;
 		RetVal->DirectiveLength = StartLine->FirstResult->datalength;
