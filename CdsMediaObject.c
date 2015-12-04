@@ -109,6 +109,7 @@ void CDS_DestroyObjects(struct CdsMediaObject *cdsObjList)
 		if (cdsObj->SeriesID != NULL) free(cdsObj->SeriesID);
 		if (cdsObj->epgProviderName != NULL) free(cdsObj->epgProviderName);
 		if (cdsObj->serviceProvider != NULL) free(cdsObj->serviceProvider);
+		if (cdsObj->uri_target != NULL) free(cdsObj->uri_target);
 
 		CDS_DestroyResources(cdsObj->Res);
 		
