@@ -161,6 +161,7 @@ struct ILibWebRequest
 
 	struct sockaddr_in remote;
 	void *user1,*user2;
+	int freeUser1;
 	void (*OnResponse)(
 				void *WebReaderToken,
 				int InterruptFlag,
@@ -1011,6 +1012,7 @@ void *ILibCreateWebClientEx(void (*OnResponse)(
 	wr->OnResponse = OnResponse;
 	ILibQueue_EnQueue(wcdo->RequestQueue,wr);
 	wr->user1 = user1;
+	wr->freeUser1 = 0;
 	wr->user2 = user2;
 	return(wcdo);
 }
@@ -1087,6 +1089,7 @@ void ILibWebClient_PipelineRequest(
 	request->remote.sin_addr.s_addr = RemoteEndpoint->sin_addr.s_addr;
 
 	request->user1 = user1;
+	request->freeUser1 = 0;
 	request->user2 = user2;
 
 	IPV4AddressLength = sprintf(IPV4Address,"%s:%d",
@@ -1162,7 +1165,7 @@ void ILibWebClient_PipelineRequestEx(
 		void *user2,
 		int *PAUSE),
 	void *user1,
-	void *user2)
+	void *user2, int freeUser1)
 {
 	int ForceUnBlock=0;
 	char IPV4Address[22];
@@ -1193,6 +1196,7 @@ void ILibWebClient_PipelineRequestEx(
 	request->remote.sin_addr.s_addr = RemoteEndpoint->sin_addr.s_addr;
 
 	request->user1 = user1;
+	request->freeUser1 = freeUser1;
 	request->user2 = user2;
 
 	IPV4AddressLength = sprintf(IPV4Address,"%s:%d",

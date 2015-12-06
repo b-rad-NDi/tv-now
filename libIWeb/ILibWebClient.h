@@ -94,7 +94,8 @@ void ILibWebClient_PipelineRequestEx(
 		void *user2,
 		int *PAUSE),
 	void *user1,
-	void *user2);
+	void *user2,
+	int freeUser1);
 void ILibWebClient_PipelineRequest(
 	void *WebClient, 
 	struct sockaddr_in *RemoteEndpoint, 
