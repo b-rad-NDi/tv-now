@@ -1198,6 +1198,8 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 	if(*TotalSubscribers<10)
 	{
 		NewSubscriber = (struct SubscriberInfo*)MALLOC(sizeof(struct SubscriberInfo));
+		NewSubscriber->SID = NULL;
+		NewSubscriber->Path = NULL;
 		SIDNumber = ++dataObject->SID;
 		SID = (char*)MALLOC(10 + 6);
 		sprintf(SID,"uuid:%d",SIDNumber);
