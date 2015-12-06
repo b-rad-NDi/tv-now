@@ -935,6 +935,7 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 {
 	struct SubscriberInfo *info = *Head;
 	struct SubscriberInfo **ptr = Head;
+
 	if (*TotalSubscribers <=0 || *TotalSubscribers > MAX_UPNP_SUBSCRIBERS || SIDLength <= 0 || SIDLength > 64)
 	{
 		dprintf(1, "BAD DATA--ignoring\n");
@@ -958,6 +959,7 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 					}
 				}
 			}
+		        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
 			break;
 		}
 		ptr = &(info->Next);
@@ -991,6 +993,8 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 }
 void UpnpExpireSubscriberInfo(struct UpnpDataObject *d, struct SubscriberInfo *info)
 {
+        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
+
 	struct SubscriberInfo *t = info;
 	while(t->Previous!=NULL)
 	{
