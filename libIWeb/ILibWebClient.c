@@ -282,7 +282,11 @@ void ILibWebClient_DestroyWebClientDataObject(void *token)
 					wr->user2,
 					&zero);		
 		}
-//		if (wr->user1 != NULL) FREE(wr->user1);
+		if (wr->freeUser1 && wr->user1 != NULL)
+		{
+			FREE(wr->user1);
+			wr->user1 = NULL;
+		}
 		FREE(wr);
 		wr = ILibQueue_DeQueue(wcdo->RequestQueue);
 	}
@@ -1303,6 +1307,11 @@ void ILibWebClient_DeleteRequests(void *WebClientToken,char *IP,int Port)
 		FREE(wr->Buffer);
 		FREE(wr->BufferLength);
 		FREE(wr->UserFree);
+		if (wr->freeUser1 && wr->user1 != NULL)
+		{
+			FREE(wr->user1);
+			wr->user1 = NULL;
+		}
 		FREE(wr);
 	}
 	ILibQueue_Destroy(RemoveQ);
