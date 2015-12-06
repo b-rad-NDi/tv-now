@@ -974,11 +974,18 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 	return(info);
 }
 
-#define UpnpDestructSubscriberInfo(info)\
-{\
-	FREE(info->Path);\
-	FREE(info->SID);\
-	FREE(info);\
+static inline void UpnpDestructSubscriberInfo(struct SubscriberInfo* info)
+{
+        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
+        /* TODO: this is memory leak
+         * Address this issue to fix random segfault due to premature destruction
+         */
+//        return;
+        if (info->Path) free(info->Path);
+        if (info->SID) free(info->SID);
+        memset(info, 0, sizeof(struct SubscriberInfo));
+        info->RefCount = -1;
+        free(info);
 }
 
 #define UpnpDestructEventObject(EvObject)\
