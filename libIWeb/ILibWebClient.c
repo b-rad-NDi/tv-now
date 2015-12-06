@@ -281,6 +281,7 @@ void ILibWebClient_DestroyWebClientDataObject(void *token)
 					wr->user2,
 					&zero);		
 		}
+//		if (wr->user1 != NULL) FREE(wr->user1);
 		FREE(wr);
 		wr = ILibQueue_DeQueue(wcdo->RequestQueue);
 	}
@@ -327,10 +328,11 @@ void ILibDestroyWebClient(void *object)
 		for(i=0;i<wr->NumberOfBuffers;++i)
 		{
 			if(wr->UserFree[i]==0) {FREE(wr->Buffer[i]);}
-			FREE(wr->Buffer);
-			FREE(wr->BufferLength);
-			FREE(wr->UserFree);
 		}
+		FREE(wr->Buffer);
+		FREE(wr->BufferLength);
+		FREE(wr->UserFree);
+
 		wr = ILibQueue_DeQueue(manager->backlogQueue);
 	}
 	ILibQueue_Destroy(manager->backlogQueue);
