@@ -107,6 +107,13 @@ struct SubscriberInfo
 	struct SubscriberInfo *Next;
 	struct SubscriberInfo *Previous;
 };
+
+struct SubscriberContainer
+{
+	struct SubscriberInfo* subscriber;
+	int Disposing;
+};
+
 struct UpnpDataObject
 {
 	void (*PreSelect)(void* object,fd_set *readset, fd_set *writeset, fd_set *errorset, int* blocktime);
@@ -1925,7 +1932,10 @@ void UpnpSendEvent_Body(void *upnptoken,char *body,int bodylength,struct Subscri
 	++info->SEQ;
 
 	++info->RefCount;
-	ILibWebClient_PipelineRequestEx(UPnPObject->EventClient,&dest,packet,packetLength,0,NULL,0,0,&UpnpSendEventSink,info,upnptoken);
+	struct SubscriberContainer* sub_con = malloc(sizeof(struct SubscriberContainer));
+	sub_con->Disposing = 0;
+	sub_con->subscriber = info;
+	ILibWebClient_PipelineRequestEx(UPnPObject->EventClient,&dest,packet,packetLength,0,NULL,0,0,&UpnpSendEventSink,sub_con,upnptoken, 1);
 }
 void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char* eventname)
 {
