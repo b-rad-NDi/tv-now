@@ -1894,24 +1894,34 @@ void *subscriber,
 void *upnp,
 int *PAUSE)
 {
-	if(done!=0 && ((struct SubscriberInfo*)subscriber)->Disposing==0)
+	sem_wait(&(((struct UpnpDataObject*)upnp)->EventLock));
+	struct SubscriberContainer* sub_con = (struct SubscriberContainer*)subscriber;
+	struct SubscriberInfo* sub = sub_con->subscriber;
+
+	if(done!=0 && sub_con->Disposing==0)
 	{
-		sem_wait(&(((struct UpnpDataObject*)upnp)->EventLock));
-		--((struct SubscriberInfo*)subscriber)->RefCount;
-		if(((struct SubscriberInfo*)subscriber)->RefCount==0)
+		--sub->RefCount;
+		sub_con->Disposing = 1;
+		if(sub->RefCount==0)
 		{
-			LVL3DEBUG(printf("\r\n\r\nSubscriber at [%s] %d.%d.%d.%d:%d was/did UNSUBSCRIBE while trying to send event\r\n\r\n",((struct SubscriberInfo*)subscriber)->SID,(((struct SubscriberInfo*)subscriber)->Address&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>8)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>16)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>24)&0xFF),((struct SubscriberInfo*)subscriber)->Port);)
-			UpnpDestructSubscriberInfo(((struct SubscriberInfo*)subscriber));
+			LVL3DEBUG(printf("\r\n\r\nSubscriber at [%s] %d.%d.%d.%d:%d was/did UNSUBSCRIBE while trying to send event\r\n\r\n", sub->SID,
+					(sub->Address&0xFF),((sub->Address>>8)&0xFF),
+					((sub->Address>>16)&0xFF),((sub->Address>>24)&0xFF),
+					sub->Port);)
+			sub_con->Disposing = 1;
+			UpnpDestructSubscriberInfo(sub);
 		}
 		else if(header==NULL)
 		{
-			LVL3DEBUG(printf("\r\n\r\nCould not deliver event for [%s] %d.%d.%d.%d:%d UNSUBSCRIBING\r\n\r\n",((struct SubscriberInfo*)subscriber)->SID,(((struct SubscriberInfo*)subscriber)->Address&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>8)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>16)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>24)&0xFF),((struct SubscriberInfo*)subscriber)->Port);)
+			LVL3DEBUG(printf("\r\n\r\nCould not deliver event for [%s] %d.%d.%d.%d:%d UNSUBSCRIBING\r\n\r\n", sub->SID,
+					(sub->Address&0xFF),((sub->Address>>8)&0xFF),
+					((sub->Address>>16)&0xFF),((sub->Address>>24)&0xFF),
+					sub->Port);)
 			// Could not send Event, so unsubscribe the subscriber
-			((struct SubscriberInfo*)subscriber)->Disposing = 1;
 			UpnpExpireSubscriberInfo(upnp,subscriber);
 		}
-		sem_post(&(((struct UpnpDataObject*)upnp)->EventLock));
 	}
+	sem_post(&(((struct UpnpDataObject*)upnp)->EventLock));
 }
 void UpnpSendEvent_Body(void *upnptoken,char *body,int bodylength,struct SubscriberInfo *info)
 {
