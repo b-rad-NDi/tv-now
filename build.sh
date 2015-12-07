@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 if [ ! -d libdvbtee ] ; then
     git clone git://github.com/mkrufky/libdvbtee.git
