@@ -90,3 +90,8 @@ if [ $? != 0 ]; then
 fi
 
 make -C dvbtee install
+
+# TODO: some Makefile target should do this...
+cp -P libdvbtee/libdvbtee.so* libdvbtee_server/libdvbtee_server.so* usr/lib
+
+
