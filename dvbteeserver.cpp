@@ -640,6 +640,8 @@ extern "C" void dvbtee_start(void* nothing)
 	ATSCMultipleStringsInit();
 #endif
 	context->tuner.feeder.parser.limit_eit(-1);
+//	enum output_options oopt = OUTPUT_PSIP;
+//	context->tuner.feeder.parser.out.set_options(oopt);
 
 	start_server(context, scan_flags, 62080, 62081);
 	context->tuner.scan_for_services(scan_flags, 0, 0, 1);
