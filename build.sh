@@ -5,17 +5,15 @@ if [ ! -d libdvbtee ] ; then
 fi
 
 cd libdvbtee
-touch .x86
 
 export DVBTEE_ROOT="`pwd`"
 
-if [ -e .mipsel ]; then
-    export ARCH="mipsel-linux"
-    export CROSS_COMPILE="mipsel-linux-"
-    export CC="mipsel-linux-gcc"
-    export GPP="mipsel-linux-g++"
-    export LD="mipsel-linux-ld"
-    export STRIP="mipsel-linux-strip"
+if [ -n "$ARCH" -a -n "$CROSS_COMPILE" ] ; then
+	# these shouldn't have to be set if CROSS_COMPILE is, but keeping to not break build
+	export CC=${CROSS_COMPILE}gcc
+	export CC=${CROSS_COMPILE}g++
+	export CC=${CROSS_COMPILE}ld
+	export CC=${CROSS_COMPILE}strip
 else
     echo using default build environment...
 fi
@@ -61,10 +59,10 @@ if [ -e .configured ]; then
 else
     ./bootstrap
     patch -p1 < ../dvbpsi-noexamples.patch
-    if [ -e ../.x86 ]; then
-	./configure --prefix=${DVBTEE_ROOT}/usr/  --disable-debug --disable-release
+    if [ -n "$ARCH" -a -n "$CROSS_COMPILE" ] ; then
+	./configure --prefix=${DVBTEE_ROOT}/usr/ --host=${ARCH} --target=${ARCH}
     else
-	./configure --prefix=${DVBTEE_ROOT}/usr/ --host=mipsel-linux --target=mipsel-linux
+	./configure --prefix=${DVBTEE_ROOT}/usr/  --disable-debug --disable-release
     fi
     touch ./.configured
 fi
