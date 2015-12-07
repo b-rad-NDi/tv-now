@@ -18,13 +18,19 @@ else
     echo using default build environment...
 fi
 
+if [ "$HDHOMERUN_SUPPORT" == "1" ] ; then
+    QMAKE_EXTRA=" "
+else
+    QMAKE_EXTRA=disallowhdhr
+fi
+
 if [ -e Makefile ]; then
     echo Makefile already exists...
 else
     if [ -e .staticlib ]; then
-        qmake -r CONFIG+=staticlib
+        qmake -r CONFIG+="staticlib $QMAKE_EXTRA"
     else
-        qmake -r
+        qmake -r CONFIG+="$QMAKE_EXTRA"
     fi
 fi
 
