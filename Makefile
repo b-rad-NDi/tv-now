@@ -19,9 +19,15 @@ OFILES = \
 	MyString.o\
 	MimeTypes.o\
 	PortingFunctions.o\
-	tv-now.o 
-	
-DVBTEE_LIBS = -L./libdvbtee/usr/lib -ldvbtee -ldvbtee_server -ldvbpsi -lstdc++ -lhdhomerun
+	tv-now.o
+
+DVBTEE_LIBS = -L./libdvbtee/usr/lib -ldvbtee -ldvbtee_server -ldvbpsi -lstdc++
+
+# libdvbtee is build with HDHomerun support
+ifeq ($(HDHOMERUN_SUPPORT),1)
+	DVBTEE_LIBS += -lhdhomerun
+endif
+
 DVBTEE_LIBS_STATIC = ./libdvbtee/libdvbtee/libdvbtee.a ./libdvbtee/libdvbtee_server/libdvbtee_server.a ./libdvbtee/usr/lib/libdvbpsi.a -lstdc++
 DVBTEE_INCLUDES = -I./libdvbtee/usr/include -I./libdvbtee/libdvbtee -I./libdvbtee/libdvbtee_server
 DVBTEE_SERVER = dvbteeserver

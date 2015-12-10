@@ -60,6 +60,7 @@ struct CdsMediaObject* CDS_AllocateObject()
 {
 	struct CdsMediaObject *cdsObj = (struct CdsMediaObject *) malloc (sizeof(struct CdsMediaObject));
 	memset(cdsObj, 0, sizeof(struct CdsMediaObject));
+	cdsObj->Recordable = -1;
 	return cdsObj;
 }
 
@@ -88,6 +89,28 @@ void CDS_DestroyObjects(struct CdsMediaObject *cdsObjList)
 		if ((cdsObj->DeallocateThese & CDS_ALLOC_Title)		&& (cdsObj->Title != NULL))		{ free(cdsObj->Title); }
 		if ((cdsObj->DeallocateThese & CDS_ALLOC_Album)		&& (cdsObj->Album != NULL))		{ free(cdsObj->Album); }
 		if ((cdsObj->DeallocateThese & CDS_ALLOC_Genre)		&& (cdsObj->Genre != NULL))		{ free(cdsObj->Genre); }
+
+		if (cdsObj->Actor != NULL) free(cdsObj->Actor);
+		if (cdsObj->AlbumArtURI != NULL) free(cdsObj->AlbumArtURI);
+		if (cdsObj->CallSign != NULL) free(cdsObj->CallSign);
+		if (cdsObj->ChannelID != NULL) free(cdsObj->ChannelID);
+		if (cdsObj->ChannelName != NULL) free(cdsObj->ChannelName);
+		if (cdsObj->ChannelNr != NULL) free(cdsObj->ChannelNr);
+		if (cdsObj->EpisodeNumber != NULL) free(cdsObj->EpisodeNumber);
+		if (cdsObj->EpisodeSeason != NULL) free(cdsObj->EpisodeSeason);
+		if (cdsObj->EpisodeType != NULL) free(cdsObj->EpisodeType);
+		if (cdsObj->GenreExtended != NULL) free(cdsObj->GenreExtended);
+		if (cdsObj->Language != NULL) free(cdsObj->Language);
+		if (cdsObj->LongDescription != NULL) free(cdsObj->LongDescription);
+		if (cdsObj->NetworkAffiliation != NULL) free(cdsObj->NetworkAffiliation);
+		if (cdsObj->ProgramID != NULL) free(cdsObj->ProgramID);
+		if (cdsObj->Rating != NULL) free(cdsObj->Rating);
+		if (cdsObj->RatingType != NULL) free(cdsObj->RatingType);
+		if (cdsObj->SeriesID != NULL) free(cdsObj->SeriesID);
+		if (cdsObj->epgProviderName != NULL) free(cdsObj->epgProviderName);
+		if (cdsObj->serviceProvider != NULL) free(cdsObj->serviceProvider);
+		if (cdsObj->uri_target != NULL) free(cdsObj->uri_target);
+
 		CDS_DestroyResources(cdsObj->Res);
 		
 		free (cdsObj);

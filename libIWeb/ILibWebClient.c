@@ -161,6 +161,7 @@ struct ILibWebRequest
 
 	struct sockaddr_in remote;
 	void *user1,*user2;
+	int freeUser1;
 	void (*OnResponse)(
 				void *WebReaderToken,
 				int InterruptFlag,
@@ -281,6 +282,11 @@ void ILibWebClient_DestroyWebClientDataObject(void *token)
 					wr->user2,
 					&zero);		
 		}
+		if (wr->freeUser1 && wr->user1 != NULL)
+		{
+			FREE(wr->user1);
+			wr->user1 = NULL;
+		}
 		FREE(wr);
 		wr = ILibQueue_DeQueue(wcdo->RequestQueue);
 	}
@@ -327,10 +333,11 @@ void ILibDestroyWebClient(void *object)
 		for(i=0;i<wr->NumberOfBuffers;++i)
 		{
 			if(wr->UserFree[i]==0) {FREE(wr->Buffer[i]);}
-			FREE(wr->Buffer);
-			FREE(wr->BufferLength);
-			FREE(wr->UserFree);
 		}
+		FREE(wr->Buffer);
+		FREE(wr->BufferLength);
+		FREE(wr->UserFree);
+
 		wr = ILibQueue_DeQueue(manager->backlogQueue);
 	}
 	ILibQueue_Destroy(manager->backlogQueue);
@@ -1009,6 +1016,7 @@ void *ILibCreateWebClientEx(void (*OnResponse)(
 	wr->OnResponse = OnResponse;
 	ILibQueue_EnQueue(wcdo->RequestQueue,wr);
 	wr->user1 = user1;
+	wr->freeUser1 = 0;
 	wr->user2 = user2;
 	return(wcdo);
 }
@@ -1085,6 +1093,7 @@ void ILibWebClient_PipelineRequest(
 	request->remote.sin_addr.s_addr = RemoteEndpoint->sin_addr.s_addr;
 
 	request->user1 = user1;
+	request->freeUser1 = 0;
 	request->user2 = user2;
 
 	IPV4AddressLength = sprintf(IPV4Address,"%s:%d",
@@ -1160,7 +1169,7 @@ void ILibWebClient_PipelineRequestEx(
 		void *user2,
 		int *PAUSE),
 	void *user1,
-	void *user2)
+	void *user2, int freeUser1)
 {
 	int ForceUnBlock=0;
 	char IPV4Address[22];
@@ -1191,6 +1200,7 @@ void ILibWebClient_PipelineRequestEx(
 	request->remote.sin_addr.s_addr = RemoteEndpoint->sin_addr.s_addr;
 
 	request->user1 = user1;
+	request->freeUser1 = freeUser1;
 	request->user2 = user2;
 
 	IPV4AddressLength = sprintf(IPV4Address,"%s:%d",
@@ -1297,6 +1307,11 @@ void ILibWebClient_DeleteRequests(void *WebClientToken,char *IP,int Port)
 		FREE(wr->Buffer);
 		FREE(wr->BufferLength);
 		FREE(wr->UserFree);
+		if (wr->freeUser1 && wr->user1 != NULL)
+		{
+			FREE(wr->user1);
+			wr->user1 = NULL;
+		}
 		FREE(wr);
 	}
 	ILibQueue_Destroy(RemoveQ);

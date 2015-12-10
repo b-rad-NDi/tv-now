@@ -51,6 +51,7 @@
 
 struct program_info
 {
+	char event_id[128];
 	char title[128];
 	char longDesc[1024];
 	time_t  start;
@@ -60,6 +61,7 @@ struct program_info
 struct dvb_channel
 {
 	char channelID[32];
+	char channelNr[16];
 	char callSign[64];
 	void* program_list;
 };

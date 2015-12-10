@@ -289,7 +289,7 @@ char* GetFileName(char* pathName, char* dirDelimiter, int returnExtension)
 	int pLen = (int) strlen(pathName);
 	int len = pLen - pos;
 	int dotPos;
-	char* name;
+	char* name = NULL;
 	int i,j;
 	int nlen;
 
@@ -1099,6 +1099,11 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		{
 			mime = (char*) FileExtensionToMimeType(ext, 0);
 		}
+		else
+		{
+			ext = "";
+			mime = "";
+		}
 	}
 
 	if ((fntd->CI >= fntd->SI) && ((fntd->NR < fntd->RC) || (fntd->RC == 0)))
@@ -1113,6 +1118,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		{
 			parentID = (char*) malloc(3);
 			strcpy(parentID, "-1");
+			pidLen = 0;
 		}
 		else
 		{
@@ -1122,6 +1128,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			{
 				parentID = (char*) malloc(2);
 				strcpy(parentID, "0");
+				pidLen = 1;
 			}
 			else
 			{
@@ -1129,29 +1136,30 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 				sprintf(parentID, "0%s%s", fntd->DirDelimiter, parentDir+fntd->RootLength);
 				pidLen = (int) strlen(parentID);
 				parentID [pidLen-1] = '\0';
-				pidLen = pidLen - 1;
+//				pidLen = pidLen - 1;
 			}
 		}
 
 		/* get title*/
 		fnLen = (int) strlen(pathName);
-		title = GetFileName(pathName, fntd->DirDelimiter, 0);
+		title = GetFileName(pathName, fntd->DirDelimiter, 1);
 
 		if (title[0] == '\0')
 		{
 			free(title);
 			if (strnicmp(pathName, fntd->Root, (int) strlen(pathName)) == 0)
 			{
-				title = MMS_STRING_ROOT;
+				title = malloc(strlen(MMS_STRING_ROOT));
+				sprintf(title, "%s", MMS_STRING_ROOT);
 			}
 			else
 			{
-				title = MMS_STRING_UNKNOWN;
+				title = malloc(strlen(MMS_STRING_UNKNOWN));
+				sprintf(title, "%s", MMS_STRING_UNKNOWN);
 			}
 		}
 
-		char channel_title[256];
-		channel_name(title, channel_title);
+		char* channel_title = title;
 
 		/* get object id: full path, where root=0 */
 		ddLen = (int) strlen(fntd->DirDelimiter);
@@ -1166,7 +1174,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		}
 		else
 		{
-			sprintf(id, "0%s%s%s", fntd->DirDelimiter, channel_title, ext);
+			sprintf(id, "%s%s", fntd->DirDelimiter, channel_title);
 		}
 
 		/* determine if directory or file */
@@ -1175,9 +1183,13 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 
 			/* get a copy of the id - ensure that it does not end with a directory delimiter */
 			cpIdLen = strlen(id);
-			cpId = (char*) malloc(cpIdLen+1);
-			memcpy(cpId, id, cpIdLen);
-			cpId[cpIdLen] = '\0';
+			cpId = (char*) malloc(cpIdLen + pidLen + 4);
+
+			if (pidLen == 0)
+				snprintf(cpId, cpIdLen + 1, "%s", id);
+			else
+				snprintf(cpId, cpIdLen + pidLen + 1, "%s%s", parentID, id);
+
 			ewDD = EndsWith(cpId, DIRDELIMITER, 0);
 			if (ewDD != 0)
 			{
@@ -1231,6 +1243,8 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					cdsObj->ChildCount = PCGetGetDirEntryCount(pathName, DIRDELIMITER);
 					cdsObj->MediaClass = mediaClass;
 
+					GetMetaData(pathName, cdsObj);
+
 					entry = CdsToDidl_GetMediaObjectDidlEscaped(cdsObj, 0, filterMask, 0, &entryLen);
 					ext = "NOT-NULL";
 				}
@@ -1249,18 +1263,35 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					cdsObj->ParentID = cpParentId;
 					cdsObj->MediaClass = FileExtensionToClassCode(ext, 0);
 
+					GetMetaData(pathName, cdsObj);
+
+					char target_uri[256] = { 0 };
+					char* prot_info = NULL;
+					if (strlen(cdsObj->uri_target) == 0)
+					{
+						/* :port/target */
+						snprintf(target_uri, 255, ":%d/%s", fntd->Port, title);
+						prot_info = FileExtensionToProtocolInfo(ext, 0);
+					}
+					else
+					{
+						snprintf(target_uri, 255, "%s", cdsObj->uri_target);
+						prot_info = cdsObj->ProtocolInfo;
+					}
+
+
 					cdsRes = &(cdsObj->Res);
 					for (ri = 0; ri < fntd->AddressListLen; ri++)
 					{
 						(*cdsRes) = CDS_AllocateResource();
 						(*cdsRes)->Size = fntd->FileSize;
-						(*cdsRes)->ProtocolInfo = FileExtensionToProtocolInfo(ext, 0);
+						(*cdsRes)->ProtocolInfo = prot_info;
 
-						(*cdsRes)->Value = (char*) malloc(82+strlen(channel_title) + 128);
-						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d:%d/tune=%s&stream/%s.mpg",
+						(*cdsRes)->Value = (char*) malloc(82+strlen(target_uri) + 128);
+						sprintf((*cdsRes)->Value, "http://%d.%d.%d.%d%s",
 						        (fntd->AddressList[ri]&0xFF), ((fntd->AddressList[ri]>>8)&0xFF),
 						        ((fntd->AddressList[ri]>>16)&0xFF), ((fntd->AddressList[ri]>>24)&0xFF),
-						        62080, title, channel_title);
+						        target_uri);
 
 						cdsRes = &((*cdsRes)->Next);
 					}
@@ -1469,15 +1500,25 @@ void CdsBrowse(void* upnpToken, char* ObjectID, char* BrowseFlag, char* Filter, 
 	objIdLen = ILibInPlaceXmlUnEscape(ObjectID);
 	filepath = (char*)malloc(ROOTPATHLENGTH + objIdLen + 10);
 
-	if (objIdLen > 2) 
+	if (objIdLen > 2)
 	{
 		if (BrowseFlag[6] == 'M')
 		{
-			sprintf(filepath,"%s%s",ROOTPATH,ObjectID+2);
+			if (ObjectID[0] == '0')
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID+2);
+			else if (ObjectID[0] == '/')
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID+1);
+			else
+				sprintf(filepath,"%s%s",ROOTPATH,ObjectID);
 		}
 		else
 		{
-			sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+2,DIRDELIMITER);
+			if (ObjectID[0] == '0')
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+2,DIRDELIMITER);
+			else if (ObjectID[0] == '/')
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID+1,DIRDELIMITER);
+			else
+				sprintf(filepath,"%s%s%s",ROOTPATH,ObjectID,DIRDELIMITER);
 		}
 	} 
 	else 
@@ -1724,7 +1765,7 @@ void UpnpConnectionManager_GetCurrentConnectionIDs(void* upnptoken)
   /* TODO: Place Action Code Here... */
 
   /* UpnpResponse_Error(upnptoken,404,"Method Not Implemented"); */
-  UpnpResponse_ConnectionManager_GetCurrentConnectionIDs(upnptoken,"");
+  UpnpResponse_ConnectionManager_GetCurrentConnectionIDs(upnptoken,"0");
 }
 
 void UpnpPresentationRequest(void* upnptoken, struct packetheader *packet)

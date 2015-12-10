@@ -280,8 +280,9 @@ void ILibForceUnBlockChain(void *Chain)
 	
 	temp = c->Terminate;
 	c->Terminate = ~0;
-	close(temp);
-	
+	if (temp >= 0)
+		close(temp);
+
 	sem_post(&ILibChainLock);
 	
 }
@@ -561,6 +562,10 @@ struct ILibXMLNode *ILibParseXML(char *buffer, int offset, int length)
 	char *NSTag;
 	int NSTagLength;
 	
+	if (buffer == NULL || length == 0)
+	{
+		return NULL;
+	}
 	xml = ILibParseString(buffer,offset,length,"<",1);
 	field = xml->FirstResult;
 	while(field!=NULL)
@@ -1276,6 +1281,12 @@ struct packetheader* ILibParsePacketHeader(char* buffer, int offset, int length)
 	}
 	else
 	{
+		if (StartLine->FirstResult->NextResult == NULL)
+		{
+			ILibDestructParserResults(p);
+			FREE(RetVal);
+			return NULL;
+		}
 		/* Request Packet */
 		RetVal->Directive = StartLine->FirstResult->data;
 		RetVal->DirectiveLength = StartLine->FirstResult->datalength;

@@ -57,6 +57,8 @@
 
 #include "MyString.h"
 #include "MicroMediaServer.h"
+#include "CdsMediaObject.h"
+#include "MimeTypes.h"
 
 #include "PortingFunctions.h"
 
@@ -85,6 +87,11 @@
 #include <unistd.h>
 #endif
 
+/* tv-now root directories */
+#define TVNOW_ROOT_ITEMS 3
+static int rootIter = 0;
+static char rootDirs[TVNOW_ROOT_ITEMS][12] = { "Channels", "EPG", "VOD" };
+
 #define MAX_PATH_LENGTH 1024
 
 void PCRandomize()
@@ -107,7 +114,7 @@ void PCRandomize()
 // Windows Version
 void PCCloseDir(void* handle)
 {
-	printf("%s\n", __func__);
+//	printf("%s\n", __func__);
 #if NDi_LiveTV
 	return;
 #endif
@@ -162,9 +169,202 @@ uint64_t PCFileTell(void *fileHandle)
 	return ftello((FILE*)fileHandle);
 }
 
+static int isDate(const char* date_string)
+{
+	const char *time_details = date_string;
+	char* endPtr;
+	struct tm tm;
+//	printf("%s( %s )\n", __func__, date_string);
+
+	endPtr = strptime(time_details, "%m-%d-%Y", &tm);
+	if (endPtr == NULL || *endPtr != '\0')
+	{
+		printf("%s( %s ) - Error\n", __func__, date_string);
+		return 0;
+	}
+	return 1;
+}
+
+/* Analyze cdsObj and allocate+fill in all desired metadata fields */
+void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
+{
+	int fdType;
+	char *title = GetFileName(path, "/", 1);
+	char *parentDir  = NULL;
+	char *parentTitle = NULL;
+	char *parentDir2 = NULL;
+	char *parentTitle2 = NULL;
+
+	cdsObj->ProtocolInfo = PROTINFO_VIDEO_MPEG;
+
+	if (strncmp(path, "./Channels", 10) == 0)
+	{
+		fdType = PCGetFileDirType(path);
+
+		if (fdType == 2)
+		{
+//			cdsObj->MediaClass = CDS_MEDIACLASS_TUNERCONTAINER;
+		}
+		else if (fdType == 1)
+		{
+			/*
+			 * <dc:title></dc:title>
+			 * <upnp:channelNr>19</upnp:channelNr>
+			 * <upnp:callSign></upnp:callSign>
+			 * <upnp:networkAffiliation></upnp:networkAffiliation>
+			 * <upnp:channelID>19654</upnp:channelID>
+			 * <upnp:recordable>1</upnp:recordable>
+			 */
+
+			cdsObj->MediaClass = CDS_MEDIACLASS_VIDEOBROADCAST;
+
+			cdsObj->CallSign = malloc(64);
+			channel_name(title, cdsObj->CallSign);
+
+			cdsObj->ChannelID = malloc(128);
+			sprintf(cdsObj->ChannelID, "%s", title);
+
+			cdsObj->ChannelNr = (char*)malloc(16);
+			channel_number(title, cdsObj->ChannelNr);
+
+			cdsObj->DeallocateThese |= CDS_ALLOC_Title;
+			cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) + strlen(cdsObj->CallSign) + 6);
+			sprintf(cdsObj->Title, "%s - %s", cdsObj->ChannelNr, cdsObj->CallSign);
+
+			cdsObj->ProgramID = NULL;
+			char* descr_ptr = NULL;
+
+			if (get_epg_data_simple(title, &cdsObj->ProgramID, &cdsObj->LongDescription, &descr_ptr, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) == 0)
+			{
+				free(descr_ptr);
+			}
+
+			cdsObj->Recordable = 1;
+
+			cdsObj->uri_target = (char*)malloc(255);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream/video.mpg", 62080, cdsObj->ChannelID);
+		}
+	}
+	else if (strncmp(path, "./EPG", 5) == 0)
+	{
+		fdType = PCGetFileDirType(path);
+		parentDir  = GetParentPath(path, "/", 1);
+		parentTitle = (parentDir != NULL) ? GetFileName(parentDir, "/", 1) : NULL;
+		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+		parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
+
+		if (fdType == 2)
+		{
+			if (strcmp(path, "./EPG") == 0)
+			{
+				/*
+				 * <upnp:epgProviderName></upnp:epgProviderName>
+				 * <upnp:serviceProvider></upnp:serviceProvider>
+				 */
+			}
+			else if (parentDir != NULL && strcmp(parentDir, "./EPG/") == 0) /*  /EPG/ch  */
+			{
+				/*
+				 * <dc:title>channel callsign</dc:title>
+				 * <upnp:channelID>19654</upnp:channelID>
+				 */
+				cdsObj->ChannelID = malloc(128);
+				sprintf(cdsObj->ChannelID, "%s", title);
+
+				cdsObj->CallSign = malloc(64);
+				channel_name(title, cdsObj->CallSign);
+
+				cdsObj->ChannelNr = malloc(16);
+				channel_number(title, cdsObj->ChannelNr);
+
+				cdsObj->DeallocateThese |= CDS_ALLOC_Title;
+				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
+				                              strlen(cdsObj->CallSign) + 12);
+
+				sprintf(cdsObj->Title, "%s - %s", cdsObj->ChannelNr, cdsObj->CallSign);
+			}
+			else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0) /*  /EPG/ch/day  */
+			{
+				/*
+				 * <dc:title>channel # callsign : date</dc:title>
+				 * <upnp:channelID>19654</upnp:channelID>
+				 * <upnp:dateTimeRange>2015-11-12T00:00:00Z/2015-11-13T00:00:00Z</upnp:dateTimeRange>
+				 */
+				cdsObj->ChannelID = malloc(128);
+				sprintf(cdsObj->ChannelID, "%s", parentTitle);
+
+				cdsObj->CallSign = malloc(64);
+				channel_name(parentTitle, cdsObj->CallSign);
+
+				cdsObj->ChannelNr = malloc(16);
+				channel_number(parentTitle, cdsObj->ChannelNr);
+
+				cdsObj->DeallocateThese |= CDS_ALLOC_Title;
+				cdsObj->Title = (char*)malloc(strlen(cdsObj->ChannelNr) +
+				                              strlen(cdsObj->CallSign) +
+											  strlen(title) + 12);
+				sprintf(cdsObj->Title, "%s - %s : %s", cdsObj->ChannelNr, cdsObj->CallSign, title);
+
+				struct tm tm = { 0 };
+				strptime(title, "%m-%d-%Y", &tm);
+				tm.tm_hour = 0;
+				tm.tm_min = 0;
+				tm.tm_sec = 0;
+				time_t t_time = mktime(&tm);
+				cdsObj->DateTimeRange.start = t_time;
+				cdsObj->DateTimeRange.duration = (24 * 60 * 60);
+			}
+			cdsObj->MediaClass = CDS_MEDIACLASS_EPGCONTAINER;
+		}
+		else
+		{
+			/*
+			 * id="EPG/Airings/15242959"
+			 *
+			 * <dc:title></dc:title>
+			 * <upnp:channelID>19654</upnp:channelID>
+			 * <upnp:scheduledStartTime usage="SCHEDULED_PROGRAM">2015-11-12T00:00:00Z</upnp:scheduledStartTime>
+			 * <upnp:scheduledEndTime>2015-11-12T00:30:00Z</upnp:scheduledEndTime>
+			 * <upnp:scheduledDurationTime>P0:30:00</upnp:scheduledDurationTime>
+			 * <upnp:longDescription></upnp:longDescription>
+			 * <upnp:programID type="xxx.COM"></upnp:programID>
+			 * <upnp:actor></upnp:actor>
+			 * <upnp:episodeNumber></upnp:episodeNumber>
+			 * <upnp:episodeSeason></upnp:episodeSeason>
+			 * <upnp:episodeType>FIRST-RUN</upnp:episodeType>
+			 * <upnp:seriesID></upnp:seriesID>
+			 * <dc:date>2015-11-11T18:00:00Z</dc:date>
+			 * <upnp:genre extended="Talk,Interview">Talk</upnp:genre>
+			 * <dc:language>English</dc:language>
+			 * <upnp:rating type="TVGUIDELINES.ORG">TVG</upnp:rating>
+			 */
+			cdsObj->MediaClass = CDS_MEDIACLASS_EPG_VIDEO;
+			cdsObj->ChannelID = malloc(128);
+			sprintf(cdsObj->ChannelID, "%s", parentTitle2);
+
+			char* old_title = cdsObj->Title;
+			cdsObj->Title = NULL;
+
+			/* description missing */
+			if (get_epg_data_simple(parentTitle2, &title, &cdsObj->Title, &cdsObj->LongDescription, &cdsObj->ScheduledStartTime, &cdsObj->ScheduledDurationTime, &cdsObj->ScheduledEndTime) != 0)
+			{
+				cdsObj->Title = old_title;
+			}
+
+			cdsObj->uri_target = (char*)malloc(255);
+			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream/video.mpg", 62080, cdsObj->ChannelID);
+		}
+	}
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
+}
+
 void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, filesize != NULL ? *filesize : 0);
+//	printf("%s(%s, filename (out), %d, %" PRIu64 ")\n", __func__, directory, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	HANDLE* hSearch;
@@ -280,16 +480,84 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
 	struct stat64 _si;
 	char fullPath[1024];
-#if NDi_LiveTV	
-	struct dvb_channel* tmpC = firstchannel();
-	if (tmpC != NULL) {
-		printf("%s/%s.mpg\n",directory,tmpC->channelID);
-		sprintf(filename, "%s.mpg", tmpC->channelID);
-		if (filename != NULL && filesize != NULL) {
-			*filesize = LIVETV_FILESIZE;
-		}
+	char *title      = NULL;
+	char *parentDir  = NULL;
+	char *parentTitle = NULL;
+	char *parentDir2 = NULL;
+	void* retval = NULL;
+
+#if NDi_LiveTV
+	if (strcmp(directory, "./") == 0)
+	{
+		/* TODO: do better */
+		rootIter = 0;
+		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
+		if (filesize != NULL) *filesize = 0;
+//		printf("%s(%s, filename (%s), %d, %" PRIu64 ")\n", __func__, directory, filename == NULL ? "" : filename, filenamelength, filesize != NULL ? *filesize : 0);
+		return &rootIter;
 	}
-	return (void*)tmpC;
+	else if (strncmp(directory, "./Channels", 10) == 0)
+	{
+		struct dvb_channel* tmpC = firstchannel();
+		if (tmpC != NULL) {
+			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+		}
+		return (void*)tmpC;
+	}
+	else if (strncmp(directory, "./EPG", 5) == 0)
+	{
+		title      = GetFileName(directory, "/", 1);
+		parentDir  = GetParentPath(directory, "/", 1);
+		parentTitle = GetFileName(parentDir, "/", 1);
+		parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+
+		if (strcmp(directory, "./EPG/") == 0 || strcmp(directory, "./EPG/") == 0)
+		{
+			char channelName[64] = { 0 };
+			struct dvb_channel* tmpC = firstchannel();
+			if (tmpC != NULL) {
+				printf("%s/%s\n",directory,tmpC->channelID);
+				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+			}
+			retval = (void*)tmpC;
+		}
+		else if (parentDir != NULL && strcmp(parentDir,"./EPG/") == 0 && ischannel(title))
+		{
+			char day_string[64] = { 0 };
+			void *x = firstEpgDay(title, day_string);
+
+			if (filename != NULL) sprintf(filename, "%s", day_string);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = 0;
+			}
+			retval = (void*)x;
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+			char event_string[64] = { 0 };
+			void* x = firstEpgEvent(parentTitle, title, event_string);
+
+			if (filename != NULL) sprintf(filename, "%s", event_string);
+			if (filename != NULL && filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+			retval = (void*)x;
+		}
+		if (title != NULL) free(title);
+		if (parentDir != NULL) free(parentDir);
+		if (parentTitle != NULL) free(parentTitle);
+		if (parentDir2 != NULL) free(parentDir2);
+		return retval;
+	}
+	else
+		return NULL;
 #endif	
 	dirObj = opendir(directory);
 
@@ -332,7 +600,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 // 1 = Next File
 int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int filenamelength, uint64_t* filesize)
 {
-	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, filesize != NULL ? *filesize : 0);
+//	printf("%s(void*, %s, filename (out), %d, %" PRIu64 ")\n", __func__, dirName, filenamelength, filesize != NULL ? *filesize : 0);
 #ifdef WIN32
 	WIN32_FIND_DATA FileData;
 	
@@ -370,16 +638,92 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 	struct dirent* dirEntry;	/* dirEntry is a pointer to static memory in the C runtime lib for readdir()*/
 	struct stat64 _si;
 	char fullPath[1024];
+	int retval = 0;
+	char *title      = NULL;
+	char *parentDir  = NULL;
+	char *parentTitle = NULL;
+	char *parentDir2 = NULL;
+	char *parentTitle2 = NULL;
+
 #if NDi_LiveTV
-	struct dvb_channel* tmpC = nextchannel();
-	if (tmpC != NULL) {
-		sprintf(filename, "%s.mpg", tmpC->channelID);
-		if (filesize != NULL) {
-			*filesize = LIVETV_FILESIZE;
-		}
-		return 1;
+	if (strcmp(dirName, "./") == 0)
+	{
+		if (rootIter == 3) return 0;
+		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
+		if (filesize != NULL) *filesize = 0;
+		retval = 1;
 	}
-	return 0;
+	else if (strncmp(dirName, "./Channels/", 11) == 0)
+	{
+		struct dvb_channel* tmpC = nextchannel();
+		if (tmpC != NULL) {
+			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
+
+			if (filesize != NULL) {
+				*filesize = LIVETV_FILESIZE;
+			}
+			retval = 1;
+		}
+	}
+	else if (strncmp(dirName, "./EPG/", 6) == 0)
+	{
+		title       = GetFileName(dirName, "/", 1);
+		parentDir   = GetParentPath(dirName, "/", 1);
+		parentTitle = GetFileName(parentDir, "/", 1);
+		parentDir2  = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+		parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
+
+		if (strcmp(dirName, "./EPG/") == 0)
+		{
+			struct dvb_channel* tmpC = nextchannel();
+			if (tmpC != NULL) {
+				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
+
+				if (filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+				retval = 1;
+			}
+		}
+		else if (parentDir != NULL && strcmp(parentDir,"./EPG/") == 0 && ischannel(title))
+		{
+			char day_string[128] = { 0 };
+			if (nextEpgDay(handle, title, day_string) != NULL)
+			{
+				if (filename != NULL) sprintf(filename, "%s", day_string);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = 0;
+				}
+				retval = 1;
+			}
+			else
+				retval = 0;
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2,"./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+			char event_string[128] = { 0 };
+			if (nextEpgEvent(handle, parentTitle, title, event_string) != NULL)
+			{
+				if (filename != NULL) sprintf(filename, "%s", event_string);
+				if (filename != NULL && filesize != NULL) {
+					*filesize = LIVETV_FILESIZE;
+				}
+				retval = 1;
+			}
+			else
+				retval = 0;
+		}
+
+	}
+
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
+
+	return retval;
 #endif
 	dirObj = (DIR*) handle;
 	dirEntry = readdir(dirObj);
@@ -412,10 +756,13 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 #endif
 }
 
+/* returns
+ * 0 - does not exist
+ * 1 - 'file'
+ * 2 - directory
+ */
 int PCGetFileDirType(char* directory)
 {
-	printf("%s(%s)\n", __func__, directory);
-
 #ifdef WIN32
 	DWORD _si;
 	int dirLen,dirSize;
@@ -494,18 +841,75 @@ int PCGetFileDirType(char* directory)
 #endif
 
 #ifdef _POSIX
+	int retval = 0;
+//	printf("%s(%s)\n", __func__, directory);
 #if NDi_LiveTV
 	if (strcmp(directory, "./") == 0)
 		return 2;
-	char chanName[128];
-	strcpy(chanName,directory);
-	chanName[IndexOf(directory, ".mpg")] = '\0';
-	if (ischannel(chanName+2)) {
-		printf("its a file\n");
-		return 1;
+
+	char *title      = GetFileName(directory, "/", 1);
+	char *parentDir  = GetParentPath(directory, "/", 1);
+	char *parentTitle = GetFileName(parentDir, "/", 1);
+	char *parentDir2 = (parentDir != NULL) ? GetParentPath(parentDir, "/", 1) : NULL;
+	char *parentTitle2 = (parentDir2 != NULL) ? GetFileName(parentDir2, "/", 1) : NULL;
+/*
+	printf("%s() title = %s\n", __func__, title = NULL ? "" : title);
+	printf("%s() parentDir = %s\n", __func__, parentDir == NULL ? "" : parentDir);
+	printf("%s() parentTitle = %s\n", __func__, parentTitle == NULL ? "" : parentTitle);
+	printf("%s() parentDir2 = %s\n", __func__, parentDir2 == NULL ? "" : parentDir2);
+	printf("%s() parentTitle2 = %s\n", __func__, parentTitle2 == NULL ? "" : parentTitle2);
+*/
+	if (strncmp(directory, "./Channels", 10) == 0)
+	{
+		if ( (strcmp(directory, "./Channels") == 0) ||
+		    (strcmp(directory, "./Channels/") == 0) )
+		{
+			retval = 2;
+		}
+		if (ischannel(title)) {
+//			printf("its a channel\n");
+			retval = 1;
+		}
 	}
-	else
-		return 0;
+	else if (strncmp(directory, "./EPG", 5) == 0)
+	{
+		if ( (strcmp(directory, "./EPG") == 0) ||
+		    (strcmp(directory, "./EPG/") == 0) )
+		{
+			retval = 2;
+		}
+		else if (strcmp(parentDir, "./EPG/") == 0)
+		{
+			if (ischannel(title)) {
+//				printf("Channel Aggregation EPG\n");
+				retval = 2;
+			}
+		}
+		else if (parentTitle2 != NULL && ischannel(parentTitle2) &&
+		         parentTitle != NULL && isDate(parentTitle))
+		{
+			if (1) // TODO: isListing(title)
+			{
+//				printf("Individual EPG listing\n");
+				retval = 1;
+			}
+		}
+		else if (parentDir2 != NULL && strcmp(parentDir2, "./EPG/") == 0 &&
+		         ischannel(parentTitle) && isDate(title))
+		{
+//			printf("Channel Day of the Week EPG Listing\n");
+			retval = 2;
+		}
+	}
+
+	if (title != NULL) free(title);
+	if (parentDir != NULL) free(parentDir);
+	if (parentTitle != NULL) free(parentTitle);
+	if (parentDir2 != NULL) free(parentDir2);
+	if (parentTitle2 != NULL) free(parentTitle2);
+
+	return retval;
+
 #endif
 	struct stat64 _si;
 
@@ -610,7 +1014,7 @@ void* SpawnNormalThread(void* method, void* arg)
 
 uint64_t PCGetFileSize(const char* fullPath)
 {
-	printf("%s\n", __func__);
+//	printf("%s\n", __func__);
 	uint64_t filesize = -1;
 
 #ifdef _POSIX
@@ -717,7 +1121,7 @@ uint64_t PCGetFileSize(const char* fullPath)
 
 int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 {
-	printf("%s\n", __func__);
+//	printf("%s( %s )\n", __func__, fullPath);
 	char fn[MAX_PATH_LENGTH];
 	void *dirObj;
 	int retVal = 0;
@@ -749,7 +1153,7 @@ int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 		PCCloseDir(dirObj);
 	}
 
-	printf("entries: %d\n", retVal);
+//	printf("%s( %s ) entries : %d\n", __func__, fullPath, retVal);
 	if (rFullPath != fullPath) {
 		free(rFullPath);
 	}
@@ -762,7 +1166,7 @@ int PCGetGetDirEntryCount(const char* fullPath, char *dirDelimiter)
 */
 int ProceedWithDirEntry(const char* dirName, const char* filename, int maxPathLength)
 {
-	printf("%s(%s, %s, %d)\n", __func__, dirName, filename, maxPathLength);
+//	printf("%s(%s, %s, %d)\n", __func__, dirName, filename, maxPathLength);
 	int dirLen;
 	int fnLen;
 	int val;
@@ -841,18 +1245,16 @@ int ProceedWithDirEntry(const char* dirName, const char* filename, int maxPathLe
 		return 1;
 }
 
+static unsigned int SystemUpdateID = 0;
+
+void PCIncrementSystemUpdateID()
+{
+	SystemUpdateID++;
+}
+
 unsigned int PCGetSystemUpdateID()
 {
-	/*
-	 *	TODO: Return a number indicating the state of the metadata store.
-	 *	Whenever the metadata in the CDS changes, this value should
-	 *	increase monotomically.
-	 *
-	 *	For file systems, the most reliable method to obtain this value would likely
-	 *	be the most recent file system date.
-	 */
-
-	return 0;
+	return SystemUpdateID;
 }
 
 unsigned int PCGetContainerUpdateID(const char* path)

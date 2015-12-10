@@ -48,6 +48,7 @@
  *
  *****************************************************************************/
 
+#define ILIBCRITICALEXIT(i) do { printf("%s() Line %d BAD!\n", __func__, 3651); exit(254); } while(0);
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -67,6 +68,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <semaphore.h>
+#include <time.h>
 
 #include "ILibParsers.h"
 #include "UpnpMicroStack.h"
@@ -76,8 +78,9 @@
 #include "PortingFunctions.h"
 #include "version.h"
 
-#define UPNP_HTTP_MAXSOCKETS 5
+#define UPNP_HTTP_MAXSOCKETS 64
 
+#define MAX_UPNP_SUBSCRIBERS 100
 
 #define UPNP_PORT 1900
 #define UPNP_GROUP "239.255.255.250"
@@ -104,6 +107,13 @@ struct SubscriberInfo
 	struct SubscriberInfo *Next;
 	struct SubscriberInfo *Previous;
 };
+
+struct SubscriberContainer
+{
+	struct SubscriberInfo* subscriber;
+	int Disposing;
+};
+
 struct UpnpDataObject
 {
 	void (*PreSelect)(void* object,fd_set *readset, fd_set *writeset, fd_set *errorset, int* blocktime);
@@ -167,17 +177,48 @@ struct MSEARCH_state
 };
 
 #define UPNP_XML_LOCATION "./%s"
-#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
+#define XML_GET_TEMPLATE "HTTP/1.1 200 OK\r\nEXT:\r\nContent-Type: text/xml; charset=\"utf-8\"\r\nCache-Control: no-cache\r\nPragma: no-cache\r\n%sServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nConnection: close\r\nAccept-Ranges: bytes\r\nDate: %s\r\nContent-Length: %d\r\n\r\n%s"
 
-void SendXML(struct ILibWebServer_Session *session, char* location)
+//#define XML_GET_TEMPLATE "HTTP/1.1 200  OK\r\nCONTENT-TYPE:  text/xml; charset=\"utf-8\"\r\nServer: POSIX, UPnP/1.0, NDi TV-Now/"TV_NOW_VERSION"\r\nContent-Length: %d\r\n\r\n%s\r\n\r\n"
+
+void getRFC1123(char* result)
+{
+	char daysofweek[7][4] = { "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat" };
+	char months[12][4] = { "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec" };
+
+	if (result == NULL) return;
+
+	time_t t = time(NULL);
+	struct tm lt = *gmtime(&t);
+
+	sprintf(result, "%s, %02d %s %d %02d:%02d:%02d GMT",
+			daysofweek[lt.tm_wday],
+			lt.tm_mday, months[lt.tm_mon], lt.tm_year + 1900,
+			lt.tm_hour, lt.tm_min, lt.tm_sec);
+	return;
+}
+
+void SendXML(struct ILibWebServer_Session *session, struct packetheader* header, char* location)
 {
 	char file_location[128];
 	char *file_contents, *buffer;
+	char dateString[64] = { 0 };
+
 	sprintf(file_location, UPNP_XML_LOCATION, location);
 	int len = file_get_contents(file_location, &file_contents);
 	if (len >= 0) {
-		buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3);
-		len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3, XML_GET_TEMPLATE, len, file_contents);
+		getRFC1123(&dateString[0]);
+		char* langHeader = ILibGetHeaderLine(header, "ACCEPT-LANGUAGE", 15);
+		if (langHeader == NULL)
+		{
+			buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3 + 64);
+			len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3 + 64, XML_GET_TEMPLATE, "", dateString, len, file_contents);
+		}
+		else
+		{
+			buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + len + 3 + 23 + 64);
+			len = snprintf(buffer, strlen(XML_GET_TEMPLATE) + len + 3 + 23 + 64, XML_GET_TEMPLATE, "Content-Language: en\r\n", dateString, len, file_contents);
+		}
 		ILibWebServer_Send_Raw(session, buffer, len, 0, 1);
 		free(file_contents);
 	}
@@ -511,7 +552,15 @@ void UpnpDispatch_ConnectionManager_GetCurrentConnectionInfo(struct parser_resul
 	char *p_ConnectionID = NULL;
 	int p_ConnectionIDLength = 0;
 	int _ConnectionID = 0;
+
 	field = xml->FirstResult;
+
+	if (field->data == NULL || field->datalength == 0)
+	{
+		UpnpResponse_Error(ReaderObject, 501, "Invalid XML");
+		return;
+	}
+
 	while(field!=NULL)
 	{
 		if((memcmp(field->data,"?",1)!=0) && (memcmp(field->data,"/",1)!=0))
@@ -623,7 +672,15 @@ void UpnpDispatch_ContentDirectory_Browse(struct parser_result *xml, struct ILib
 	int p_SortCriteriaLength = 0;
 	char* _SortCriteria = "";
 	int _SortCriteriaLength;
+
 	field = xml->FirstResult;
+/*
+	if (field->data == NULL || field->datalength == 0)
+	{
+		UpnpResponse_Error(ReaderObject, 501, "Invalid XML");
+		return;
+	}
+*/
 	while(field!=NULL)
 	{
 		if((memcmp(field->data,"?",1)!=0) && (memcmp(field->data,"/",1)!=0))
@@ -878,6 +935,13 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 {
 	struct SubscriberInfo *info = *Head;
 	struct SubscriberInfo **ptr = Head;
+
+	if (*TotalSubscribers <=0 || *TotalSubscribers > MAX_UPNP_SUBSCRIBERS || SIDLength <= 0 || SIDLength > 64)
+	{
+		dprintf(1, "BAD DATA--ignoring\n");
+		return info;
+	}
+
 	while(info!=NULL)
 	{
 		if(info->SIDLength==SIDLength && memcmp(info->SID,SID,SIDLength)==0)
@@ -895,6 +959,7 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 					}
 				}
 			}
+		        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
 			break;
 		}
 		ptr = &(info->Next);
@@ -909,11 +974,18 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 	return(info);
 }
 
-#define UpnpDestructSubscriberInfo(info)\
-{\
-	FREE(info->Path);\
-	FREE(info->SID);\
-	FREE(info);\
+static inline void UpnpDestructSubscriberInfo(struct SubscriberInfo* info)
+{
+        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
+        /* TODO: this is memory leak
+         * Address this issue to fix random segfault due to premature destruction
+         */
+//        return;
+        if (info->Path) free(info->Path);
+        if (info->SID) free(info->SID);
+        memset(info, 0, sizeof(struct SubscriberInfo));
+        info->RefCount = -1;
+        free(info);
 }
 
 #define UpnpDestructEventObject(EvObject)\
@@ -928,6 +1000,8 @@ struct SubscriberInfo* UpnpRemoveSubscriberInfo(struct SubscriberInfo **Head, in
 }
 void UpnpExpireSubscriberInfo(struct UpnpDataObject *d, struct SubscriberInfo *info)
 {
+        dprintf(1, "%s( %p:%d ) Line %d\n", __func__, info, info->RefCount, __LINE__);
+
 	struct SubscriberInfo *t = info;
 	while(t->Previous!=NULL)
 	{
@@ -979,6 +1053,7 @@ void UpnpExpireSubscriberInfo(struct UpnpDataObject *d, struct SubscriberInfo *i
 	if(info->RefCount==0)
 	{
 		UpnpDestructSubscriberInfo(info);
+		info = NULL;
 	}
 }
 
@@ -1008,8 +1083,8 @@ void UpnpProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Se
 {
 	char* SID = NULL;
 	int SIDLength = 0;
-	struct SubscriberInfo *Info;
-	struct packetheader_field_node *f;
+	struct SubscriberInfo *Info = NULL;
+	struct packetheader_field_node *f = NULL;
 	char* packet = (char*)MALLOC(sizeof(char)*50);
 	int packetlength;
 
@@ -1026,45 +1101,47 @@ void UpnpProcessUNSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Se
 		}
 		f = f->NextField;
 	}
+
+	if (SID == NULL)
+	{
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 412, "Invalid SID");
+		ILibWebServer_Send_Raw(session, packet, packetlength, 1, 1);
+		return;
+	}
+
 	sem_wait(&(((struct UpnpDataObject*)session->User)->EventLock));
 	if(header->DirectiveObjLength==24 && memcmp(header->DirectiveObj + 1,"ConnectionManager/event",23)==0)
 	{
-		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				UpnpDestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
+		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ConnectionManager),
+				&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager),SID,SIDLength);
+		if(Info!=NULL && Info->RefCount == 1)
+			dprintf(1, "%s( %p  %d  %s  :  %s )\n", __func__, Info, (((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory), header->DirectiveObj, SID);
 	}
 	else if(header->DirectiveObjLength==23 && memcmp(header->DirectiveObj + 1,"ContentDirectory/event",22)==0)
 	{
-		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
-		if(Info!=NULL)
-		{
-			--Info->RefCount;
-			if(Info->RefCount==0)
-			{
-				UpnpDestructSubscriberInfo(Info);
-			}
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",200,"OK");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
-		else
-		{
-			packetlength = sprintf(packet,"HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n",412,"Invalid SID");
-			ILibWebServer_Send_Raw(session,packet,packetlength,0,1);
-		}
+		Info = UpnpRemoveSubscriberInfo(&(((struct UpnpDataObject*)session->User)->HeadSubscriberPtr_ContentDirectory),
+				&(((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ContentDirectory),SID,SIDLength);
+		if(Info != NULL && Info->RefCount == 1)
+				dprintf(1, "%s( %p  %d  %s  :  %s )\n", __func__, Info, (((struct UpnpDataObject*)session->User)->NumberOfSubscribers_ConnectionManager), header->DirectiveObj, SID);
 	}
+
+	if (Info != NULL)
+	{
+		--Info->RefCount;
+		if (Info->RefCount == 0)
+		{
+			UpnpDestructSubscriberInfo(Info);
+			Info = NULL;
+		}
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 200, "OK");
+	}
+	else
+	{
+		packetlength = snprintf(packet, 50, "HTTP/1.1 %d %s\r\nContent-Length: 0\r\n\r\n", 412, "Invalid SID");
+	}
+
+	ILibWebServer_Send_Raw(session, packet, packetlength, 0, 1);
+
 	sem_post(&(((struct UpnpDataObject*)session->User)->EventLock));
 }
 void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLength,struct ILibWebServer_Session *session)
@@ -1121,31 +1198,74 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 	if(*TotalSubscribers<10)
 	{
 		NewSubscriber = (struct SubscriberInfo*)MALLOC(sizeof(struct SubscriberInfo));
+		NewSubscriber->SID = NULL;
+		NewSubscriber->Path = NULL;
 		SIDNumber = ++dataObject->SID;
 		SID = (char*)MALLOC(10 + 6);
 		sprintf(SID,"uuid:%d",SIDNumber);
-		p = ILibParseString(URL,0,URLLength,"://",3);
-		if(p->NumResults==1)
+
+		struct parser_result *p0;
+		p0 = ILibParseString(URL, 0, URLLength, "http://", 7);
+		if (p0->NumResults == 1)
 		{
-			ILibWebServer_Send_Raw(session,"HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n",55,1,1);
-			ILibDestructParserResults(p);
+			ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+			ILibDestructParserResults(p0);
 			return;
 		}
-		TempString = p->LastResult->data;
-		TempStringLength = p->LastResult->datalength;
-		ILibDestructParserResults(p);
-		p = ILibParseString(TempString,0,TempStringLength,"/",1);
-		p2 = ILibParseString(p->FirstResult->data,0,p->FirstResult->datalength,":",1);
-		TempString2 = (char*)MALLOC(1+sizeof(char)*p2->FirstResult->datalength);
-		memcpy(TempString2,p2->FirstResult->data,p2->FirstResult->datalength);
-		TempString2[p2->FirstResult->datalength] = '\0';
-		NewSubscriber->Address = inet_addr(TempString2);
-		if(p2->NumResults==1)
+		/* spin through and find one where the ip address passes */
+
+		/* a = split on http://
+		 * ignore first result (opening <)
+		 * b = split a.i on >
+		 * this should be entire URL
+		 * c = split b.j on / for IP:port/path
+		 * d = split c.k on : for IP:port
+		 * if d.0 is invalid IP go to next result in a
+		 */
+		struct parser_result *close_split;
+		struct parser_result_field *searcher = p0->FirstResult->NextResult;
+		char *ip_tmp = NULL;
+		do
+		{
+			close_split = ILibParseString(searcher->data, 0, searcher->datalength, ">", 1);
+			if (close_split->NumResults == 0)
+			{	/* shouldn't be possible to get in here */
+				ILibDestructParserResults(close_split);
+				ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+				return;
+			}
+			/* in between http:// and first slash--aka ip:port */
+			p = ILibParseString(close_split->FirstResult->data, 0, close_split->FirstResult->datalength,"/", 1);
+			/* splitting up for IP and port in string */
+			p2 = ILibParseString(p->FirstResult->data, 0, p->FirstResult->datalength, ":", 1);
+			ip_tmp = malloc(p2->FirstResult->datalength + 2);
+			snprintf(ip_tmp, p2->FirstResult->datalength + 1, "%s", p2->FirstResult->data);
+			NewSubscriber->Address = inet_addr(ip_tmp);
+			if (NewSubscriber->Address != INADDR_NONE)
+			{
+				break;
+			}
+			ILibDestructParserResults(p);
+			ILibDestructParserResults(p2);
+			searcher = searcher->NextResult;
+		} while (searcher != NULL);
+		ILibDestructParserResults(p0);
+
+		if (NewSubscriber->Address == INADDR_NONE)
+		{
+			ILibDestructParserResults(close_split);
+			ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+			return;
+		}
+		if (p2->NumResults == 1)
 		{
 			NewSubscriber->Port = 80;
-			path = (char*)MALLOC(1+TempStringLength - p2->FirstResult->datalength -1);
-			memcpy(path,TempString + p2->FirstResult->datalength,TempStringLength - p2->FirstResult->datalength -1);
-			path[TempStringLength - p2->FirstResult->datalength - 1] = '\0';
+			if ((path = (char*)malloc(1+close_split->FirstResult->datalength )) == NULL) ILIBCRITICALEXIT(254);
+			memcpy(path,
+					close_split->FirstResult->data + p2->FirstResult->datalength,
+					close_split->FirstResult->datalength - p2->FirstResult->datalength - 1);
+
+			path[close_split->FirstResult->datalength - p2->FirstResult->datalength] = '\0';
 			NewSubscriber->Path = path;
 			NewSubscriber->PathLength = (int)strlen(path);
 		}
@@ -1153,24 +1273,28 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		{
 			ILibGetLong(p2->LastResult->data,p2->LastResult->datalength,&TempLong);
 			NewSubscriber->Port = (unsigned short)TempLong;
-			if(TempStringLength==p->FirstResult->datalength)
+			if (close_split->FirstResult->datalength == p->FirstResult->datalength)
 			{
-				path = (char*)MALLOC(2);
-				memcpy(path,"/",1);
+				if ((path = (char*)malloc(2)) == NULL) ILIBCRITICALEXIT(254);
+				memcpy(path, "/", 1);
 				path[1] = '\0';
 			}
 			else
 			{
-				path = (char*)MALLOC(1+TempStringLength - p->FirstResult->datalength -1);
-				memcpy(path,TempString + p->FirstResult->datalength,TempStringLength - p->FirstResult->datalength -1);
-				path[TempStringLength - p->FirstResult->datalength -1] = '\0';
+				if ((path = (char*)malloc(1 + close_split->FirstResult->datalength )) == NULL) ILIBCRITICALEXIT(254);
+				memcpy(path,
+						close_split->FirstResult->data + p->FirstResult->datalength,
+						close_split->FirstResult->datalength - p->FirstResult->datalength );
+				path[close_split->FirstResult->datalength - p->FirstResult->datalength] = '\0';
 			}
 			NewSubscriber->Path = path;
 			NewSubscriber->PathLength = (int)strlen(path);
 		}
-		ILibDestructParserResults(p);
-		ILibDestructParserResults(p2);
-		FREE(TempString2);
+
+		/* TODO: these should be freeable */
+//		ILibDestructParserResults(p);
+//		ILibDestructParserResults(p2);
+
 		NewSubscriber->RefCount = 1;
 		NewSubscriber->Disposing = 0;
 		NewSubscriber->Previous = NULL;
@@ -1187,6 +1311,7 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 		                 NewSubscriber->SID,(NewSubscriber->Address)&0xFF,(NewSubscriber->Address>>8)&0xFF,
 		                 (NewSubscriber->Address>>16)&0xFF,(NewSubscriber->Address>>24)&0xFF,NewSubscriber->Port,Timeout);)
 		LVL3DEBUG(printf("TIMESTAMP: %d <%d>\r\n\r\n",(NewSubscriber->RenewByTime).tv_sec-Timeout,NewSubscriber);)
+
 		packet = (char*)MALLOC(132 + (int)strlen(SID) + 4);
 		packetlength = sprintf(packet,"HTTP/1.1 200 OK\r\nSERVER: POSIX, UPnP/1.0, NDi TV-Now/%s\r\nSID: %s\r\nTIMEOUT: Second-%ld\r\nContent-Length: 0\r\n\r\n",
 		                       TV_NOW_VERSION, SID, Timeout);
@@ -1334,6 +1459,8 @@ void UpnpProcessSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Sess
 		}
 		ILibDestructParserResults(p);
 	}
+	struct UpnpDataObject *dataObject = (struct UpnpDataObject*)session->User;
+	sem_wait(&(dataObject->EventLock));
 	if(SID==NULL)
 	{
 		/* Subscribe */
@@ -1344,6 +1471,7 @@ void UpnpProcessSUBSCRIBE(struct packetheader *header, struct ILibWebServer_Sess
 		/* Renew */
 		UpnpRenewEvents(header->DirectiveObj,header->DirectiveObjLength,SID,SIDLength,Timeout,TimeoutLength,session);
 	}
+	sem_post(&(dataObject->EventLock));
 }
 void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packetheader* header, char *bodyBuffer, int offset, int bodyBufferLength)
 
@@ -1355,11 +1483,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
 	int errorPacketLength;
 	char *buffer;
 	/* Virtual Directory Support */
-	if(header->DirectiveObjLength>=4 && memcmp(header->DirectiveObj,"/web",4)==0)
-	{
-		UpnpPresentationRequest((void*)session,header);
-	}
-	else if(header->DirectiveLength==3 && memcmp(header->Directive,"GET",3)==0)
+	if(header->DirectiveLength==3 && memcmp(header->Directive,"GET",3)==0)
 	{
 		if(header->DirectiveObjLength==1 && memcmp(header->DirectiveObj,"/",1)==0)
 		{
@@ -1369,34 +1493,50 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                         static int bufferLen = 0;
                         if (hostAddress == NULL) {
                                 hostAddress = (char*)malloc(40);
-                                deviceDescription = (char*)malloc(dataObject->DeviceDescriptionLength + (40 * 3));
+                                deviceDescription = (char*)malloc(dataObject->DeviceDescriptionLength + (40 * 3) + 2);
                                 if (hostAddress == NULL || deviceDescription == NULL) exit(254);
                         }
-                        char* tmpHostAddress = ILibGetHeaderLine(header, "Host", 4);
+                        char* tmpHostAddress = NULL;
+                        tmpHostAddress = ILibGetHeaderLine(header, "Host", 4);
                         if (tmpHostAddress != NULL) {
-                                char* colonSpot = rindex(tmpHostAddress, ':');
+                                char* colonSpot = NULL;
+                                colonSpot = rindex(tmpHostAddress, ':');
                                 if (colonSpot != NULL) *colonSpot = '\0';
 
                                 if (strcmp(hostAddress,tmpHostAddress) != 0) {
                                         strncpy(hostAddress, tmpHostAddress, 40);
                                         //printf("HOST IP IS : %s\n", hostAddress);
                                 }
-                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength, dataObject->DeviceDescription);
+                                bufferLen = snprintf(deviceDescription, dataObject->DeviceDescriptionLength + 1, "%s", dataObject->DeviceDescription);
+                                free(tmpHostAddress);
                         }
+            			char* langHeader = ILibGetHeaderLine(header, "ACCEPT-LANGUAGE", 15);
+            			char dateString[64] = { 0 };
+            			getRFC1123(&dateString[0]);
+            			if (langHeader == NULL)
+            			{
+            				buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 64);
+            				if (buffer == NULL) exit(1);
 
-                        buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3);
-                        if (buffer == NULL) exit(254);
+            				bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 64, XML_GET_TEMPLATE, "", dateString, bufferLen, deviceDescription);
+            			}
+            			else
+            			{
+            				buffer = (char*)malloc(strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 23 + 64);
+            				if (buffer == NULL) exit(1);
 
-                        bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3, XML_GET_TEMPLATE, bufferLen, deviceDescription);
-                        ILibWebServer_Send_Raw(session, buffer, bufferLen, 0, 1);
+            				bufferLen = snprintf(buffer, strlen(XML_GET_TEMPLATE) + bufferLen + 3 + 23 + 64, XML_GET_TEMPLATE, "Content-Language: en\r\n", dateString, bufferLen, deviceDescription);
+            			}
+
+            			ILibWebServer_Send_Raw(session, buffer, bufferLen, 0, 1);
 		}
 		else if(header->DirectiveObjLength==26 && memcmp((header->DirectiveObj)+1,"ContentDirectory/scpd.xml",25)==0)
 		{
-			SendXML(session, "ContentDirectory.xml");
+			SendXML(session, header, "ContentDirectory.xml");
 		}
 		else if(header->DirectiveObjLength==27 && memcmp((header->DirectiveObj)+1,"ConnectionManager/scpd.xml",26)==0)
 		{
-			SendXML(session, "ConnectionManager.xml");
+			SendXML(session, header, "ConnectionManager.xml");
 		}
 		else
 		{
@@ -1767,24 +1907,34 @@ void *subscriber,
 void *upnp,
 int *PAUSE)
 {
-	if(done!=0 && ((struct SubscriberInfo*)subscriber)->Disposing==0)
+	sem_wait(&(((struct UpnpDataObject*)upnp)->EventLock));
+	struct SubscriberContainer* sub_con = (struct SubscriberContainer*)subscriber;
+	struct SubscriberInfo* sub = sub_con->subscriber;
+
+	if(done!=0 && sub_con->Disposing==0)
 	{
-		sem_wait(&(((struct UpnpDataObject*)upnp)->EventLock));
-		--((struct SubscriberInfo*)subscriber)->RefCount;
-		if(((struct SubscriberInfo*)subscriber)->RefCount==0)
+		--sub->RefCount;
+		sub_con->Disposing = 1;
+		if(sub->RefCount==0)
 		{
-			LVL3DEBUG(printf("\r\n\r\nSubscriber at [%s] %d.%d.%d.%d:%d was/did UNSUBSCRIBE while trying to send event\r\n\r\n",((struct SubscriberInfo*)subscriber)->SID,(((struct SubscriberInfo*)subscriber)->Address&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>8)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>16)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>24)&0xFF),((struct SubscriberInfo*)subscriber)->Port);)
-			UpnpDestructSubscriberInfo(((struct SubscriberInfo*)subscriber));
+			LVL3DEBUG(printf("\r\n\r\nSubscriber at [%s] %d.%d.%d.%d:%d was/did UNSUBSCRIBE while trying to send event\r\n\r\n", sub->SID,
+					(sub->Address&0xFF),((sub->Address>>8)&0xFF),
+					((sub->Address>>16)&0xFF),((sub->Address>>24)&0xFF),
+					sub->Port);)
+			sub_con->Disposing = 1;
+			UpnpDestructSubscriberInfo(sub);
 		}
 		else if(header==NULL)
 		{
-			LVL3DEBUG(printf("\r\n\r\nCould not deliver event for [%s] %d.%d.%d.%d:%d UNSUBSCRIBING\r\n\r\n",((struct SubscriberInfo*)subscriber)->SID,(((struct SubscriberInfo*)subscriber)->Address&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>8)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>16)&0xFF),((((struct SubscriberInfo*)subscriber)->Address>>24)&0xFF),((struct SubscriberInfo*)subscriber)->Port);)
+			LVL3DEBUG(printf("\r\n\r\nCould not deliver event for [%s] %d.%d.%d.%d:%d UNSUBSCRIBING\r\n\r\n", sub->SID,
+					(sub->Address&0xFF),((sub->Address>>8)&0xFF),
+					((sub->Address>>16)&0xFF),((sub->Address>>24)&0xFF),
+					sub->Port);)
 			// Could not send Event, so unsubscribe the subscriber
-			((struct SubscriberInfo*)subscriber)->Disposing = 1;
 			UpnpExpireSubscriberInfo(upnp,subscriber);
 		}
-		sem_post(&(((struct UpnpDataObject*)upnp)->EventLock));
 	}
+	sem_post(&(((struct UpnpDataObject*)upnp)->EventLock));
 }
 void UpnpSendEvent_Body(void *upnptoken,char *body,int bodylength,struct SubscriberInfo *info)
 {
@@ -1805,7 +1955,10 @@ void UpnpSendEvent_Body(void *upnptoken,char *body,int bodylength,struct Subscri
 	++info->SEQ;
 
 	++info->RefCount;
-	ILibWebClient_PipelineRequestEx(UPnPObject->EventClient,&dest,packet,packetLength,0,NULL,0,0,&UpnpSendEventSink,info,upnptoken);
+	struct SubscriberContainer* sub_con = malloc(sizeof(struct SubscriberContainer));
+	sub_con->Disposing = 0;
+	sub_con->subscriber = info;
+	ILibWebClient_PipelineRequestEx(UPnPObject->EventClient,&dest,packet,packetLength,0,NULL,0,0,&UpnpSendEventSink,sub_con,upnptoken, 1);
 }
 void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char* eventname)
 {
@@ -1834,6 +1987,7 @@ void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char
 		if(!UpnpSubscriptionExpired(info))
 		{
 			UpnpSendEvent_Body(upnptoken,body,bodylength,info);
+			info = info->Next;
 		}
 		else
 		{
@@ -1841,9 +1995,11 @@ void UpnpSendEvent(void *upnptoken, char* body, const int bodylength, const char
 			LVL3DEBUG(gettimeofday(&tv,NULL);)
 			LVL3DEBUG(printf("\r\n\r\nTIMESTAMP: %d\r\n",tv.tv_sec);)
 			LVL3DEBUG(printf("Did not renew [%s] %d.%d.%d.%d:%d UNSUBSCRIBING <%d>\r\n\r\n",((struct SubscriberInfo*)info)->SID,(((struct SubscriberInfo*)info)->Address&0xFF),((((struct SubscriberInfo*)info)->Address>>8)&0xFF),((((struct SubscriberInfo*)info)->Address>>16)&0xFF),((((struct SubscriberInfo*)info)->Address>>24)&0xFF),((struct SubscriberInfo*)info)->Port,info);)
-		}
 
-		info = info->Next;
+			struct SubscriberInfo *tmp = info;
+			info = info->Next;
+			UpnpExpireSubscriberInfo(UPnPObject, tmp);
+		}
 	}
 
 	sem_post(&(UPnPObject->EventLock));

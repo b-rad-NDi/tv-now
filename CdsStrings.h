@@ -150,6 +150,10 @@
 #define CDS_DIDL_GENRE1_ESCAPED					"\r\n&lt;upnp:genre&gt;"
 #define CDS_DIDL_GENRE2_ESCAPED					"&lt;/upnp:genre&gt;"
 
+#define CDS_DIDL_GENRE_EXT1_ESCAPED				"\r\n&lt;upnp:genre extended=\"%s\"&gt;"
+#define CDS_DIDL_GENRE_EXT2_ESCAPED				"&lt;/upnp:genre&gt;"
+#define CDS_DIDL_GENRE_EXT2_ESCAPED_LEN			55
+
 #define CDS_DIDL_CLASS_ESCAPED					"\r\n&lt;upnp:class&gt;%s&lt;/upnp:class&gt;"
 #define CDS_DIDL_CLASS_ESCAPED_LEN				39
 
@@ -231,6 +235,112 @@
 #define CDS_DIDL_RES_VALUE1_ESCAPED				"&gt;"
 #define CDS_DIDL_RES_VALUE2_ESCAPED				"&lt;/res&gt;"
 
+#define CDS_DIDL_CHANNEL_NUM1					"\r\n&lt;upnp:channelNr&gt;"
+#define CDS_DIDL_CHANNEL_NUM2					"&lt;/upnp:channelNr&gt;"
+#define CDS_DIDL_CHANNEL_NUM_LEN				47
+
+
+#define CDS_DIDL_CHANNEL_NAME1					"\r\n&lt;upnp:channelName&gt;"
+#define CDS_DIDL_CHANNEL_NAME2					"&lt;/upnp:channelName&gt;"
+#define CDS_DIDL_CHANNEL_NAME_LEN				51
+
+#define CDS_DIDL_CHANNEL_ID1					"\r\n&lt;upnp:channelID&gt;"
+#define CDS_DIDL_CHANNEL_ID2					"&lt;/upnp:channelID&gt;"
+#define CDS_DIDL_CHANNEL_ID_LEN					48
+
+#define CDS_DIDL_EPG_PROVIDER1					"\r\n&lt;upnp:epgProviderName&gt;"
+#define CDS_DIDL_EPG_PROVIDER2					"&lt;/upnp:epgProviderName&gt;"
+#define CDS_DIDL_EPG_PROVIDER_LEN				59
+
+#define CDS_DIDL_SVC_PROVIDER1					"\r\n&lt;upnp:serviceProvider&gt;"
+#define CDS_DIDL_SVC_PROVIDER2					"&lt;/upnp:serviceProvider&gt;"
+#define CDS_DIDL_SVC_PROVIDER_LEN				59
+
+#define CDS_DIDL_CALL_SIGN1						"\r\n&lt;upnp:callSign&gt;"
+#define CDS_DIDL_CALL_SIGN2						"&lt;/upnp:callSign&gt;"
+#define CDS_DIDL_CALL_SIGN_LEN					45
+
+#define CDS_DIDL_NETWORK_AFFIL1					"\r\n&lt;upnp:networkAffiliation&gt;"
+#define CDS_DIDL_NETWORK_AFFIL2					"&lt;/upnp:networkAffiliation&gt;"
+#define CDS_DIDL_NETWORK_AFFIL_LEN				65
+
+#define CDS_DIDL_RECORDABLE1					"\r\n&lt;upnp:recordable&gt;"
+#define CDS_DIDL_RECORDABLE2					"&lt;/upnp:recordable&gt;"
+#define CDS_DIDL_RECORDABLE_LEN					49
+
+#define CDS_DIDL_DATE_RANGE1					"\r\n&lt;upnp:dateTimeRange&gt;"
+#define CDS_DIDL_DATE_RANGE2					"&lt;/upnp:dateTimeRange&gt;"
+#define CDS_DIDL_DATE_RANGE_LEN					55
+
+#define CDS_DIDL_START_TIME1					"\r\n&lt;upnp:scheduledStartTime&gt;"
+#define CDS_DIDL_START_TIME2					"&lt;/upnp:scheduledStartTime&gt;"
+#define CDS_DIDL_START_TIME_LEN					65
+
+#define CDS_DIDL_START_TIME_USE1				"\r\n&lt;upnp:scheduledStartTime usage=\"%s\"&gt;"
+#define CDS_DIDL_START_TIME_USE2				"&lt;/upnp:scheduledStartTime&gt;"
+#define CDS_DIDL_START_TIME_USE_LEN				76
+
+#define CDS_DIDL_END_TIME1						"\r\n&lt;upnp:scheduledEndTime&gt;"
+#define CDS_DIDL_END_TIME2						"&lt;/upnp:scheduledEndTime&gt;"
+#define CDS_DIDL_END_TIME_LEN					61
+
+#define CDS_DIDL_DURATION1						"\r\n&lt;upnp:scheduledDurationTime&gt;"
+#define CDS_DIDL_DURATION2						"&lt;/upnp:scheduledDurationTime&gt;"
+#define CDS_DIDL_DURATION_LEN					71
+
+#define CDS_DIDL_PROGRAM_ID1					"\r\n&lt;upnp:programID&gt;"
+#define CDS_DIDL_PROGRAM_ID2					"&lt;/upnp:programID&gt;"
+#define CDS_DIDL_PROGRAM_ID_LEN					47
+
+#define CDS_DIDL_PROGRAM_ID_TYPE1				"\r\n&lt;upnp:programID type=\"%s\"&gt;"
+#define CDS_DIDL_PROGRAM_ID_TYPE2				"&lt;/upnp:programID&gt;"
+#define CDS_DIDL_PROGRAM_ID_TYPE_LEN			57
+
+#define CDS_DIDL_SERIES_ID1						"\r\n&lt;upnp:seriesID&gt;"
+#define CDS_DIDL_SERIES_ID2						"&lt;/upnp:seriesID&gt;"
+#define CDS_DIDL_SERIES_ID_LEN					55
+
+#define CDS_DIDL_EPISODE_NR1					"\r\n&lt;upnp:episodeNumber&gt;"
+#define CDS_DIDL_EPISODE_NR2					"&lt;/upnp:episodeNumber&gt;"
+#define CDS_DIDL_EPISODE_NR_LEN					55
+
+#define CDS_DIDL_EPISODE_SEASON1				"\r\n&lt;upnp:episodeSeason&gt;"
+#define CDS_DIDL_EPISODE_SEASON2				"&lt;/upnp:episodeSeason&gt;"
+#define CDS_DIDL_EPISODE_SEASON_LEN				55
+
+#define CDS_DIDL_EPISODE_TYPE1					"\r\n&lt;upnp:episodeType&gt;"
+#define CDS_DIDL_EPISODE_TYPE2					"&lt;/upnp:episodeType&gt;"
+#define CDS_DIDL_EPISODE_TYPE_LEN				51
+
+#define CDS_DIDL_LONG_DESCR1					"\r\n&lt;upnp:longDescription&gt;"
+#define CDS_DIDL_LONG_DESCR2					"&lt;/upnp:longDescription&gt;"
+#define CDS_DIDL_LONG_DESCR_LEN					59
+
+#define CDS_DIDL_DATE1							"\r\n&lt;dc:date&gt;"
+#define CDS_DIDL_DATE2							"&lt;/dc:date&gt;"
+#define CDS_DIDL_DATE_LEN						33
+
+#define CDS_DIDL_RATING1						"\r\n&lt;upnp:rating&gt;"
+#define CDS_DIDL_RATING2						"&lt;/upnp:rating&gt;"
+#define CDS_DIDL_RATING_LEN						41
+
+#define CDS_DIDL_RATING_TYPE1					"\r\n&lt;upnp:rating type=\"%s\"&gt;"
+#define CDS_DIDL_RATING_TYPE2					"&lt;/upnp:rating&gt;"
+#define CDS_DIDL_RATING_TYPE_LEN				41
+
+#define CDS_DIDL_LANGUAGE1						"\r\n&lt;dc:language&gt;"
+#define CDS_DIDL_LANGUAGE2						"&lt;/dc:language&gt;"
+#define CDS_DIDL_LANGUAGE_LEN					41
+
+#define CDS_DIDL_ACTOR1							"\r\n&lt;upnp:actor&gt;"
+#define CDS_DIDL_ACTOR2							"&lt;/upnp:actor&gt;"
+#define CDS_DIDL_ACTOR_LEN						39
+
+#define CDS_DIDL_RES_THUMBNAIL					"&lt;upnp:albumArtURI dlna:profileID=&quot;JPEG_TN&quot; xmlns:dlna=&quot;urn:schemas-dlna-org:metadata-1-0/&quot;&gt;"
+#define CDS_DIDL_RES_THUMBNAIL2					"&lt;/upnp:albumArtURI&gt;"
+#define CDS_DIDL_RES_THUMBNAIL_LEN				142
+
+/********************************************/
 
 #define CDS_FILTER_CHILDCOUNT					"@childCount"
 #define CDS_FILTER_CHILDCOUNT_LEN				11
@@ -282,5 +392,77 @@
 
 #define CDS_FILTER_SEARCHABLE					"@searchable"
 #define CDS_FILTER_SEARCHABLE_LEN				11
+
+#define CDS_FILTER_CHANNEL_NUMBER				"upnp:channelNr"
+#define CDS_FILTER_CHANNEL_NUMBER_LEN			14
+
+#define CDS_FILTER_CHANNEL_NAME					"upnp:channelName"
+#define CDS_FILTER_CHANNEL_NAME_LEN				16
+
+#define CDS_FILTER_EPG_PROVIDER					"upnp:epgProviderName"
+#define CDS_FILTER_EPG_PROVIDER_LEN				20
+
+#define CDS_FILTER_SVC_PROVIDER					"upnp:serviceProvider"
+#define CDS_FILTER_SVC_PROVIDER_LEN				20
+
+#define CDS_FILTER_CHANNEL_ID					"upnp:channelID"
+#define CDS_FILTER_CHANNEL_ID_LEN				14
+
+#define CDS_FILTER_CALL_SIGN					"upnp:callSign"
+#define CDS_FILTER_CALL_SIGN_LEN				13
+
+#define CDS_FILTER_NETWORK_AFFIL				"upnp:networkAffiliation"
+#define CDS_FILTER_NETWORK_AFFIL_LEN			24
+
+#define CDS_FILTER_RECORDABLE					"upnp:recordable"
+#define CDS_FILTER_RECORDABLE_LEN				15
+
+#define CDS_FILTER_DATE_RANGE					"upnp:dateTimeRange"
+#define CDS_FILTER_DATE_RANGE_LEN				18
+
+#define CDS_FILTER_START_TIME					"upnp:scheduledStartTime"
+#define CDS_FILTER_START_TIME_LEN				23
+
+#define CDS_FILTER_END_TIME						"upnp:scheduledEndTime"
+#define CDS_FILTER_END_TIME_LEN					21
+
+#define CDS_FILTER_DURATION						"upnp:scheduledDurationTime"
+#define CDS_FILTER_DURATION_LEN					27
+
+#define CDS_FILTER_PROGRAM_ID					"upnp:programID"
+#define CDS_FILTER_PROGRAM_ID_LEN				14
+
+#define CDS_FILTER_SERIES_ID					"upnp:seriesID"
+#define CDS_FILTER_SERIES_ID_LEN				13
+
+#define CDS_FILTER_EPISODE_NR					"upnp:episodeNumber"
+#define CDS_FILTER_EPISODE_NR_LEN				18
+
+#define CDS_FILTER_EPISODE_SEASON				"upnp:episodeSeason"
+#define CDS_FILTER_EPISODE_SEASON_LEN			18
+
+#define CDS_FILTER_EPISODE_TYPE					"upnp:episodeType"
+#define CDS_FILTER_EPISODE_TYPE_LEN				16
+
+#define CDS_FILTER_LONG_DESCR					"upnp:longDescription"
+#define CDS_FILTER_LONG_DESCR_LEN				20
+
+#define CDS_FILTER_DATE							"dc:date"
+#define CDS_FILTER_DATE_LEN						7
+
+#define CDS_FILTER_RATING						"upnp:rating"
+#define CDS_FILTER_RATING_LEN					11
+
+#define CDS_FILTER_LANGUAGE						"dc:language"
+#define CDS_FILTER_LANGUAGE_LEN					11
+
+#define CDS_FILTER_ACTOR						"upnp:actor"
+#define CDS_FILTER_ACTOR_LEN					10
+
+#define CDS_FILTER_THUMB						"upnp:albumArtURI"
+#define CDS_FILTER_THUMB_LEN					16
+
+#define CDS_FILTER_THUMB2						"upnp:albumArtURI@dlna:profileID"
+#define CDS_FILTER_THUMB2_LEN					31
 
 #endif

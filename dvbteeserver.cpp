@@ -81,6 +81,7 @@ struct dvbtee_context
 
 extern "C" struct program_info
 {
+	char event_id[128];
 	char title[128];
 	char description[1024];
 	time_t  start;
@@ -90,6 +91,7 @@ extern "C" struct program_info
 extern "C" struct dvb_channel
 {
 	char channelID[32];
+	char channelNr[16];
 	char callSign[64];
 	std::list<struct program_info*> program_list;
 };
@@ -108,7 +110,7 @@ void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channe
 	std::list<dvb_channel*>::iterator it;
 	for(it=channels.begin(); it!=channels.end(); ++it)
 	{
-		if (strcasecmp((*it)->callSign,channel->callSign) > 0)
+		if (strcasecmp((*it)->channelNr,channel->channelNr) > 0)
 		{
 			channels.insert(it,channel);
 			return;
@@ -126,6 +128,11 @@ void insert_sorted_epg(std::list<struct program_info*> &programs, program_info *
 	for(it=programs.begin(); it!=programs.end(); )
 	{
 		if ((*it)->start+(*it)->duration <= cur_t)
+		{
+			it = programs.erase(it);
+			continue;
+		}
+		if ((*it)->start == program->start)
 		{
 			it = programs.erase(it);
 			continue;
@@ -158,6 +165,20 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 #endif
 }
 
+void destroy_lists()
+{
+	std::list<dvb_channel*>::iterator it;
+	std::list<program_info*>::iterator it2;
+
+	for(it=channel_list.begin(); it!=channel_list.end(); )
+	{
+		for(it2=(*it)->program_list.begin(); it2!=(*it)->program_list.end(); )
+		{
+			it2 = (*it)->program_list.erase(it2);
+		}
+		it = channel_list.erase(it);
+	}
+}
 
 void stop_server(struct dvbtee_context* context)
 {
@@ -189,6 +210,8 @@ extern "C" void dvbtee_stop()
 {
 	killServer = 1;
 	sleep(3);
+
+	destroy_lists();
 }
 
 extern "C" const dvb_channel* firstchannel() {
@@ -231,8 +254,258 @@ extern "C" const int channel_name(char* channelID, char* chanName) {
 			return 1;
 		}
 	}
-	sprintf(chanName,"");
+	sprintf(chanName,"%s","");
 	return 0;
+}
+
+extern "C" const int channel_number(char* channelID, char* chan_nr) {
+	std::list<dvb_channel*>::iterator it;
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channelID) == 0)
+		{
+			sprintf(chan_nr, "%s", (*it)->channelNr);
+			return 1;
+		}
+	}
+	sprintf(chan_nr,"%s","");
+	return 0;
+}
+
+struct epg_iter
+{
+	std::list<struct program_info*> *program_list;
+	std::list<struct program_info*>::iterator it;
+};
+
+extern "C" void* firstEpgDay(const char* channel, char* day_string)
+{
+	std::list<dvb_channel*>::iterator it;
+
+//	printf("%s( %s )\n", __func__, channel);
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+			epg_iter *e_iter = new epg_iter;
+			e_iter->program_list = &(*it)->program_list;
+			for(e_iter->it=e_iter->program_list->begin(); e_iter->it!=e_iter->program_list->end(); e_iter->it++)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+
+				time_t cur_t;
+				time(&cur_t);
+
+				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				{
+					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					continue;
+				}
+				if (cur_t >= (*e_iter->it)->start)
+				{
+					struct tm* tmDate = localtime(&(*e_iter->it)->start);
+					if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
+					return (void*)e_iter;
+				}
+			}
+			delete e_iter;
+		}
+	}
+	return NULL;
+}
+
+extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
+{
+	epg_iter *e_iter = (epg_iter*)handle;
+	time_t next_day;
+
+	if (e_iter->it == e_iter->program_list->end())
+	{
+		return NULL;
+	}
+
+	time_t cur_t;
+	time(&cur_t);
+	time_t cur_day = (*e_iter->it)->start;
+	struct tm* tm = localtime(&cur_day);
+	tm->tm_hour = 0;
+	tm->tm_min = 0;
+	tm->tm_sec = 0;
+	next_day = mktime(tm);
+	next_day += ( 24 * 60 * 60 );
+
+	e_iter->it++;
+	while (e_iter->it != e_iter->program_list->end())
+	{
+//		printf("%s() - %s : %s - %d - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), mktime(tm), ctime(&next_day));
+		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		{
+			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			continue;
+		}
+		if ((*e_iter->it)->start >= next_day) /* TODO: plus duration? */
+		{
+			struct tm* tmDate = localtime(&(*e_iter->it)->start);
+			if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
+
+			return (void*)e_iter;
+		}
+		e_iter->it++;
+	}
+	return NULL;
+}
+
+extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* event_string)
+{
+	std::list<dvb_channel*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+//	printf("%s( %s, %s )\n", __func__, channel, day_string);
+
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+//			print_epg((*it));
+			epg_iter *e_iter = new epg_iter;
+			e_iter->program_list = &(*it)->program_list;
+			for(e_iter->it=(*it)->program_list.begin(); e_iter->it!=(*it)->program_list.end();)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+
+				struct tm tm = { 0 };
+				strptime(day_string, "%m-%d-%Y", &tm);
+				tm.tm_hour = 0;
+				tm.tm_min = 0;
+				tm.tm_sec = 0;
+				time_t t_time = mktime(&tm);
+				time_t t_time2 = t_time + ( 24 * 60 * 60 );
+
+				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				{
+					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					continue;
+				}
+				if ((*e_iter->it)->start >= t_time && (*e_iter->it)->start < t_time2)
+				{
+					sprintf(event_string, "%s", (*e_iter->it)->event_id);
+					return (void*)e_iter;
+				}
+				e_iter->it++;
+			}
+		}
+	}
+	return NULL;
+}
+
+extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_string, char* event_string)
+{
+	epg_iter *e_iter = (epg_iter*)handle;
+
+	char* endPtr;
+	time_t next_day;
+
+	time_t cur_t;
+	time(&cur_t);
+
+//	printf("%s( %p, %s, %s )\n", __func__, handle, channel, day_string);
+
+	struct tm tm = { 0 };
+	strptime(day_string, "%m-%d-%Y", &tm);
+	tm.tm_hour = 0;
+	tm.tm_min = 0;
+	tm.tm_sec = 0;
+	next_day = mktime(&tm);
+	next_day += ( 24 * 60 * 60 );
+
+	e_iter->it++;
+	while (e_iter->it != e_iter->program_list->end())
+	{
+//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), ctime(&next_day));
+
+		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		{
+			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			continue;
+		}
+		if ((*e_iter->it)->start < next_day)
+		{
+			sprintf(event_string, "%s", (*e_iter->it)->event_id);
+			return (void*)e_iter;
+		}
+		else
+		{
+			return NULL;
+		}
+		e_iter->it++;
+	}
+
+	return NULL;
+}
+
+/* if *epg_id is NULL return first current item */
+/* epg_id is in/out */
+extern "C" int get_epg_data_simple(const char* channel, char** epg_id, char **title, char **description, time_t *start_t, time_t *duration_t, time_t *end_t)
+{
+	std::list<dvb_channel*>::iterator it;
+	time_t cur_t;
+	time(&cur_t);
+
+//	printf("%s( %s )\n", __func__, channel);
+
+	for(it=channel_list.begin(); it!=channel_list.end(); ++it)
+	{
+		if (strcmp((*it)->channelID, channel) == 0)
+		{
+//			printf("%s() - %s\n", __func__, (*it)->channelID);
+
+			std::list<struct program_info*>::iterator it2;
+
+			for(it2=(*it)->program_list.begin(); it2!=(*it)->program_list.end();)
+			{
+//				printf("%s() - %s : %s\n", __func__, (*it2)->title, ctime(&(*it2)->start));
+				if ((*it2)->start+(*it2)->duration <= cur_t)
+				{
+					it2 = (*it)->program_list.erase(it2);
+					continue;
+				}
+				if ( *epg_id == NULL || strcmp(*epg_id, (*it2)->event_id) == 0 )
+				{
+//					printf("%s() !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! %d\n", __func__, __LINE__);
+					if (strlen((*it2)->description) >= 1)
+					{
+						*description = (char*)malloc(strlen((*it2)->description) + 1);
+						sprintf(*description, "%s", (*it2)->description);
+
+					}
+					if (strlen((*it2)->title) == 0)
+					{
+						*title = (char*)malloc(6);
+						sprintf(*title, "%s", "_____");
+					}
+					else
+					{
+						*title = (char*)malloc(strlen((*it2)->title) + 1);
+						sprintf(*title, "%s", (*it2)->title);
+					}
+					*start_t = (*it2)->start;
+					*duration_t = (*it2)->duration;
+					*end_t = (*it2)->start + (*it2)->duration;
+
+					if (*epg_id == NULL)
+					{
+						*epg_id = (char*)malloc(strlen((*it2)->event_id) + 1);
+						sprintf(*epg_id, "%s", (*it2)->event_id);
+					}
+					return 0;
+				}
+				it2++;
+			}
+		}
+	}
+
+	return 1;
 }
 
 class server_parse_iface : public parse_iface
@@ -255,8 +528,30 @@ public:
 		if (tmp == NULL)
 			return;
 
-		sprintf(tmp->channelID, "%d.%02d", c->physical_channel, c->program_number);
-		sprintf(tmp->callSign, "%s - %s", channelno, c->service_name);
+		if (c->major + c->minor > 1)
+		{
+			sprintf(tmp->channelNr, "%02d.%02d", c->major, c->minor);
+			sprintf(tmp->channelID, "%d.%02d", c->physical_channel, c->program_number);
+		}
+		else if (c->lcn)
+		{
+			sprintf(tmp->channelNr, "%d", c->lcn);
+			sprintf(tmp->channelID, "%d.%02d", c->physical_channel, c->program_number);
+		}
+		else
+		{
+			sprintf(tmp->channelNr, "%02d.%02d", c->physical_channel, c->program_number);
+			sprintf(tmp->channelID, "%d.%02d", c->physical_channel, c->program_number);
+		}
+
+		sprintf(tmp->callSign, "%s", c->service_name);
+		/* right trim the call sign */
+		char* is_space = tmp->callSign + strlen(tmp->callSign);
+		while (is_space >= tmp->callSign && (*is_space == ' ' || *is_space == '\0'))
+		{
+			*is_space = '\0';
+			is_space--;
+		};
 
 		insert_sorted(channel_list, tmp);
 
@@ -286,31 +581,47 @@ bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
 	server->scan(flags, &iface);
 }
 
+#if TVNOW_TESTDATA
+static time_t testing_offset = 0;
+#endif
+
 class server_decode_report : public decode_report
 {
 public:
 	virtual void epg_event(decoded_event_t &e)
 	{
-		printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
-		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
+//		printf("received event id: %d on channel name: %s, major: %d, minor: %d, physical: %d, service id: %d, title: %s, desc: %s, start time (time_t) %ld, duration (sec) %d\n",
+//		        e.event_id, e.channel_name.c_str(), e.chan_major, e.chan_minor, e.chan_physical, e.chan_svc_id, e.name.c_str(), e.text.c_str(), e.start_time, e.length_sec);
 
-		char channelno[16];
-		sprintf(channelno, "%d.%02d", e.chan_physical, e.chan_svc_id);
+		char channelID[16];
+
+		sprintf(channelID, "%d.%02d", e.chan_physical, e.chan_svc_id);
 
 		std::list<dvb_channel*>::iterator it;
 		for(it=channel_list.begin(); it!=channel_list.end(); ++it)
 		{
-			if (strcmp((*it)->channelID, channelno) == 0) {
+			if (strcmp((*it)->channelID, channelID) == 0) {
 				struct program_info* tmp;
 				tmp = new program_info;
 				if (tmp == NULL)
 					return;
 
+#if TVNOW_TESTDATA
+				if (testing_offset == 0)
+				{
+					time(&testing_offset);
+					testing_offset = testing_offset - e.start_time - (60 * 60);
+				}
+				tmp->start = testing_offset + e.start_time;
+#else
 				tmp->start = e.start_time;
+#endif
+				tmp->title[0] = '\0';
+				tmp->description[0] = '\0';
 				tmp->duration = e.length_sec;
 				snprintf(tmp->title, sizeof(tmp->title), "%s", e.name.c_str());
 				snprintf(tmp->description, sizeof(tmp->description), "%s", e.text.c_str());
-
+				snprintf(tmp->event_id, sizeof(tmp->event_id), "%d", e.event_id);
 				insert_sorted_epg((*it)->program_list, tmp);
 			}
 		}
@@ -318,6 +629,11 @@ public:
 	virtual void epg_header_footer(bool header, bool channel) {}
 	virtual void print(const char *, ...) {}
 };
+
+#if TVNOW_TESTDATA
+#include "testdata.cpp"
+#endif
+
 extern "C" void dvbtee_start(void* nothing)
 {
 	int opt;
@@ -334,13 +650,23 @@ extern "C" void dvbtee_start(void* nothing)
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
+#if TVNOW_TESTDATA
+	load_test_data();
+#else
+	dvbtee_context tmpContext;
+	context = &tmpContext;
+	context->server = NULL;
 
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
 #endif
 	context->tuner.feeder.parser.limit_eit(-1);
+//	enum output_options oopt = OUTPUT_PSIP;
+//	context->tuner.feeder.parser.out.set_options(oopt);
 
 	start_server(context, scan_flags, 62080, 62081);
+	context->tuner.scan_for_services(scan_flags, 0, 0, 1);
+
 #if 0
 	channel_scan_and_dump(context->server, scan_flags);
 #else
@@ -354,9 +680,11 @@ extern "C" void dvbtee_start(void* nothing)
 		while (context->server->is_running() && killServer != 1) sleep(1);
 		stop_server(context);
 	}
-//	cleanup(&context);
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
+
+	//	cleanup(&context);
+	#if 1 /* FIXME */
+		ATSCMultipleStringsDeInit();
+	#endif
 #endif
 
 }
