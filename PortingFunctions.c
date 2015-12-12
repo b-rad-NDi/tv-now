@@ -498,9 +498,8 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 	}
 	else if (strncmp(directory, "./Channels", 10) == 0)
 	{
-		struct dvb_channel* tmpC = firstchannel();
+		void* tmpC = firstchannel(filename);
 		if (tmpC != NULL) {
-			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
 			if (filename != NULL && filesize != NULL) {
 				*filesize = LIVETV_FILESIZE;
 			}
@@ -517,10 +516,8 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		if (strcmp(directory, "./EPG/") == 0 || strcmp(directory, "./EPG/") == 0)
 		{
 			char channelName[64] = { 0 };
-			struct dvb_channel* tmpC = firstchannel();
+			void* tmpC = firstchannel(filename);
 			if (tmpC != NULL) {
-				printf("%s/%s\n",directory,tmpC->channelID);
-				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
 				if (filename != NULL && filesize != NULL) {
 					*filesize = LIVETV_FILESIZE;
 				}
@@ -655,10 +652,8 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 	}
 	else if (strncmp(dirName, "./Channels/", 11) == 0)
 	{
-		struct dvb_channel* tmpC = nextchannel();
+		void* tmpC = nextchannel(handle, filename);
 		if (tmpC != NULL) {
-			if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
-
 			if (filesize != NULL) {
 				*filesize = LIVETV_FILESIZE;
 			}
@@ -675,10 +670,8 @@ int PCGetDirNextFile(void* handle, const char* dirName, char* filename, int file
 
 		if (strcmp(dirName, "./EPG/") == 0)
 		{
-			struct dvb_channel* tmpC = nextchannel();
+			void* tmpC = nextchannel(handle, filename);
 			if (tmpC != NULL) {
-				if (filename != NULL) sprintf(filename, "%s", tmpC->channelID);
-
 				if (filesize != NULL) {
 					*filesize = LIVETV_FILESIZE;
 				}
