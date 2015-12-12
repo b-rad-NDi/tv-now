@@ -107,12 +107,10 @@ struct combo_iter
 
 static std::list<struct dvb_channel*> channel_list;
 static std::list<struct dvb_channel*>::iterator channel_iterator;
-static int noChannel = 0;
 static int killServer = 0;
 static dvbtee_context *context;
 
 void stop_server(struct dvbtee_context* context);
-
 
 void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channel)
 {
@@ -229,6 +227,12 @@ extern "C" void destroy_iterator(void* iter)
 
 	if (c_iter != NULL)
 		delete c_iter;
+}
+
+extern "C" void* channel_token()
+{
+	combo_iter *it = new combo_iter;
+	return it;
 }
 
 extern "C" const dvb_channel* firstchannel() {
