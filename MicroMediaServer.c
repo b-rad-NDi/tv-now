@@ -1311,7 +1311,6 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 				cdsObj->ID = NULL;
 				cdsObj->ParentID = NULL;
 				cdsObj->RefID = NULL;
-				cdsObj->Title = NULL;
 				CDS_DestroyObjects(cdsObj);
 			}
 		}
