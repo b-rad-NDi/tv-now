@@ -58,15 +58,6 @@ struct program_info
 	int  duration;
 };
 
-struct dvb_channel
-{
-	char channelID[32];
-	char channelNr[16];
-	char callSign[64];
-	void* program_list;
-};
-
-
 void dvbtee_start();
 void dvbtee_stop();
 
