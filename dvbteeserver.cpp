@@ -96,6 +96,15 @@ extern "C" struct dvb_channel
 	std::list<struct program_info*> program_list;
 };
 
+struct combo_iter
+{
+	std::list<struct dvb_channel*> *channel_list;
+	std::list<struct dvb_channel*>::iterator c_iter;
+
+	std::list<struct program_info*> *program_list;
+	std::list<struct program_info*>::iterator p_iter;
+};
+
 static std::list<struct dvb_channel*> channel_list;
 static std::list<struct dvb_channel*>::iterator channel_iterator;
 static int noChannel = 0;
@@ -212,6 +221,14 @@ extern "C" void dvbtee_stop()
 	sleep(3);
 
 	destroy_lists();
+}
+
+extern "C" void destroy_iterator(void* iter)
+{
+	combo_iter* c_iter = (combo_iter*)iter;
+
+	if (c_iter != NULL)
+		delete c_iter;
 }
 
 extern "C" const dvb_channel* firstchannel() {
