@@ -49,15 +49,6 @@
  *
  *****************************************************************************/
 
-struct program_info
-{
-	char event_id[128];
-	char title[128];
-	char longDesc[1024];
-	time_t  start;
-	int  duration;
-};
-
 void dvbtee_start();
 void dvbtee_stop();
 
