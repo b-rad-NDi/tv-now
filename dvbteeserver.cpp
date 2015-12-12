@@ -235,24 +235,41 @@ extern "C" void* channel_token()
 	return it;
 }
 
-extern "C" const dvb_channel* firstchannel() {
-	printf("%s()\n", __func__);
+extern "C" void* firstchannel(char* chan_name)
+{
+//	printf("%s()\n", __func__);
 	if (channel_list.empty())
 		return NULL;
 
-	printf("%s() channel_list ! empty\n", __func__);
-	noChannel = 1;
-	channel_iterator = channel_list.begin();
-	return *channel_iterator;
+	combo_iter *it = new combo_iter;
+	it->c_iter = channel_list.begin();
+	it->channel_list = &channel_list;
+	it->program_list = NULL;
+
+	if (chan_name != NULL)
+	{
+		sprintf(chan_name, "%s", (*it->c_iter)->channelID);
+	}
+	it->c_iter++;
+	return it;
 }
 
-extern "C" const dvb_channel* nextchannel() {
-	if (noChannel == 0 || channel_list.empty() || ++channel_iterator == channel_list.end())
+extern "C" void* nextchannel(void* c_iter, char* chan_name)
+{
+//	printf("%s()\n", __func__);
+	combo_iter *it = (combo_iter*)c_iter;
+	if (it == NULL || it->c_iter == it->channel_list->end())
+	{
 		return NULL;
+	}
 
-	printf("%s()\n", __func__);
+	if (chan_name != NULL)
+	{
+		sprintf(chan_name, "%s", (*it->c_iter)->channelID);
+	}
 
-	return *channel_iterator;
+	it->c_iter++;
+	return it;
 }
 
 extern "C" const int ischannel(char* channelID) {
