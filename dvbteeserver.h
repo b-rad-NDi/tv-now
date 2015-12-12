@@ -61,7 +61,7 @@ struct program_info
 void dvbtee_start();
 void dvbtee_stop();
 
-const struct dvb_channel* firstchannel();
-const struct dvb_channel* nextchannel();
+void* firstchannel(char* chan_name);
+void* nextchannel(void* c_iter, char* chan_name);
 const int ischannel(char* channelID);
 
