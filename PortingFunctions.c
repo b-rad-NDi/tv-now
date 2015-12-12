@@ -494,7 +494,7 @@ void* PCGetDirFirstFile(const char* directory, char* filename, int filenamelengt
 		if (filename != NULL) sprintf(filename, "%s", rootDirs[rootIter++]);
 		if (filesize != NULL) *filesize = 0;
 //		printf("%s(%s, filename (%s), %d, %" PRIu64 ")\n", __func__, directory, filename == NULL ? "" : filename, filenamelength, filesize != NULL ? *filesize : 0);
-		return &rootIter;
+		return channel_token();	/* 'fake' token to be freed on closedir */
 	}
 	else if (strncmp(directory, "./Channels", 10) == 0)
 	{
