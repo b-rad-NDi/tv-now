@@ -405,12 +405,11 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 	{
 		if (strcmp((*it)->channelID, channel) == 0)
 		{
-//			print_epg((*it));
-			epg_iter *e_iter = new epg_iter;
+			combo_iter *e_iter = new combo_iter;
 			e_iter->program_list = &(*it)->program_list;
-			for(e_iter->it=(*it)->program_list.begin(); e_iter->it!=(*it)->program_list.end();)
+			for(e_iter->p_iter=(*it)->program_list.begin(); e_iter->p_iter!=(*it)->program_list.end();)
 			{
-//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->p_iter)->title, ctime(&(*e_iter->p_iter)->start));
 
 				struct tm tm = { 0 };
 				strptime(day_string, "%m-%d-%Y", &tm);
@@ -420,17 +419,17 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				time_t t_time = mktime(&tm);
 				time_t t_time2 = t_time + ( 24 * 60 * 60 );
 
-				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 				{
-					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 					continue;
 				}
-				if ((*e_iter->it)->start >= t_time && (*e_iter->it)->start < t_time2)
+				if ((*e_iter->p_iter)->start >= t_time && (*e_iter->p_iter)->start < t_time2)
 				{
-					sprintf(event_string, "%s", (*e_iter->it)->event_id);
+					sprintf(event_string, "%s", (*e_iter->p_iter)->event_id);
 					return (void*)e_iter;
 				}
-				e_iter->it++;
+				e_iter->p_iter++;
 			}
 		}
 	}
@@ -439,7 +438,7 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 
 extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_string, char* event_string)
 {
-	epg_iter *e_iter = (epg_iter*)handle;
+	combo_iter *e_iter = (combo_iter*)handle;
 
 	char* endPtr;
 	time_t next_day;
@@ -457,26 +456,26 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 	next_day = mktime(&tm);
 	next_day += ( 24 * 60 * 60 );
 
-	e_iter->it++;
-	while (e_iter->it != e_iter->program_list->end())
+	e_iter->p_iter++;
+	while (e_iter->p_iter != e_iter->program_list->end())
 	{
-//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), ctime(&next_day));
+//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->p_iter)->title, ctime(&(*e_iter->p_iter)->start), ctime(&next_day));
 
-		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 		{
-			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 			continue;
 		}
-		if ((*e_iter->it)->start < next_day)
+		if ((*e_iter->p_iter)->start < next_day)
 		{
-			sprintf(event_string, "%s", (*e_iter->it)->event_id);
+			sprintf(event_string, "%s", (*e_iter->p_iter)->event_id);
 			return (void*)e_iter;
 		}
 		else
 		{
 			return NULL;
 		}
-		e_iter->it++;
+		e_iter->p_iter++;
 	}
 
 	return NULL;
