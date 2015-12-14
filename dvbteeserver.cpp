@@ -653,9 +653,6 @@ extern "C" void dvbtee_start(void* nothing)
 #if TVNOW_TESTDATA
 	load_test_data();
 #else
-	dvbtee_context tmpContext;
-	context = &tmpContext;
-	context->server = NULL;
 
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
