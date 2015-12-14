@@ -350,6 +350,10 @@ void GetMetaData(const char* path, struct CdsMediaObject *cdsObj)
 			{
 				cdsObj->Title = old_title;
 			}
+			else
+			{
+				cdsObj->DeallocateThese |= CDS_ALLOC_Title;
+			}
 
 			cdsObj->uri_target = (char*)malloc(255);
 			snprintf(cdsObj->uri_target, 255, ":%d/tune=%s&stream/video.mpg", 62080, cdsObj->ChannelID);
