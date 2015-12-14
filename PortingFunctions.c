@@ -116,6 +116,7 @@ void PCCloseDir(void* handle)
 {
 //	printf("%s\n", __func__);
 #if NDi_LiveTV
+	destroy_iterator(handle);
 	return;
 #endif
 #ifdef WIN32
