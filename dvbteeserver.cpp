@@ -673,6 +673,9 @@ public:
 
 extern "C" void dvbtee_start(void* nothing)
 {
+#if TVNOW_TESTDATA
+	load_test_data();
+#else
 	int opt;
 
 	dvbtee_context tmpContext;
@@ -687,9 +690,6 @@ extern "C" void dvbtee_start(void* nothing)
 
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
-#if TVNOW_TESTDATA
-	load_test_data();
-#else
 
 #if 1 /* FIXME */
 	ATSCMultipleStringsInit();
