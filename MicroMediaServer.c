@@ -1159,11 +1159,9 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 			}
 		}
 
-		char* channel_title = title;
-
 		/* get object id: full path, where root=0 */
 		ddLen = (int) strlen(fntd->DirDelimiter);
-		idLen = 2 + 1 + ddLen + strlen(channel_title) + strlen(ext);
+		idLen = 2 + 1 + ddLen + strlen(title) + strlen(ext);
 		id = (char*) malloc (idLen+1);
 		j = fntd->RootLength;
 		pchar = pathName+j;
@@ -1174,7 +1172,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 		}
 		else
 		{
-			sprintf(id, "%s%s", fntd->DirDelimiter, channel_title);
+			sprintf(id, "%s%s", fntd->DirDelimiter, title);
 		}
 
 		/* determine if directory or file */
@@ -1258,7 +1256,7 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 					)
 				{
 					cdsObj = CDS_AllocateObject();
-					cdsObj->Title = channel_title;
+					cdsObj->Title = title;
 					cdsObj->ID = cpId;
 					cdsObj->ParentID = cpParentId;
 					cdsObj->MediaClass = FileExtensionToClassCode(ext, 0);
@@ -1311,7 +1309,6 @@ void DirectoryEntryToDidl(char* pathName, struct FNTD* fntd)
 				cdsObj->ID = NULL;
 				cdsObj->ParentID = NULL;
 				cdsObj->RefID = NULL;
-				cdsObj->Title = NULL;
 				CDS_DestroyObjects(cdsObj);
 			}
 		}

@@ -49,28 +49,10 @@
  *
  *****************************************************************************/
 
-struct program_info
-{
-	char event_id[128];
-	char title[128];
-	char longDesc[1024];
-	time_t  start;
-	int  duration;
-};
-
-struct dvb_channel
-{
-	char channelID[32];
-	char channelNr[16];
-	char callSign[64];
-	void* program_list;
-};
-
-
 void dvbtee_start();
 void dvbtee_stop();
 
-const struct dvb_channel* firstchannel();
-const struct dvb_channel* nextchannel();
+void* firstchannel(char* chan_name);
+void* nextchannel(void* c_iter, char* chan_name);
 const int ischannel(char* channelID);
 

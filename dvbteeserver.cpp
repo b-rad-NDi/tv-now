@@ -96,14 +96,21 @@ extern "C" struct dvb_channel
 	std::list<struct program_info*> program_list;
 };
 
+struct combo_iter
+{
+	std::list<struct dvb_channel*> *channel_list;
+	std::list<struct dvb_channel*>::iterator c_iter;
+
+	std::list<struct program_info*> *program_list;
+	std::list<struct program_info*>::iterator p_iter;
+};
+
 static std::list<struct dvb_channel*> channel_list;
 static std::list<struct dvb_channel*>::iterator channel_iterator;
-static int noChannel = 0;
 static int killServer = 0;
 static dvbtee_context *context;
 
 void stop_server(struct dvbtee_context* context);
-
 
 void insert_sorted(std::list<struct dvb_channel*> &channels, dvb_channel *channel)
 {
@@ -214,24 +221,55 @@ extern "C" void dvbtee_stop()
 	destroy_lists();
 }
 
-extern "C" const dvb_channel* firstchannel() {
-	printf("%s()\n", __func__);
+extern "C" void destroy_iterator(void* iter)
+{
+	combo_iter* c_iter = (combo_iter*)iter;
+
+	if (c_iter != NULL)
+		delete c_iter;
+}
+
+extern "C" void* channel_token()
+{
+	combo_iter *it = new combo_iter;
+	return it;
+}
+
+extern "C" void* firstchannel(char* chan_name)
+{
+//	printf("%s()\n", __func__);
 	if (channel_list.empty())
 		return NULL;
 
-	printf("%s() channel_list ! empty\n", __func__);
-	noChannel = 1;
-	channel_iterator = channel_list.begin();
-	return *channel_iterator;
+	combo_iter *it = new combo_iter;
+	it->c_iter = channel_list.begin();
+	it->channel_list = &channel_list;
+	it->program_list = NULL;
+
+	if (chan_name != NULL)
+	{
+		sprintf(chan_name, "%s", (*it->c_iter)->channelID);
+	}
+	it->c_iter++;
+	return it;
 }
 
-extern "C" const dvb_channel* nextchannel() {
-	if (noChannel == 0 || channel_list.empty() || ++channel_iterator == channel_list.end())
+extern "C" void* nextchannel(void* c_iter, char* chan_name)
+{
+//	printf("%s()\n", __func__);
+	combo_iter *it = (combo_iter*)c_iter;
+	if (it == NULL || it->c_iter == it->channel_list->end())
+	{
 		return NULL;
+	}
 
-	printf("%s()\n", __func__);
+	if (chan_name != NULL)
+	{
+		sprintf(chan_name, "%s", (*it->c_iter)->channelID);
+	}
 
-	return *channel_iterator;
+	it->c_iter++;
+	return it;
 }
 
 extern "C" const int ischannel(char* channelID) {
@@ -287,23 +325,23 @@ extern "C" void* firstEpgDay(const char* channel, char* day_string)
 	{
 		if (strcmp((*it)->channelID, channel) == 0)
 		{
-			epg_iter *e_iter = new epg_iter;
+			combo_iter *e_iter = new combo_iter;
 			e_iter->program_list = &(*it)->program_list;
-			for(e_iter->it=e_iter->program_list->begin(); e_iter->it!=e_iter->program_list->end(); e_iter->it++)
+			for(e_iter->p_iter=e_iter->program_list->begin(); e_iter->p_iter!=e_iter->program_list->end(); e_iter->p_iter++)
 			{
 //				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
 
 				time_t cur_t;
 				time(&cur_t);
 
-				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 				{
-					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 					continue;
 				}
-				if (cur_t >= (*e_iter->it)->start)
+				if (cur_t >= (*e_iter->p_iter)->start)
 				{
-					struct tm* tmDate = localtime(&(*e_iter->it)->start);
+					struct tm* tmDate = localtime(&(*e_iter->p_iter)->start);
 					if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
 					return (void*)e_iter;
 				}
@@ -316,17 +354,17 @@ extern "C" void* firstEpgDay(const char* channel, char* day_string)
 
 extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
 {
-	epg_iter *e_iter = (epg_iter*)handle;
+	combo_iter *e_iter = (combo_iter*)handle;
 	time_t next_day;
 
-	if (e_iter->it == e_iter->program_list->end())
+	if (e_iter->p_iter == e_iter->program_list->end())
 	{
 		return NULL;
 	}
 
 	time_t cur_t;
 	time(&cur_t);
-	time_t cur_day = (*e_iter->it)->start;
+	time_t cur_day = (*e_iter->p_iter)->start;
 	struct tm* tm = localtime(&cur_day);
 	tm->tm_hour = 0;
 	tm->tm_min = 0;
@@ -334,23 +372,23 @@ extern "C" void* nextEpgDay(void* handle, const char* channel, char* day_string)
 	next_day = mktime(tm);
 	next_day += ( 24 * 60 * 60 );
 
-	e_iter->it++;
-	while (e_iter->it != e_iter->program_list->end())
+	e_iter->p_iter++;
+	while (e_iter->p_iter != e_iter->program_list->end())
 	{
-//		printf("%s() - %s : %s - %d - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), mktime(tm), ctime(&next_day));
-		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+//		printf("%s() - %s : %s - %d - %s\n", __func__, (*e_iter->p_iter)->title, ctime(&(*e_iter->p_iter)->start), mktime(tm), ctime(&next_day));
+		if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 		{
-			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 			continue;
 		}
-		if ((*e_iter->it)->start >= next_day) /* TODO: plus duration? */
+		if ((*e_iter->p_iter)->start >= next_day) /* TODO: plus duration? */
 		{
-			struct tm* tmDate = localtime(&(*e_iter->it)->start);
+			struct tm* tmDate = localtime(&(*e_iter->p_iter)->start);
 			if (tmDate != NULL) strftime(&day_string[0], 128, "%m-%d-%Y", tmDate);
 
 			return (void*)e_iter;
 		}
-		e_iter->it++;
+		e_iter->p_iter++;
 	}
 	return NULL;
 }
@@ -367,12 +405,11 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 	{
 		if (strcmp((*it)->channelID, channel) == 0)
 		{
-//			print_epg((*it));
-			epg_iter *e_iter = new epg_iter;
+			combo_iter *e_iter = new combo_iter;
 			e_iter->program_list = &(*it)->program_list;
-			for(e_iter->it=(*it)->program_list.begin(); e_iter->it!=(*it)->program_list.end();)
+			for(e_iter->p_iter=(*it)->program_list.begin(); e_iter->p_iter!=(*it)->program_list.end();)
 			{
-//				printf("%s() - %s : %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start));
+//				printf("%s() - %s : %s\n", __func__, (*e_iter->p_iter)->title, ctime(&(*e_iter->p_iter)->start));
 
 				struct tm tm = { 0 };
 				strptime(day_string, "%m-%d-%Y", &tm);
@@ -382,17 +419,17 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 				time_t t_time = mktime(&tm);
 				time_t t_time2 = t_time + ( 24 * 60 * 60 );
 
-				if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+				if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 				{
-					e_iter->it = e_iter->program_list->erase(e_iter->it);
+					e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 					continue;
 				}
-				if ((*e_iter->it)->start >= t_time && (*e_iter->it)->start < t_time2)
+				if ((*e_iter->p_iter)->start >= t_time && (*e_iter->p_iter)->start < t_time2)
 				{
-					sprintf(event_string, "%s", (*e_iter->it)->event_id);
+					sprintf(event_string, "%s", (*e_iter->p_iter)->event_id);
 					return (void*)e_iter;
 				}
-				e_iter->it++;
+				e_iter->p_iter++;
 			}
 		}
 	}
@@ -401,7 +438,7 @@ extern "C" void* firstEpgEvent(const char* channel, char* day_string, char* even
 
 extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_string, char* event_string)
 {
-	epg_iter *e_iter = (epg_iter*)handle;
+	combo_iter *e_iter = (combo_iter*)handle;
 
 	char* endPtr;
 	time_t next_day;
@@ -419,26 +456,26 @@ extern "C" void* nextEpgEvent(void* handle, const char* channel, char* day_strin
 	next_day = mktime(&tm);
 	next_day += ( 24 * 60 * 60 );
 
-	e_iter->it++;
-	while (e_iter->it != e_iter->program_list->end())
+	e_iter->p_iter++;
+	while (e_iter->p_iter != e_iter->program_list->end())
 	{
-//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->it)->title, ctime(&(*e_iter->it)->start), ctime(&next_day));
+//		printf("%s() - %s : %s - %s\n", __func__, (*e_iter->p_iter)->title, ctime(&(*e_iter->p_iter)->start), ctime(&next_day));
 
-		if ((*e_iter->it)->start+(*e_iter->it)->duration <= cur_t)
+		if ((*e_iter->p_iter)->start+(*e_iter->p_iter)->duration <= cur_t)
 		{
-			e_iter->it = e_iter->program_list->erase(e_iter->it);
+			e_iter->p_iter = e_iter->program_list->erase(e_iter->p_iter);
 			continue;
 		}
-		if ((*e_iter->it)->start < next_day)
+		if ((*e_iter->p_iter)->start < next_day)
 		{
-			sprintf(event_string, "%s", (*e_iter->it)->event_id);
+			sprintf(event_string, "%s", (*e_iter->p_iter)->event_id);
 			return (void*)e_iter;
 		}
 		else
 		{
 			return NULL;
 		}
-		e_iter->it++;
+		e_iter->p_iter++;
 	}
 
 	return NULL;

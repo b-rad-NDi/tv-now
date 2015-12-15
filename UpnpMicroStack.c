@@ -1230,6 +1230,7 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 			close_split = ILibParseString(searcher->data, 0, searcher->datalength, ">", 1);
 			if (close_split->NumResults == 0)
 			{	/* shouldn't be possible to get in here */
+				ILibDestructParserResults(p0);
 				ILibDestructParserResults(close_split);
 				ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
 				return;
@@ -1249,12 +1250,15 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 			ILibDestructParserResults(p2);
 			searcher = searcher->NextResult;
 		} while (searcher != NULL);
-		ILibDestructParserResults(p0);
 
 		if (NewSubscriber->Address == INADDR_NONE)
 		{
-			ILibDestructParserResults(close_split);
 			ILibWebServer_Send_Raw(session, "HTTP/1.1 412 Precondition Failed\r\nContent-Length: 0\r\n\r\n", 55, 1, 1);
+			ILibDestructParserResults(close_split);
+			ILibDestructParserResults(p0);
+			ILibDestructParserResults(p);
+			ILibDestructParserResults(p2);
+			free(ip_tmp);
 			return;
 		}
 		if (p2->NumResults == 1)
@@ -1287,13 +1291,17 @@ void UpnpTryToSubscribe(char* ServiceName, long Timeout, char* URL, int URLLengt
 						close_split->FirstResult->datalength - p->FirstResult->datalength );
 				path[close_split->FirstResult->datalength - p->FirstResult->datalength] = '\0';
 			}
+			printf("%s() Path: %s:%d%s|    Line %d\n", __func__, ip_tmp, TempLong, path, __LINE__);
 			NewSubscriber->Path = path;
 			NewSubscriber->PathLength = (int)strlen(path);
 		}
 
-		/* TODO: these should be freeable */
-//		ILibDestructParserResults(p);
-//		ILibDestructParserResults(p2);
+		free(ip_tmp);
+
+		ILibDestructParserResults(close_split);
+		ILibDestructParserResults(p0);
+		ILibDestructParserResults(p);
+		ILibDestructParserResults(p2);
 
 		NewSubscriber->RefCount = 1;
 		NewSubscriber->Disposing = 0;
@@ -1503,7 +1511,7 @@ void UpnpProcessHTTPPacket(struct ILibWebServer_Session *session, struct packeth
                                 colonSpot = rindex(tmpHostAddress, ':');
                                 if (colonSpot != NULL) *colonSpot = '\0';
 
-                                if (strcmp(hostAddress,tmpHostAddress) != 0) {
+                                if (hostAddress != NULL && tmpHostAddress != NULL && strcmp(hostAddress,tmpHostAddress) != 0) {
                                         strncpy(hostAddress, tmpHostAddress, 40);
                                         //printf("HOST IP IS : %s\n", hostAddress);
                                 }
