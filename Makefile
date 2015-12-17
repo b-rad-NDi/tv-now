@@ -28,7 +28,7 @@ ifeq ($(HDHOMERUN_SUPPORT),1)
 	DVBTEE_LIBS += -lhdhomerun
 endif
 
-DVBTEE_LIBS_STATIC = ./libdvbtee/libdvbtee/libdvbtee.a ./libdvbtee/libdvbtee_server/libdvbtee_server.a ./libdvbtee/usr/lib/libdvbpsi.a -lstdc++
+DVBTEE_LIBS_STATIC = ./libdvbtee/usr/lib/libdvbtee.a ./libdvbtee/usr/lib/libdvbtee_server.a ./libdvbtee/usr/lib/libdvbpsi.a -lstdc++
 DVBTEE_INCLUDES = -I./libdvbtee/usr/include -I./libdvbtee/libdvbtee -I./libdvbtee/libdvbtee_server
 DVBTEE_SERVER = dvbteeserver
 
