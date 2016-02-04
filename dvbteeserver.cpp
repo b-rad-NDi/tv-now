@@ -67,8 +67,6 @@
 #endif
 #include "serve.h"
 
-#include "atsctext.h"
-
 struct dvbtee_context
 {
 #if LINUXTV
@@ -167,9 +165,6 @@ void cleanup(struct dvbtee_context* context, bool quick = false)
 	}
 
 	context->tuner.close_fe();
-#if 1 /* FIXME */
-	ATSCMultipleStringsDeInit();
-#endif
 }
 
 void destroy_lists()
@@ -691,9 +686,6 @@ extern "C" void dvbtee_start(void* nothing)
 	unsigned int serv_flags  = 0;
 	unsigned int scan_flags  = 0;
 
-#if 1 /* FIXME */
-	ATSCMultipleStringsInit();
-#endif
 	context->tuner.feeder.parser.limit_eit(-1);
 //	enum output_options oopt = OUTPUT_PSIP;
 //	context->tuner.feeder.parser.out.set_options(oopt);
@@ -716,9 +708,6 @@ extern "C" void dvbtee_start(void* nothing)
 	}
 
 	//	cleanup(&context);
-	#if 1 /* FIXME */
-		ATSCMultipleStringsDeInit();
-	#endif
 #endif
 
 }
