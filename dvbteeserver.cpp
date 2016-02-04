@@ -601,12 +601,12 @@ bool list_channels(serve *server)
 	return server->get_channels(&iface);
 }
 
-bool start_async_channel_scan(serve *server, unsigned int flags = 0)
+void start_async_channel_scan(serve *server, unsigned int flags = 0)
 {
 	server->scan(flags);
 }
 
-bool channel_scan_and_dump(serve *server, unsigned int flags = 0)
+void channel_scan_and_dump(serve *server, unsigned int flags = 0)
 {
 	server_parse_iface iface;
 
