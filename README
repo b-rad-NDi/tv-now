@@ -1,5 +1,5 @@
 *******************************************************************************
- *   TV-NOW : The Live TV streaming DLNA PVR Media Server                    *
+ *   TV-NOW : The Live TV Streaming Virtual Headend Server                    *
 *******************************************************************************
  * Copyright (C) 2012- Brad Love : b-rad at next dimension dot cc
  *    Next Dimension Innovations : http://nextdimension.cc
@@ -13,6 +13,12 @@
  *   TV-Now delivers EPG data in the DLNA container for compatible
  *   clients and also offers an html5+jquery tv player with full EPG.
  *   TV-Now uses the libdvbtee library as its backend.
+ *
+ *   TV-Now is a Virtual Headend reference implementation.
+ *   http://apps.fcc.gov/ecfs/document/view?id=60001330156
+ *
+ *   #UnlockTheBox
+ *
  *
  * TV-Now has the following features:
  *   - Works with any device in dvb-core

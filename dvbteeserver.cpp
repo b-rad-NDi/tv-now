@@ -305,12 +305,6 @@ extern "C" const int channel_number(char* channelID, char* chan_nr) {
 	return 0;
 }
 
-struct epg_iter
-{
-	std::list<struct program_info*> *program_list;
-	std::list<struct program_info*>::iterator it;
-};
-
 extern "C" void* firstEpgDay(const char* channel, char* day_string)
 {
 	std::list<dvb_channel*>::iterator it;
